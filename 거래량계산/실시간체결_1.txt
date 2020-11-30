@@ -1,0 +1,91 @@
+tmp_flag_3 ::  False
+self.LIST__CHECK_3 ::  [True, False, True, True]
+tmp_flag_1 ::  True
+self.LIST__CHECK_1 ::  [0, 0, True, True]
+self.STOCK_IN_ATTENTION.state ::  FILTER
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+_on_receive_real_data in BE activated...
+In _on_receive_real_data in BE 
+stock_code : 005930
+realdata : 131556	+54400	+600	+1.12	+54500	+54400	-2	6570351	357546	+54200	+54700	+54100	2	-10208776	-551549014760	-39.16	0.11	153	109.25	3247562	2	0	-39.33	000000	000000	7454	090017	100036	090301	2895171	3162865	+52.21	15590	17195	-108	-2	 0	-2	5440	4352	54418	301
+realtype : 주식체결
+enter real time data handler (2)
+tmp_dict from getcomm real data : {'price': 54400.0, 'volume': -2.0}
+enter real time data (2)
+{'005930': {'20200717131547': {'price': 54400.0, 'volume': -22.0}, '20200717131548': {'price': 54400.0, 'volume': -100.0}, '20200717131549': {'price': 54500.0, 'volume': 3.0}, '20200717131551': {'price': 54400.0, 'volume': -2.0}, '20200717131552': {'price': 54400.0, 'volume': -1.0}, '20200717131553': {'price': 54400.0, 'volume': -83.0}, '20200717131554': {'price': 54400.0, 'volume': -6.0}, '20200717131555': {'price': 54500.0, 'volume': 378.0}, '20200717131556': {'price': 54400.0, 'volume': -2.0}}}
+do periodc work [100ms] active #$#
+****************************************
+        -period process [1sec] now time stamp :  2020-07-17 13:15:56.869692
+****************************************
+서버 연결 중
+FE - login instance 함수 실행 종료
+login checking process...
+tmp_flag_3 ::  False
+self.LIST__CHECK_3 ::  [True, False, True, True]
+tmp_flag_1 ::  True
+self.LIST__CHECK_1 ::  [0, 0, True, True]
+self.STOCK_IN_ATTENTION.state ::  FILTER
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+_on_receive_real_data in BE activated...
+In _on_receive_real_data in BE 
+stock_code : 005930
+realdata : 131557	+54500	+700	+1.30	+54500	+54400	+5	6570356	357547	+54200	+54700	+54100	2	-10208771	-551548742260	-39.16	0.11	154	109.25	3253531	2	0	-39.33	000000	000000	7454	090017	100036	090301	2895171	3162870	+52.21	15590	17196	+272	 0	+5	+5	5450	4360	54418	301
+realtype : 주식체결
+enter real time data handler (2)
+tmp_dict from getcomm real data : {'price': 54500.0, 'volume': 5.0}
+enter real time data (2)
+{'005930': {'20200717131547': {'price': 54400.0, 'volume': -22.0}, '20200717131548': {'price': 54400.0, 'volume': -100.0}, '20200717131549': {'price': 54500.0, 'volume': 3.0}, '20200717131551': {'price': 54400.0, 'volume': -2.0}, '20200717131552': {'price': 54400.0, 'volume': -1.0}, '20200717131553': {'price': 54400.0, 'volume': -83.0}, '20200717131554': {'price': 54400.0, 'volume': -6.0}, '20200717131555': {'price': 54500.0, 'volume': 378.0}, '20200717131556': {'price': 54400.0, 'volume': -2.0}, '20200717131557': {'price': 54500.0, 'volume': 5.0}}}
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+****************************************
+        -period process [1sec] now time stamp :  2020-07-17 13:15:57.872951
+****************************************
+서버 연결 중
+FE - login instance 함수 실행 종료
+login checking process...
+tmp_flag_3 ::  False
+self.LIST__CHECK_3 ::  [True, False, True, True]
+tmp_flag_1 ::  True
+self.LIST__CHECK_1 ::  [0, 0, True, True]
+self.STOCK_IN_ATTENTION.state ::  FILTER
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+_on_receive_real_data in BE activated...
+In _on_receive_real_data in BE 
+stock_code : 005930
+realdata : 131558	+54500	+700	+1.30	+54500	+54400	+2	6570358	357547	+54200	+54700	+54100	2	-10208769	-551548633260	-39.16	0.11	154	109.25	3253531	2	0	-39.33	000000	000000	7454	090017	100036	090301	2895171	3162872	+52.21	15590	17197	+109	 0	+2	+2	5450	4360	54418	301
+realtype : 주식체결
+enter real time data handler (2)
+tmp_dict from getcomm real data : {'price': 54500.0, 'volume': 2.0}
+enter real time data (2)
+{'005930': {'20200717131547': {'price': 54400.0, 'volume': -22.0}, '20200717131548': {'price': 54400.0, 'volume': -100.0}, '20200717131549': {'price': 54500.0, 'volume': 3.0}, '20200717131551': {'price': 54400.0, 'volume': -2.0}, '20200717131552': {'price': 54400.0, 'volume': -1.0}, '20200717131553': {'price': 54400.0, 'volume': -83.0}, '20200717131554': {'price': 54400.0, 'volume': -6.0}, '20200717131555': {'price': 54500.0, 'volume': 378.0}, '20200717131556': {'price': 54400.0, 'volume': -2.0}, '20200717131557': {'price': 54500.0, 'volume': 5.0}, '20200717131558': {'price': 54500.0, 'volume': 2.0}}}
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+do periodc work [100ms] active #$#
+****************************************
+        -period process [1sec] now time stamp :  2020-07-17 13:15:58.873266
+****************************************
+서버 연결 중
+FE - login instance 함수 실행 종료
+login checking process...
+tmp_flag_3 ::  False
+self.LIST__CHECK_3 ::  [True, False, True, True]
+tmp_flag_1 ::  True
+self.LIST__CHECK_1 ::  [0, 0, True, True]
