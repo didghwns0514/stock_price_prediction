@@ -85,3 +85,16 @@ class Regression_stock_prediction:
 			pass
 		else:
 			os.mkdir(self.AT_SAVE_PATH__folder)
+
+
+
+
+	def FUNC_FOLDER__per_stock(self, stock_code):
+		"""
+
+		:param stock_code:
+		:return:  if check point exists, returns check point.
+		"""
+		pass
+
+
