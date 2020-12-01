@@ -1,0 +1,2 @@
+model_checkpoint_path: "fnn_encoder-DQN-14"
+all_model_checkpoint_paths: "fnn_encoder-DQN-14"
