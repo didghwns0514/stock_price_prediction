@@ -37,12 +37,14 @@ import tensorflow as tf
 import ENCODER__ML_MAIN as EN
 import DENOISER__ML_MAIN as DE
 import sub_DATETIME_function as SUB_F
+import PREDICTER__ML_CLASS as PCLS
 
 
 
 class NN_wrapper:
 	def __init__(self):
 		pass
+
 
 class Options:
 	def __init__(self, env):
@@ -74,27 +76,19 @@ class Regression_stock_prediction:
 		# @ previous declarations
 		self.AGENT_SUB__encoder = EN.Autoencoder(module=True)
 		self.AGENT_SUB__denoiser = DE.Denoiser(module=True)
+		self.nestgraph = PCLS.NestedGraph()
 
 		self.options = Options(self.envs)
 		self.module = module
 
 
-		# @ locations
-		self.AT_SAVE_PATH__folder = str(os.getcwd() + "\\PREDICTER__REGRESSION_SAVE")
-		if os.path.isdir(self.AT_SAVE_PATH__folder):
-			pass
-		else:
-			os.mkdir(self.AT_SAVE_PATH__folder)
+	def _getDay(self):
+
+		return datetime.datetime.now().replcace(hour=0, 
+										minute=0,
+										second=0,
+										mirosecond=0)
 
 
-
-
-	def FUNC_FOLDER__per_stock(self, stock_code):
-		"""
-
-		:param stock_code:
-		:return:  if check point exists, returns check point.
-		"""
-		pass
 
 
