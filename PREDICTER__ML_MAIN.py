@@ -84,7 +84,7 @@ class Regression_stock_prediction:
 
 	def _getDay(self):
 
-		return datetime.datetime.now().replcace(hour=0, 
+		return datetime.datetime.now().replace(hour=0,
 										minute=0,
 										second=0,
 										mirosecond=0)
