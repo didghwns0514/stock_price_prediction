@@ -188,8 +188,9 @@ class KiwoomAPI(QAxWidget):
 		# @ comm get real 부름
 		try:
 			print(f'In _on_receive_real_data in BE \nstock_code : {stock_code}')
-			print(f'realdata : {realdata}')
-			print(f'realtype : {realtype}')
+			# @ 이거 그냥, 원문 text로 들어오는 것
+			# print(f'realdata : {realdata}')
+			# print(f'realtype : {realtype}')
 			tmp_dict = tr.on_receive_realtime_data(self, stock_code, realtype)
 			print(f'tmp_dict from getcomm real data : {tmp_dict}')
 
@@ -201,28 +202,58 @@ class KiwoomAPI(QAxWidget):
 		if realtype == "순간체결량":
 			print('enter real time data (1)')
 			if stock_code not in self.latest_stock_realtime_data: # 코드 자체가 처음 들어감
-				#self.latest_stock_realtime_data[stock_code] = {tmp_datetime :  realdata} # FID 코드일 것으로 추정은 되는데...
 				self.latest_stock_realtime_data[stock_code] = {tmp_datetime: tmp_dict}  # FID 코드일 것으로 추정은 되는데...
 			else: # 코드가 있음
-				if tmp_datetime in self.latest_stock_realtime_data[stock_code] and tmp_dict: # 만약에 timestamp에 대한 기록 있고 tmp_dict 가 비지 않았으면
-					self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price'] + self.latest_stock_realtime_data[stock_code]['price']
-					self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume'] + self.latest_stock_realtime_data[stock_code]['volume']
-				else: # 해당 시간 unique timestamp 임
-					self.latest_stock_realtime_data[stock_code][tmp_datetime] = tmp_dict
-			
+				if tmp_dict:
+					if tmp_datetime in self.latest_stock_realtime_data[
+						stock_code]:  # 만약에 timestamp에 대한 기록 있고 tmp_dict 가 비지 않았으면
+						if 'price' not in self.latest_stock_realtime_data[stock_code][tmp_datetime]:
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price']
+						else:
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price']
+
+						if 'volume' not in self.latest_stock_realtime_data[stock_code][tmp_datetime]:  # 둘다 없어서 처음 들어갈 때
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume']
+						else:
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume'] +  self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume']
+					else:  # 해당 시간 unique timestamp 임
+						self.latest_stock_realtime_data[stock_code][tmp_datetime] = tmp_dict
+				else:  # empty tmp_dict
+					pass  # cannot update
+
 			print(self.latest_stock_realtime_data)
 
 		elif realtype == "주식체결":
+			# print(f'self.latest_stock_realtime_data in BE  _on_receive_real_data : {self.latest_stock_realtime_data}')
+			# print(f'tmp_datetime in BE _on_receive_real_data : {tmp_datetime}')
 			print('enter real time data (2)')
 			if stock_code not in self.latest_stock_realtime_data:  # 코드 자체가 처음 들어감
 				# self.latest_stock_realtime_data[stock_code] = {tmp_datetime :  realdata} # FID 코드일 것으로 추정은 되는데...
+				#print('enter real time data (2)-1')
 				self.latest_stock_realtime_data[stock_code] = {tmp_datetime: tmp_dict}  # FID 코드일 것으로 추정은 되는데...
 			else:  # 코드가 있음
-				if tmp_datetime in self.latest_stock_realtime_data[stock_code]:  # 만약에 timestamp에 대한 기록 있고 tmp_dict 가 비지 않았으면
-					self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price'] + self.latest_stock_realtime_data[stock_code]['price']
-					self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume'] + self.latest_stock_realtime_data[stock_code]['volume']
-				else:  # 해당 시간 unique timestamp 임
-					self.latest_stock_realtime_data[stock_code][tmp_datetime] = tmp_dict
+				#print('enter real time data (2)-2')
+				if tmp_dict:
+					#print('enter real time data (2)-2-1')
+					if tmp_datetime in self.latest_stock_realtime_data[stock_code]:  # 만약에 timestamp에 대한 기록 있고 tmp_dict 가 비지 않았으면
+						if 'price' not in self.latest_stock_realtime_data[stock_code][tmp_datetime] :
+							#print('enter real time data (2)-2-a')
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price']
+						else:
+							#print('enter real time data (2)-2-b')
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price']
+
+						if 'volume' not in self.latest_stock_realtime_data[stock_code][tmp_datetime]: # 둘다 없어서 처음 들어갈 때
+							#print('enter real time data (2)-2-c')
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume']
+						else:
+							#print('enter real time data (2)-2-d')
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume'] + self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume']
+					else:  # 해당 시간 unique timestamp 임
+						self.latest_stock_realtime_data[stock_code][tmp_datetime] = tmp_dict
+				else: #empty tmp_dict
+					print('enter real time data (2)-2-2')
+					pass # cannot update
 
 			print(self.latest_stock_realtime_data)
 
@@ -232,12 +263,22 @@ class KiwoomAPI(QAxWidget):
 				# self.latest_stock_realtime_data[stock_code] = {tmp_datetime :  realdata} # FID 코드일 것으로 추정은 되는데...
 				self.latest_stock_realtime_data[stock_code] = {tmp_datetime: tmp_dict}  # FID 코드일 것으로 추정은 되는데...
 			else:  # 코드가 있음
-				if tmp_datetime in self.latest_stock_realtime_data[stock_code]:  # 만약에 timestamp에 대한 기록 있고 tmp_dict 가 비지 않았으면
-					self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price'] + self.latest_stock_realtime_data[stock_code]['price']
-					self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume'] + self.latest_stock_realtime_data[stock_code]['volume']
-				else:  # 해당 시간 unique timestamp 임
-					self.latest_stock_realtime_data[stock_code][tmp_datetime] = tmp_dict
-			print(self.latest_stock_realtime_data)
+				if tmp_dict:
+					if tmp_datetime in self.latest_stock_realtime_data[
+						stock_code]:  # 만약에 timestamp에 대한 기록 있고 tmp_dict 가 비지 않았으면
+						if 'price' not in self.latest_stock_realtime_data[stock_code][tmp_datetime]:
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price']
+						else:
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['price'] = tmp_dict['price']
+
+						if 'volume' not in self.latest_stock_realtime_data[stock_code][tmp_datetime]:  # 둘다 없어서 처음 들어갈 때
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume']
+						else:
+							self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume'] = tmp_dict['volume'] +  self.latest_stock_realtime_data[stock_code][tmp_datetime]['volume']
+					else:  # 해당 시간 unique timestamp 임
+						self.latest_stock_realtime_data[stock_code][tmp_datetime] = tmp_dict
+				else:  # empty tmp_dict
+					pass  # cannot update
 
 		else:
 			pass
@@ -352,8 +393,8 @@ class KiwoomAPI(QAxWidget):
 				"""
 
 				ohlcv['gunbun']=str(gubun.strip())
-				ohlcv['item_cnt']= int(item_cnt.strip())
-				ohlcv['fid_list']= str(fid_list.strip())
+				ohlcv['item_cnt']= int(item_cnt)
+				ohlcv['fid_list']= str(fid_list)
 				#print(gubun, item_cnt, fid_list)
 				# -> 의미  :  https://ldgeao99.tistory.com/559?category=880439
 
@@ -410,8 +451,8 @@ class KiwoomAPI(QAxWidget):
 				"""
 
 				ohlcv['gunbun']= str(gubun.strip())
-				ohlcv['item_cnt']= int(item_cnt.strip())
-				ohlcv['fid_list']= str(fid_list.strip())
+				ohlcv['item_cnt']= int(item_cnt)
+				ohlcv['fid_list']= str(fid_list)
 				#print(gubun, item_cnt, fid_list)
 				# -> 의미  :  https://ldgeao99.tistory.com/559?category=880439
 
@@ -436,8 +477,12 @@ class KiwoomAPI(QAxWidget):
 				error flag 값 띄워야함!
 				"""
 			try:
+				print(f'%%%%%%%%')
+				print(f'self.latest_buy_sell_result_first_data : \n{self.latest_buy_sell_result_first_data}')
+				print(f'self.latest_buy_sell_result_second_data : \n{self.latest_buy_sell_result_second_data}')
 
 				if self.latest_buy_sell_result_first_data != None and self.latest_buy_sell_result_second_data != None and self.latest_buy_sell_result_message != None : # 세가지 모두 받았다면 exit 시도
+
 					self.chejen_event_loop.exit()
 					self.chejen_event_loop = None
 					self.flag_check_noraml_chejen = False # 정상 request 종료
@@ -484,6 +529,7 @@ class KiwoomAPI(QAxWidget):
 		self.latest_owning_stocks_data = None
 		self.latest_stock_additional_info = None
 		self.latest_stock_unmet_order_data = None
+		self.latest_stock_high_low_data = None
 
 		if next == '2':
 			self.is_tr_data_remained = True
@@ -545,6 +591,7 @@ class KiwoomAPI(QAxWidget):
 			메세지 받는거 체크,
 			메세지 수신 맞으면 밑에서 빼고 여기서 loop exit 구현
 			"""
+
 		
 		elif rqname == "check_unmet_order" : # 미체결 종목 조회하는
 			print('tr - check unmet order path')
@@ -565,10 +612,14 @@ class KiwoomAPI(QAxWidget):
 			https://m.blog.naver.com/PostView.nhn?blogId=jhsgo&logNo=221526307126&proxyReferer=https:%2F%2Fwww.google.com%2F
 			"""
 		
+		elif rqname == "opt10017_req":
+			print('_on_receive_tr_data in BE activated - opt10017_req ')
+			self.latest_stock_high_low_data = tr.on_receive_high_low_data(self, rqname, trcode)
+
 		
 		# @ opt10081 / opt10080 / opw00004
 		try:
-			if rqname in ["opt10081_req", "opt10080_req", "check_owning_stocks", "stock_additional_info_tr"] : # 이쪽으로 들어와야 event loop 있음
+			if rqname in ["opt10081_req", "opt10080_req", "check_owning_stocks", "check_unmet_order", "opt10017_req", "stock_additional_info_tr"] : # 이쪽으로 들어와야 event loop 있음
 				try:
 					self.tr_event_loop.exit()
 					self.tr_event_loop = None

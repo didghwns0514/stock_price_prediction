@@ -26,8 +26,6 @@ from keras import backend as K
 import h5py
 from keras.backend.tensorflow_backend import set_session
 
-# @ xgboos
-import xgboost
 
 # @ tensorflow
 import tensorflow as tf
@@ -38,37 +36,20 @@ import ENCODER__ML_MAIN as EN
 import DENOISER__ML_MAIN as DE
 import sub_DATETIME_function as SUB_F
 import PREDICTER__ML_CLASS as PCLS
+from LOGGER_FOR_MAIN import pushLog as pl
 
 
 
-class NN_wrapper:
-	def __init__(self):
-		pass
 
-
-class Options:
-	def __init__(self, env):
-		self.INPUT_DATA_DIM = env[0]  # 입력 데이터 variable 갯수
-		self.RNN_HIDDEN_CELL_DIM = env[1]  # 각 셀의 (hidden)출력 크기
-		self.RESULT_DATA_DIM = env[2]  # 결과데이터의 컬럼 개수 : many to one
-		self.N_EMBEDDING = env[3]  # stacked LSTM layers 개수
-		self.SEQ_LENGTH = env[4]  # window, for time series length
-
-		self.FORGET_BIAS = env[5]  # 망각편향(기본값 1.0)
-		self.MAX_EPISODE = env[6]  # max number of episodes iteration
-		self.LR = env[7]  # learning rate # 학습률
-		self.DROP_OUT = env[8]
-
-class Regression_stock_prediction:
-	NAME = 'XGBOOST_stock_prediction_'
+class Stock_prediction:
+	NAME = 'stock_prediction_'
 	LENGTH__MINUTE_DATA = int(60 * 4) # 3 data used, stock / kospi / dollar-mearchant
 	LENGTH__NEWS_ENCODED = int(20)
 	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 3) \
 						+ int(LENGTH__NEWS_ENCODED) \
 						+ int(1200)
-	#                 0,  1,   2,   3,              4,    5,      6,       7,     8
-	envs = [None, 90,  30,   2, None,  1.0,   500,  0.0005,  0.6]  # 0.6 / 0.72 # 180
-	# 7 -> 0.0006
+	LENGTH__ALL_OUTPUT = int(30)
+
 
 
 	def __init__(self, module=True):
@@ -76,7 +57,8 @@ class Regression_stock_prediction:
 		# @ previous declarations
 		self.AGENT_SUB__encoder = EN.Autoencoder(module=True)
 		self.AGENT_SUB__denoiser = DE.Denoiser(module=True)
-		self.nestgraph = PCLS.NestedGraph()
+		self.nestgraph = PCLS.NestedGraph(shape_input=Stock_prediction.LENGTH__ALL_INPUT,
+		shape_output=Stock_prediction.LENGTH__ALL_OUTPUT)
 
 		self.options = Options(self.envs)
 		self.module = module

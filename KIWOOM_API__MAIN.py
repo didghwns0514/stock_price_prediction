@@ -115,16 +115,16 @@ class pyq_object(QWidget, QObject):  # this is API
 	REQUEST_MAX_NUM_ON_THE_RUN = 998 # 돌고있는 와중에 request number for tr data
 	STOCK_AT_MAX_NUM = 10 # 최대로 들고 있을 주식 갯수
 	STOCK_AT_WATCH_MAX_NUM = 20 + int(len(MUST_WATCH_LIST))#최대로 realtime 받을 종목 수
-	STOCK_SECOND_DATA_LEN = 3 #관리할 초의 length in minutes
+	STOCK_SECOND_DATA_LEN = 4 #관리할 초의 length in minutes
 
-	STOCK_TARGET_PROFIT = 0.03 # 목표 수익률
+	STOCK_TARGET_MINUS_ALLOWED_PROFIT = - 0.015 # 최대 허용할 마이너스 수익률
 	STOCK_TARGET_MICRO_PROFIT = 0.03 # 30분간 목표 수익률
-	STOCK_TARGET_MINUS_PROFIT = -0.03 # SEC 데이터에서 이거 이하로 내려가면 sell 한다
+	STOCK_INSTANT_TARGET_MINUS_PROFIT = -0.025 # SEC 데이터에서 이거 이하로 내려가면 sell 한다
 
 	ARTICLE_MIN_NUMBER = 1 # 최소 들고있어야 할 기사 개수
 	ARTICLE_MIN_NUMBER_ONGOING = 10 # 개장중 안보고 있었을 때 뉴스기사 생성되면 db 만들고 scrno 등록할 최소 개수
 
-	STOCK_AT_TIME_WINDOW_HOUR = 10 # 최대 감시해서 들고있을 주식 시간 width
+	STOCK_AT_TIME_WINDOW_HOUR = 14 # 9 # 최대 감시해서 들고있을 주식 시간 width
 	STOCK_BUDGET_AT_LEAST = 100000 # 최소 계좌에 들고있어야 하는 금액
 	
 	AUTO_TRADE_FEE = 0.0034792 # 대략
@@ -132,7 +132,7 @@ class pyq_object(QWidget, QObject):  # this is API
 
 
 	# https://www.google.com/search?q=python+class+slot&rlz=1C1GCEA_enKR869KR869&oq=python+class+slot&aqs=chrome..69i57j0l7.3873j0j4&sourceid=chrome&ie=UTF-8
-	__slots__= ['TEST', 'MINIMIZED_STOCK_LIST','GC_THRESHOLD__old', 'GC_THRESHOLD__new', 'name', 'test_fe', 'SIGNAL_MINE', 'layout', 'STATE_TIME', 'KI_MESSAGE', 'SCREEN_NO', 'STOCK_IN_ATTENTION', 'STATE_MACHINE', 'input_queue', 'output_queue', 'DISP_STRING__display_current_job', 'STOCK_DICTIONARY_FROM_BE__real_time_data_SEC', 'STOCK_DICTIONARY_FROM_BE__real_time_data_MIN', 'STOCK_DICTIONARY_PICKLE_FROM_BE__path_for_ML', 'STOCK_DICTIONARY_FROM_ML__real_time_data_MIN', 'STOCK_DICTIONARY_FROM_ML__path_for_32bit', 'TEMP_CHECK_2_STOCK_IN_ATTENTION', 'STOCK_LIST__for_total_display', 'STOCK_DICTIONARY__name_to_code', 'STOCK_DICTIONARY__code_to_name', 'STOCK_DICTIONARY_NAME__article_dump', 'STOCK_DICTIONARY_NAME__article_result', 'STOCK_PICKLE__path_for_article', 'STOCK_DICTIONARY_NAMES__owning_stocks', 'STOCK_DICTIONARY_NAMES__basic_info', 'STOCK_DICTIONARY_NAMES__additional_info_tr', 'STOCK_DICTIONARY_NAMES__unmet_order', 'STOCK_FLAG__additional_info_creation_in_progress', 'STOCK_FLAG__additional_info_is_stalled', 'STOCK_FLAG__started_getting_additional_info_tr', 'STOCK_FLAG__when_unmet_order_made', 'STOCK_PICKLE__path_for_additional_info', 'SQLITE_LIST__folder_sub_file_path', 'SQLITE_PICKLE__path_for_db_update_date', 'SQLITE_DICTIONARY__db_update_date', 'SQLITE__con_top', 'SQLITE__cur_top', 'SQLITE_LIST__stocks_already_updated', 'BALANCE_PICKLE__path_for_balance_update_date', 'BALANCE_DICTIONARY__for_normal_update', 'ACCOUNT__code_of_my_account', 'ACCOUNT_LIST__for_accounts_owned', 'ACCOUNT__user_id', 'STOCK_LIST__all_kospi', 'STOCK_LIST__all_kosdq', 'ERROR_COUNTER_BE__request_num', 'ERROR_COUNTER_BE__front_be_counter_previous', 'ERROR_DICTIONARY__backend_and_critical', 'flag_FUNC_STOCK__enable_auto_trading', 'ERROR_FLAG__sell_all_err_critical_check_3', 'SQLITE_FLAG__database_creation_in_progress','SQLITE_FLAG__database_is_stalled', 'DISP_FLAG__test_code_look_up_sucess', 'SQLITE_FLAG__latest_database_data_checked', 'COUNTER_GLOBAL','CHECK_1_FLAG__ALL_login','CHECK_1_RESULT__api_real_or_try','CHECK_1_LOGICAL__windows_1st_login','CHECK_1_LOGICAL__ki_connect_state','CHECK_2_FLAG__every_data_get_success', 'CHECK_2_FLAG_BALANCE__get_success', 'CHECK_2_FLAG_STOCK__get_all_stock_codes', 'CHECK_2_FLAG_SQLITE__first_database_create_success', 'CHECK_2_FLAG_STOCK__owning_stock_get_success', 'CHECK_2_FLAG_STOCK__unmet_order_success', 'CHECK_2_FLAG__news_article_pickle_ready', 'CHECK_2_FLAG_STOCK__basic_info', 'CHECK_2_FLAG_STOCK__additional_info_tr', 'CHECK_FILTER_FLAG__at_initialize', 'CHECK_3_FLAG__ALL_auto_trade_ready', 'CHECK_3_FLAG__ALTIMATE_AUTO_ON', 'CHECK_SELL_ALL_FLAG__restart_api', 'AT_STOCK_CLASS__wrapper', 'AT_FLAG__very_first_init_func_called', 'AT_TUPLE__profit_record_watch', 'AT_TUPLE__profit_record_trans', 'FLAG__FIRST_TIME_REACHED_FILTER_STAGE', 'TOTAL_DICT', 'COMM_32','tabs', 'tab_login', 'tab_cockpit', 'tab_stats','tab_database','tab_test', 'KIWOOM', 'CHECK_1_LOGICAL__windows_1st_login', 'timer', 'timer_num_req']
+	__slots__= ['TEST', 'MINIMIZED_STOCK_LIST','GC_THRESHOLD__old', 'GC_THRESHOLD__new', 'name', 'test_fe', 'SIGNAL_MINE', 'layout', 'STATE_TIME', 'KI_MESSAGE', 'SCREEN_NO', 'STOCK_IN_ATTENTION', 'STATE_MACHINE', 'input_queue', 'output_queue', 'DISP_STRING__display_current_job', 'STOCK_DICTIONARY_FROM_BE__real_time_data_SEC', 'STOCK_DICTIONARY_FROM_BE__real_time_data_MIN', 'STOCK_DICTIONARY_PICKLE_FROM_BE__path_for_ML', 'STOCK_DICTIONARY_FROM_ML__real_time_data_MIN', 'STOCK_DICTIONARY_FROM_ML__path_for_32bit', 'TEMP_CHECK_2_STOCK_IN_ATTENTION', 'STOCK_LIST__for_total_display', 'STOCK_DICTIONARY__name_to_code', 'STOCK_DICTIONARY__code_to_name', 'STOCK_DICTIONARY_NAME__article_dump', 'STOCK_DICTIONARY_NAME__article_result', 'STOCK_PICKLE__path_for_article', 'STOCK_DICTIONARY_NAMES__owning_stocks', 'STOCK_DICTIONARY_NAMES__basic_info', 'STOCK_DICTIONARY_NAMES__additional_info_tr', 'STOCK_DICTIONARY_NAMES__unmet_order', 'STOCK_FLAG__additional_info_creation_in_progress', 'STOCK_FLAG__additional_info_is_stalled', 'STOCK_FLAG__started_getting_additional_info_tr', 'STOCK_FLAG__when_unmet_order_made', 'STOCK_PICKLE__path_for_additional_info', 'SQLITE_LIST__folder_sub_file_path', 'SQLITE_PICKLE__path_for_db_update_date', 'SQLITE_DICTIONARY__db_update_date', 'SQLITE__con_top', 'SQLITE__cur_top', 'SQLITE_LIST__stocks_already_updated', 'BALANCE_PICKLE__path_for_balance_update_date', 'BALANCE_DICTIONARY__for_normal_update', 'ACCOUNT__code_of_my_account', 'ACCOUNT_LIST__for_accounts_owned', 'ACCOUNT__user_id', 'STOCK_LIST__all_kospi', 'STOCK_LIST__all_kosdq', 'ERROR_COUNTER_BE__request_num', 'ERROR_COUNTER_BE__front_be_counter_previous', 'ERROR_DICTIONARY__backend_and_critical', 'flag_FUNC_STOCK__enable_auto_trading', 'ERROR_FLAG__sell_all_err_critical_check_3', 'SQLITE_FLAG__database_creation_in_progress','SQLITE_FLAG__database_is_stalled', 'DISP_FLAG__test_code_look_up_sucess', 'SQLITE_FLAG__latest_database_data_checked', 'COUNTER_GLOBAL','CHECK_1_FLAG__ALL_login','CHECK_1_RESULT__api_real_or_try','CHECK_1_LOGICAL__windows_1st_login','CHECK_1_LOGICAL__ki_connect_state','CHECK_2_FLAG__every_data_get_success', 'CHECK_2_FLAG_BALANCE__get_success', 'CHECK_2_FLAG_STOCK__get_all_stock_codes', 'CHECK_2_FLAG_SQLITE__first_database_create_success', 'CHECK_2_FLAG_STOCK__owning_stock_get_success', 'CHECK_2_FLAG_STOCK__unmet_order_success', 'CHECK_2_FLAG__news_article_pickle_ready', 'CHECK_2_FLAG_STOCK__basic_info', 'CHECK_2_FLAG_STOCK__additional_info_tr', 'CHECK_FILTER_FLAG__at_initialize', 'CHECK_3_FLAG__ALL_auto_trade_ready', 'CHECK_3_FLAG__ALTIMATE_AUTO_ON', 'CHECK_SELL_ALL_FLAG__restart_api', 'AT_STOCK_CLASS__wrapper', 'AT_FLAG__very_first_init_func_called', 'AT_TUPLE__profit_record_watch', 'AT_TUPLE__profit_record_trans', 'FLAG__FIRST_TIME_REACHED_FILTER_STAGE', 'TOTAL_DICT', 'COMM_32','tabs', 'tab_login', 'tab_cockpit', 'tab_stats','tab_database','tab_test', 'KIWOOM', 'CHECK_1_LOGICAL__windows_1st_login', 'timer', 'timer_num_req', 'STOCK_PICKLE__path_for_order', 'STOCK_LIST__skipped', 'STOCK_DICTIONARY__high_and_low_arrived', 'CHECK_2_FLAG__high_low_data']
 	
 
 	def __init__(self, parent, api_to_bit32_Q, bit32_to_api_Q):
@@ -213,7 +213,8 @@ class pyq_object(QWidget, QObject):  # this is API
 			'SQLITE' : {},
 			'FILTER' : {},
 			'BUDGET' : {},
-			'OWNING' : {}
+			'OWNING' : {},
+			'AVERAGE_PRICE':{}
 		} # SQLITE로 boolian True일 때 만 작업함
 		self.STOCK_DICTIONARY_PICKLE_FROM_BE__path_for_ML = None
 		
@@ -228,6 +229,7 @@ class pyq_object(QWidget, QObject):  # this is API
 		"""
 
 		self.STOCK_LIST__for_total_display = None # 전체 종목 list //self.STOCK_LIST__for_total_display//
+		self.STOCK_LIST__skipped = []
 		self.STOCK_DICTIONARY__name_to_code = {} # 이름에 대한 code값 (사용자 편의)
 		self.STOCK_DICTIONARY__code_to_name = {}
 		self.STOCK_DICTIONARY_NAME__article_dump = {} # 기사 article 엎어치는 부분 ----------------------------------------------------- 64bit 에서 축약본 가져오기
@@ -237,12 +239,20 @@ class pyq_object(QWidget, QObject):  # this is API
 		self.STOCK_DICTIONARY_NAMES__basic_info = {}
 		self.STOCK_DICTIONARY_NAMES__additional_info_tr = {} # tr에서 구할 수 있는 더 세밀한 정보
 		self.STOCK_DICTIONARY_NAMES__unmet_order = { } # unmet order 나올 때 마다 담아놓을 부분
+		self.STOCK_DICTIONARY__high_and_low_arrived = {
+			'high_now':[],
+			'high_yesterday':{},
+			'low_now':[],
+			'low_yesterday':[]
+		}
 		
 		self.STOCK_FLAG__additional_info_creation_in_progress = False # 이거 정보 가져온다고 올린다
 		self.STOCK_FLAG__additional_info_is_stalled = False # 다시 시작했으므로 멈춘다
 		self.STOCK_FLAG__started_getting_additional_info_tr = False
 		self.STOCK_FLAG__when_unmet_order_made = False # unmet order 생성시마다 올리는 부분
 		self.STOCK_PICKLE__path_for_additional_info = None # 경로
+		self.STOCK_PICKLE__path_for_order = None # 64bit에 상태 전달하는 부분!
+		
 
 		#self.pickle_last_update_record = None # db 업데이트 시점 pickle 데이터 저장하는 부분
 		self.SQLITE_LIST__folder_sub_file_path = []
@@ -309,6 +319,7 @@ class pyq_object(QWidget, QObject):  # this is API
 		self.CHECK_2_FLAG_STOCK__owning_stock_get_success = False # 보유 종목 체크 확인시 true
 		self.CHECK_2_FLAG_STOCK__unmet_order_success = False # 미체결 종목 확인 여부 flag 올림
 		self.CHECK_2_FLAG__news_article_pickle_ready = False  # 뉴스 pickle 데이터베이스 데이터를 가져오는데 성공하면, 올린다.
+		self.CHECK_2_FLAG__high_low_data = False # 상한가 하한가 받는 부분
 		self.CHECK_2_FLAG_STOCK__basic_info = False # 기본 감리정보 등 가져오는 부분
 		self.CHECK_2_FLAG_STOCK__additional_info_tr = False # TR 에서 추가 정보 가져오도록 요청하는 부분 (세부 디테일)...!
 		
@@ -395,7 +406,7 @@ class pyq_object(QWidget, QObject):  # this is API
 	# 	self.SIG_database_create.emit()
 
 	def FUNC__restart_api(self): # 재접속 하는 부분
-		print('FE - initiate re-login proces....')
+		print('FE - initiate re-login process....')
 		# @ FE 먼저 초기화
 		#===================================================================
 		# @ BE error 값 저장
@@ -486,7 +497,19 @@ class pyq_object(QWidget, QObject):  # this is API
 		except Exception as e:
 			print('error in func_STOCK_DICTIONARY_PICKLE__min_data_dump_for_ML :: ', e)
 		
-	
+	def FUNC_COMM_PICKLE__path_to_give_order(self, int_given):
+		# 64 bit에 상태 명령내리는 부분
+		python_path = os.getcwd()
+		folder_path = str(python_path + '\\' + 'KIWOOM_API__ML__COMMON').replace('/', '\\')
+		file_path = folder_path + '\\' + 'COMM_32_ORDER.p'
+		self.STOCK_PICKLE__path_for_order = None
+
+		try:
+			with open(file_path, 'rb') as file:
+				pickle.dump(int_given, file)
+		except Exception as e:
+			print('error in FUNC_COMM_PICKLE__path_to_give_order :: ', e)
+
 	
 	def func_STOCK_DICTIONARY_PICKLE__article_location(self):
 		# article pickle 주소 확인하고 가져오는 부분
@@ -606,7 +629,7 @@ class pyq_object(QWidget, QObject):  # this is API
 					self.FUNC_STOCK_DATABASE__get_all_codes_api()
 				if self.CHECK_2_FLAG_STOCK__owning_stock_get_success == False:
 					print('periodic_work_wrapper - 4 path')
-					self.FUNC_CHECK_STOCK__owning()
+					#self.FUNC_CHECK_STOCK__owning()
 					self.func_CHECK_STOCK_DISP__owning() # 보유 주식 disp
 				if self.CHECK_2_FLAG_STOCK__unmet_order_success == False:
 					print('periodic_work_wrapper - 5 path')
@@ -630,6 +653,10 @@ class pyq_object(QWidget, QObject):  # this is API
 					print('periodic_work_wrapper - 8 path')
 					#self.FUNC_CHECK_STOCK__additional_info_tr()
 					self.CHECK_2_FLAG_STOCK__additional_info_tr = True
+				
+				if self.CHECK_2_FLAG__high_low_data == False:
+					print('periodic_work_wrapper - 9 path')
+					self.FUNC_STOCK__high_low_arrived_get()
 
 				# 반드시 마지막
 				elif self.CHECK_2_FLAG_SQLITE__first_database_create_success == False:
@@ -715,11 +742,12 @@ class pyq_object(QWidget, QObject):  # this is API
 			
 				if self.STATE_TIME.weekday_num != 5 and self.STATE_TIME.weekday_num != 6: # 주중
 					# 개장 1시간 전에 수행 한다. 대략 8시 즈음?!
-					#self.AT_STOCK_CLASS__wrapper = at.Stock_wrapper(self.STOCK_TARGET_PROFIT) # 1차 AT 부분 선언
+					#self.AT_STOCK_CLASS__wrapper = at.Stock_wrapper(self.STOCK_TARGET_MINUS_ALLOWED_PROFIT) # 1차 AT 부분 선언
 
 					# TEST
 					if self.TEST == True:
 						if self.CHECK_FILTER_FLAG__at_initialize == False:
+							print(f'AT_INIT start in FILTER stage...')
 							self.AT_INIT_EVERYTHING()  # init 해줌
 							self.AT_FUNC_PACKAGE__wake_up()
 					else:
@@ -750,7 +778,7 @@ class pyq_object(QWidget, QObject):  # this is API
 						# 여기 나중에 시간 끝나면 FILTER에서 빠져나오도록 구현해야됨
 						# worker 말고 stage 관리 QTimer에서 bool로 시간으로 가져와서 stage넘어가는거 구현
 
-				self.FUNC_PYQT__rest_timer(0.05)
+				#self.FUNC_PYQT__rest_timer(0.05)
 
 				if 1: # 주가 예측 + 트레이팅 수 들고 오는 부분
 					pass # FUNCTION_PACKAGE로 수행
@@ -768,6 +796,33 @@ class pyq_object(QWidget, QObject):  # this is API
 				
 				self.FUNC_STOCK_BE__update_real_time_for_FE() # 자동으로 BE 단 realtime 데이터 가지고 옴.. 복사
 
+				#-----------------------------------------------------------------------------------------------
+				#######################################################################################################
+				if self.COUNTER_GLOBAL % (60) == 0:  # 60초마다 주문 list 작업 수행
+					self.FUNC_CHECK_STOCK__owning()
+					self.AT_FUNC_PACKAGE__on_the_run_PERIODIC()
+
+				else:
+
+					if self.COUNTER_GLOBAL % (60*60 + 1) == 0: # 1시간 마다
+						try:
+							gc.collect()
+						except Exception as e:
+							print('error in gc.collect in perodic worker Stage check 3')
+
+					if self.COUNTER_GLOBAL % (19) == 0 : # 20초 마다
+						self.FUNC_CHECK_STOCK__owning() # 보유 update
+						self.AT_FUNC__update_TOTAL_DICT__ONGOING() #  자동수행에서 필요한것 update 해주고 엎어친다
+
+					if self.TEST == True:
+						pass
+					else:
+						if self.COUNTER_GLOBAL % (29) == 0: # 30초에 한번
+							self.FUNC_CHECK_ARTICLE__get() # 기사 pickle 읽어옴 ->  항상 해야 됨
+				#######################################################################################################
+				# -----------------------------------------------------------------------------------------------
+
+
 				try: # BE sec realtime information reset
 					if(self.COUNTER_GLOBAL % (60 * 2) == 0 ): # 2분마다 reset
 						if self.KIWOOM.flag_latest_stock_realtime_data == False: # protection
@@ -775,18 +830,14 @@ class pyq_object(QWidget, QObject):  # this is API
 							self.KIWOOM.latest_stock_realtime_data = copy.deepcopy({}) # reset done
 							print('RESET in real time data in BE has been done...')
 
-					if (self.COUNTER_GLOBAL % (60 * 3) == 0):  # 2분마다 reset
+					if (self.COUNTER_GLOBAL % (60 * 3) == 0):  # 3분마다 reset
 						print('FORCED RESET in real time data in BE begin...')
 						self.KIWOOM.latest_stock_realtime_data = copy.deepcopy({})  # forced reset done!
 						print('FORCED RESET in real time data in BE has been done...')
 				except:
 					pass
 				
-				if self.TEST == True:
-					pass
-				else:
-					if self.COUNTER_GLOBAL % (30) == 0: # 30초에 한번
-						self.FUNC_CHECK_ARTICLE__get() # 기사 pickle 읽어옴 ->  항상 해야 됨
+
 					
 					# if self.COUNTER_GLOBAL % (60*10) == 0: # 10분에 한번
 					# 	self.func_CHECK_ARTICLE__date_validation() # 최신 데이터인지 판단!
@@ -809,22 +860,12 @@ class pyq_object(QWidget, QObject):  # this is API
 					self.FUNC_CHECK_STOCK__owning() # 보유 종목 재 확인
 					self.STOCK_FLAG__when_unmet_order_made = False
 
-				if(self.COUNTER_GLOBAL % (60) == 0) : # 1분에 한번씩 업데이트
+				if(self.COUNTER_GLOBAL % (61) == 0) : # 1분에 한번씩 업데이트
 					if self.line_test_text_input.text() in self.STOCK_DICTIONARY__name_to_code:
 						tmp_stock_code = self.STOCK_DICTIONARY__name_to_code[self.line_test_text_input.text()]
 						self.FUNC_STOCK__draw_daily_graph(tmp_stock_code) # 그래프 그리기
-					self.func_CHECK_STOCK_DISP__owning() # 보유 주식 disp
+					#self.func_CHECK_STOCK_DISP__owning() # 보유 주식 disp
 
-				if self.COUNTER_GLOBAL % (58) == 0:  # 58초마다 주문 list 작업 수행
-					self.AT_FUNC_PACKAGE__on_the_run_PERIODIC()
-				
-				else:
-					if self.COUNTER_GLOBAL % (60*60) == 0: # 1시간 마다
-						try:
-							gc.collect()
-						except Exception as e:
-							print('error in gc.collect in perodic worker Stage check 3')
-					pass # 1분동안 사이에 다른 AT 단 periodic 작업 수행
 
 
 			if self.STOCK_IN_ATTENTION.state == "ERROR_SELL_ALL":
@@ -835,6 +876,10 @@ class pyq_object(QWidget, QObject):  # this is API
 				# 1) 32bit에 큐를 보내지 않고, sell 동작을 하는 것으로!
 				# 2) self.FUNC__restart_api() 로 다시시작
 				# error sell all에서 wakeup으로 돌아가는거 짜야됨
+
+			if self.STOCK_IN_ATTENTION.state == "ERROR_CANT_RUN":
+				print(f'to recover from ERROR_CANT_RUN, run restart')
+				self.FUNC__restart_api()  # 재시작
 
 			else:
 				pass
@@ -921,7 +966,8 @@ class pyq_object(QWidget, QObject):  # this is API
 								self.CHECK_2_FLAG__news_article_pickle_ready,
 								self.CHECK_2_FLAG_SQLITE__first_database_create_success,
 								self.CHECK_2_FLAG_STOCK__basic_info,
-								self.CHECK_2_FLAG_STOCK__additional_info_tr] # data creation able to autotrade able
+								self.CHECK_2_FLAG_STOCK__additional_info_tr,
+								self.CHECK_2_FLAG__high_low_data] # data creation able to autotrade able
 
 			
 			if self.TEST == False:
@@ -971,6 +1017,10 @@ class pyq_object(QWidget, QObject):  # this is API
 
 		# @ error dictionary update
 		self.ERROR_DICTIONARY__backend_and_critical['error_backend'] = self.ERROR_COUNTER_BE__front_be_counter_previous
+	
+	def FUNC_STOCK__check_for_vi(self):
+		pass
+		#vi 발동여부 체크
 
 	def FUNC_STOCK_BE__update_real_time_for_FE(self):
 		try:
@@ -986,6 +1036,7 @@ class pyq_object(QWidget, QObject):  # this is API
 			#--------------------------------------
 			# 1) dictionary 비어있는지 확인 + 2) update
 			print('FUNC_STOCK_BE__update_real_time_for_FE entered...')
+			print(f'updating STOCK_DICTIONARY_FROM_BE__real_time_data_SEC')
 			if self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC : # 비어있는지 확인 -> 안비어있으면!
 				"""
 				self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC = self.KIWOOM.latest_stock_realtime_data
@@ -1011,6 +1062,7 @@ class pyq_object(QWidget, QObject):  # this is API
 
 			# 2) 관리할 길이로 짜름
 			# STOCK_SECOND_DATA_LEN
+			print(f'managing length of STOCK_DICTIONARY_FROM_BE__real_time_data_SEC')
 			tmp_list_of_datetime_to_remove = [] # 제거할 대상 다 넣는다
 			if self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC:  # 비어있는지 확인 -> 안비어있으면!
 				# @ 제거 대상 찾음
@@ -1046,113 +1098,69 @@ class pyq_object(QWidget, QObject):  # this is API
 			Volume은 합산해야됨
 			"""
 			# 볼륨합산! -> 볼륨은 -이면 매수, + 매도  // price는 전일가 보다 낮으면 - 붙음, ABS 내장 함수 써야할 수도? -> receive handler에서 이미 abs로 받아옴 매도/매수 표기 - 알필요 없어서.
+			print(f'updating  STOCK_DICTIONARY_FROM_BE__real_time_data_MIN  from  STOCK_DICTIONARY_FROM_BE__real_time_data_SEC')
 			if  self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'] : # 빈 dictionary가 아님!
 				for stock_code in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC: # sec 데이터에서 min을 업데이트 할 것 이므로
+
 					if stock_code in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN']: # 이미 있는데 업데이트 함
-						for datetime_data in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]: # sec data에서 가져오는 부분
-
-							# @ 정각 계산용
-							tmp_datetime_from_sec__microsec_z__obj = datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S").replace(microsecond=0)
-							tmp_datetime_from_sec__sec_z__obj = datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S").replace(second=0, microsecond=0)
-
-							if tmp_datetime_from_sec__microsec_z__obj == tmp_datetime_from_sec__sec_z__obj: # sec 데이터 second정각
-								if datetime_data not in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code]: # min 데이터에 없는 경우에
-									# @ price 업데이트
-									self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_data]['price'] = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][datetime_data]['price']
-
-									# @ volume 업데이트
-									tmp_volume_value__window_1_min = 0 # volume 기록용
-									tmp_while_fali_safe = 0
-									tmp_datetime_min_target__obj = copy.deepcopy((tmp_datetime_from_sec__microsec_z__obj - datetime.timedelta(minutes=1)).replace(second=0, microsecond=0)) #1분전 datetime_obj
-									while tmp_datetime_min_target__obj < tmp_datetime_from_sec__microsec_z__obj and tmp_while_fali_safe <= 60:
-										tmp_while_fali_safe = tmp_while_fali_safe + 1 # fail safe counter up
-										# datetime.datetime.now().strftime('%Y%m%d%H%M%S') : obj to string
-										# datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S") : string to obj
-										tmp_datetime_min_target__obj_str = tmp_datetime_min_target__obj.strftime('%Y%m%d%H%M%S')
-										if tmp_datetime_min_target__obj_str in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]:
-											tmp_volume_value__window_1_min = tmp_volume_value__window_1_min + self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][tmp_datetime_min_target__obj_str]['volume']
-										tmp_datetime_min_target__obj = tmp_datetime_min_target__obj + datetime.timedelta(seconds=1)
-									else:
-										self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_data]['volume'] = tmp_volume_value__window_1_min
-
-
-
-								else: # min에 이미 있는 데이터면 작업을 하지 않는다
-									pass
-							else: # 비 정각시 min에 대해서 작업을 하지 않는다
-								pass
-
-							# @ del
-							try:
-								tmp_datetime_from_sec__microsec_z__obj = None
-								tmp_datetime_from_sec__sec_z__obj = None
-								tmp_volume_value__window_1_min = None
-								tmp_while_fali_safe = None
-								tmp_datetime_min_target__obj = None
-								tmp_datetime_min_target__obj_str = None
-
-								del tmp_datetime_from_sec__microsec_z__obj
-								del tmp_datetime_from_sec__sec_z__obj
-								del tmp_volume_value__window_1_min
-								del tmp_while_fali_safe
-								del tmp_datetime_min_target__obj
-								del tmp_datetime_min_target__obj_str
-
-							except Exception as e:
-								print('error in FUNC_STOCK_BE__update_real_time_for_FE (2) del :: ', e)
-
-					else: # 없는 stock_code 인데 api 실시간 요청 띄워서 sec 데이터에서 새로 받음
+						pass
+					else:
 						self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code] = {}
-						for datetime_data in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]: # sec data에서 가져오는 부분
-							# @ 정각 계산용
-							tmp_datetime_from_sec__microsec_z__obj = datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S").replace(microsecond=0)
-							tmp_datetime_from_sec__sec_z__obj = datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S").replace(second=0, microsecond=0)
 
-							if tmp_datetime_from_sec__microsec_z__obj == tmp_datetime_from_sec__sec_z__obj: # sec 데이터 second정각
-								if datetime_data not in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code]: # min 데이터에 없는 경우에
-									# @ price 업데이트
-									self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_data]['price'] = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][datetime_data]['price']
+					for datetime_data in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]: # sec data에서 가져오는 부분
 
-									# @ volume 업데이트
-									tmp_volume_value__window_1_min = 0 # volume 기록용
-									tmp_while_fali_safe = 0
-									tmp_datetime_min_target__obj = copy.deepcopy((tmp_datetime_from_sec__microsec_z__obj - datetime.timedelta(minutes=1)).replace(second=0, microsecond=0)) #1분전 datetime_obj
-									while tmp_datetime_min_target__obj < tmp_datetime_from_sec__microsec_z__obj and tmp_while_fali_safe <= 60:
-										tmp_while_fali_safe = tmp_while_fali_safe + 1 # fail safe counter up
-										# datetime.datetime.now().strftime('%Y%m%d%H%M%S') : obj to string
-										# datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S") : string to obj
-										tmp_datetime_min_target__obj_str = tmp_datetime_min_target__obj.strftime('%Y%m%d%H%M%S')
-										if tmp_datetime_min_target__obj_str in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]:
-											tmp_volume_value__window_1_min = tmp_volume_value__window_1_min + self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][tmp_datetime_min_target__obj_str]['volume']
-										tmp_datetime_min_target__obj = tmp_datetime_min_target__obj + datetime.timedelta(seconds=1)
-									else:
-										self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_data]['volume'] = tmp_volume_value__window_1_min
+						# @ 정각 계산용 00~59초 사이를 국룰로 정함
+						#tmp_datetime_from_sec__microsec_z__obj = datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S").replace(microsecond=0)
+						tmp_datetime_from_sec__sec_z__obj = datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S").replace(second=0, microsecond=0)
+
+						# @ Price data
+						if tmp_datetime_from_sec__sec_z__obj.strftime('%Y%m%d%H%M%S') in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code]:
+							pass # 이미 datetime data가 MIN에 있었음
+						else:
+							tmp_fail_safe_counter = 0
+							tmp_datetime_from_sec__sec_z__obj_copy = tmp_datetime_from_sec__sec_z__obj
+							while tmp_fail_safe_counter <= 60 and tmp_datetime_from_sec__sec_z__obj_copy <= tmp_datetime_from_sec__sec_z__obj.replace(second=59, microsecond=0):
+
+								if tmp_datetime_from_sec__sec_z__obj_copy.strftime('%Y%m%d%H%M%S') in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]:
+									# Min 데이타에 선언
+									self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][tmp_datetime_from_sec__sec_z__obj.strftime('%Y%m%d%H%M%S')] = {}
+									self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][tmp_datetime_from_sec__sec_z__obj.strftime('%Y%m%d%H%M%S')]['price'] = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][tmp_datetime_from_sec__sec_z__obj_copy.strftime('%Y%m%d%H%M%S')]['price']
+									break
+
+								# next iteration
+								tmp_fail_safe_counter = tmp_fail_safe_counter + 1
+								tmp_datetime_from_sec__sec_z__obj_copy = tmp_datetime_from_sec__sec_z__obj_copy + datetime.timedelta(seconds=1)
+
+						# @ volume data : 계속해서 업데이트 한다
+						if tmp_datetime_from_sec__sec_z__obj.strftime('%Y%m%d%H%M%S') in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code]:
+							tmp_fail_safe_counter = 0
+							tmp_datetime_from_sec__sec_z__obj_copy = tmp_datetime_from_sec__sec_z__obj
+							tmp_summed_volume = 0
+							while tmp_fail_safe_counter <= 60 and tmp_datetime_from_sec__sec_z__obj_copy <= tmp_datetime_from_sec__sec_z__obj.replace(second=59, microsecond=0):
+								if tmp_datetime_from_sec__sec_z__obj_copy.strftime('%Y%m%d%H%M%S') in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]:
+									tmp_summed_volume = tmp_summed_volume + self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][tmp_datetime_from_sec__sec_z__obj_copy.strftime('%Y%m%d%H%M%S')]['volume']
+
+								# next iter
+								tmp_fail_safe_counter = tmp_fail_safe_counter + 1
+								tmp_datetime_from_sec__sec_z__obj_copy = tmp_datetime_from_sec__sec_z__obj_copy + datetime.timedelta(seconds=1)
+
+							else: # end of while loop
+								self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][tmp_datetime_from_sec__sec_z__obj.strftime('%Y%m%d%H%M%S')]['volume'] = tmp_summed_volume
+
+						else: # 위에서 Price data 있는 경우만 넣을 것임
+							pass
 
 
+						# @ del
+						try:
+							tmp_datetime_from_sec__sec_z__obj = None
+							tmp_fail_safe_counter = None
 
-								else: # min에 이미 있는 데이터면 작업을 하지 않는다
-									pass
-							else: # 비 정각시 min에 대해서 작업을 하지 않는다
-								pass
+							del tmp_datetime_from_sec__sec_z__obj
+							del tmp_fail_safe_counter
 
-							# @ del
-							try:
-								tmp_datetime_from_sec__microsec_z__obj = None
-								tmp_datetime_from_sec__sec_z__obj = None
-								tmp_volume_value__window_1_min = None
-								tmp_while_fali_safe = None
-								tmp_datetime_min_target__obj = None
-								tmp_datetime_min_target__obj_str = None
-
-								del tmp_datetime_from_sec__microsec_z__obj
-								del tmp_datetime_from_sec__sec_z__obj
-								del tmp_volume_value__window_1_min
-								del tmp_while_fali_safe
-								del tmp_datetime_min_target__obj
-								del tmp_datetime_min_target__obj_str
-
-							except Exception as e:
-								print('error in FUNC_STOCK_BE__update_real_time_for_FE (3) del :: ', e)
+						except Exception as e:
+							print('error in FUNC_STOCK_BE__update_real_time_for_FE (2) del :: ', e)
 
 			else:
 				# minute data from second data
@@ -1167,64 +1175,83 @@ class pyq_object(QWidget, QObject):  # this is API
 
 			# @ MIN data 10시간 안쪽으로 관리할 것!
 			# self.STOCK_AT_TIME_WINDOW_HOUR 사용
+			print(f'getting STOCK_DICTIONARY_FROM_BE__real_time_data_MIN removable list!')
 			tmp_list_of_datetime_to_remove_in_min = []
 			for stock_code in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN']:
-				tmp_list_of_datetime_to_remove_in_min = []
+				#tmp_list_of_datetime_to_remove_in_min = []
 				tmp_hash_of_datetime = self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code]
 				tmp_keys_from_hash = copy.deepcopy(list(tmp_hash_of_datetime.keys()))
 				tmp_keys_from_hash.sort()
 
 				# @ 가져온 날짜
-				tmp_most_past_hash = tmp_keys_from_hash[0]
-				tmp_most_latest_hash = tmp_keys_from_hash[-1]
-				tmp_most_past_hash__obj = datetime.datetime.strptime(tmp_most_past_hash, "%Y%m%d%H%M%S")
-				tmp_window_from_latest_hash__obj = datetime.datetime.strptime(tmp_most_latest_hash, "%Y%m%d%H%M%S") - datetime.timedelta(hours = self.STOCK_AT_TIME_WINDOW_HOUR)
+				tmp_most_past_hash = tmp_keys_from_hash[0] # 가장 과거
+				tmp_most_latest_hash = tmp_keys_from_hash[-1] # 가장 최신
 
-				tmp_fail_safe = 0
-				while tmp_fail_safe <= 60*10 and tmp_most_past_hash__obj < tmp_window_from_latest_hash__obj:
-					tmp_fail_safe = tmp_fail_safe + 1
-					tmp_list_of_datetime_to_remove_in_min.append(tmp_most_past_hash__obj.strftime('%Y%m%d%H%M%S'))
-					tmp_most_past_hash__obj = tmp_most_past_hash__obj + datetime.timedelta(minutes=1)
+				hash_key_length = len(tmp_keys_from_hash)
+				for i in range(hash_key_length-1,-1,-1):
+					if hash_key_length > self.STOCK_AT_TIME_WINDOW_HOUR * 60: # 관리 길이보다 길다.
+						if hash_key_length - i - 1 < self.STOCK_AT_TIME_WINDOW_HOUR * 60 :
+							pass
+						else: # 대략적으로 잘라줌, 빈 데이터와 가장 오래된 데이터가 관리 시간보다 길 수는 있음
+							tmp_list_of_datetime_to_remove_in_min.append( ( stock_code, tmp_keys_from_hash[i] ) )
+					else:# 관리할 길이보다 작음..
+						pass
 
-				else: # end of while loop
 
-					# @ del items in list
-					for datetime_to_remove in tmp_list_of_datetime_to_remove_in_min:
-						try:
-							self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_to_remove] = None
-							del self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_to_remove]
-						except Exception as e:
-							print('error in FUNC_STOCK_BE__update_real_time_for_FE (4) del :: ', e)
-					
-					# @ del for while loop
-					try:
-						tmp_fail_safe = None
-						del tmp_fail_safe
-
-					except Exception as e:
-						print('error in FUNC_STOCK_BE__update_real_time_for_FE (5) del :: ', e)
-			
-				# del for forloop
+				# @ eraise after for loop
 				try:
-					tmp_list_of_datetime_to_remove_in_min = None
 					tmp_hash_of_datetime = None
 					tmp_keys_from_hash = None
 					tmp_most_past_hash = None
 					tmp_most_latest_hash = None
-					tmp_most_past_hash__obj = None
-					tmp_window_from_latest_hash__obj = None
 
-					del tmp_list_of_datetime_to_remove_in_min
 					del tmp_hash_of_datetime
 					del tmp_keys_from_hash
 					del tmp_most_past_hash
 					del tmp_most_latest_hash
-					del tmp_most_past_hash__obj
-					del tmp_window_from_latest_hash__obj
+
 
 				except Exception as e:
 					print('error in FUNC_STOCK_BE__update_real_time_for_FE (6) del :: ', e)
 
+
+			# @ del items in list
+			print(f'really deleting!!')
+			if self.TEST == True and False:
+				print(f'tmp_list_of_datetime_to_remove_in_min : {tmp_list_of_datetime_to_remove_in_min}')
+				for item in tmp_list_of_datetime_to_remove_in_min:
+					if item[0] in self.MUST_WATCH_LIST:
+						print(item)
+				#self.FUNC_PYQT__rest_timer(15)
+			for datetime_to_remove_have in tmp_list_of_datetime_to_remove_in_min:
+				try:
+					stock_code = datetime_to_remove_have[0]
+					datetime_to_remove = datetime_to_remove_have[1]
+
+					if self.TEST == True and False:
+						print(f'★★★★★ deleting for MIN data [{stock_code}] : {self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN["STOCK_MIN"][stock_code][datetime_to_remove]}, of datetime : {datetime_to_remove}')
+
+					self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_to_remove] = None
+					del self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN'][stock_code][datetime_to_remove]
+				except Exception as e:
+					print('error in FUNC_STOCK_BE__update_real_time_for_FE (4) del :: ', e)
+					traceback.print_exc()
+
+
+			# @ test print
+			# MUST_WATCH_LIST
+			if self.TEST == True and False:
+				if self.COUNTER_GLOBAL % 2 == 0:
+					if self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN']:
+						for stock_code in self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['STOCK_MIN']:
+							if stock_code in self.MUST_WATCH_LIST :
+								print(f'for test perpose MIN...{stock_code} : {self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN["STOCK_MIN"][stock_code]}')
+								print(f'for test perpose MIN...{stock_code} : {len(list(self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN["STOCK_MIN"][stock_code].keys()))}')
+
+					if  self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC :
+						for stock_code in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC:
+							if stock_code in self.MUST_WATCH_LIST:
+								print(f'for test perpose SEC...{stock_code} : {self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]}')
 
 
 		except Exception as e:
@@ -1417,7 +1444,7 @@ class pyq_object(QWidget, QObject):  # this is API
 				"""
 				# logical 하게 판단할 부분
 				# 1) 빈 데이터 프레임 확인
-				bool_1 = (len(tmp_df) >= 900 * 0.95) and (len(tmp_df) != 0) # 비지 않고 900*0.9 이상
+				bool_1 = (len(tmp_df) >= 900 * 0.95) and (len(tmp_df) != 0) or (stock_code in self.STOCK_DICTIONARY__high_and_low_arrived['high_yesterday'])# 비지 않고 900*0.9 이상 or 전날 상한가
 
 
 				# 2) 최신 데이터 여부 확인
@@ -1579,7 +1606,43 @@ class pyq_object(QWidget, QObject):  # this is API
 			traceback.print_exc()
 		
 		
+	def FUNC_STOCK__high_low_arrived_get(self):
+		"""
+		https://blog.naver.com/rkdwnsdud555/220893825977
+		ㅋㅋ
+		self.STOCK_DICTIONARY__high_and_low_arrived = {
+			'high_now':[],
+			'high_yesterday':[],
+			'low_now':[],
+			'low_yesterday':[]
+		} 사용
+		"""
 
+		input_dict ={}
+
+		# @ 세부 설정
+		input_dict['상하한구분'] = 6 # 전일상한
+		input_dict['정렬구분'] = 1 # 종목코드순
+		input_dict['종목조건'] = 0 # 전체조회
+		input_dict['거래량구분'] = '00000'
+		input_dict['신용조건'] = 0 # 전체조회
+		input_dict['매매금구분'] = 0 # 전체 조회
+
+		self.KIWOOM.set_input_value(input_dict)
+
+		tmp_return = self.KIWOOM.comm_rq_data("opt10017_req", "opt10017", 0, self.SCREEN_NO.opt10017_req, self.STATE_TIME.stage, self.STATE_TIME.weekday_num) # look_type  =>  0 : 단순조회 , 2 : 연속조회
+		
+		if tmp_return == 0 : # 정상수신
+			
+			# @ BE 단에서 가져오기
+			self.STOCK_DICTIONARY__high_and_low_arrived['high_yesterday'] = self.KIWOOM.latest_stock_high_low_data
+
+			# @ flag up !!
+			self.CHECK_2_FLAG__high_low_data = True
+		else:
+			self.CHECK_2_FLAG__high_low_data = False
+
+		pass
 
 	def FUNC_CHECK_ARTICLE__get(self): # pickle data를 news에서 읽어온다.
 		#self.CHECK_2_FLAG__news_article_pickle_ready = True
@@ -2052,18 +2115,32 @@ class pyq_object(QWidget, QObject):  # this is API
 						break # for loop 빠져나옴
 				
 				# @ 로그인 성공 정보 ram 변수에 탑재
+				"""
+				★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+				★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+				실투 계좌, 조회할 때 비밀번호 요구 -> 자동로그인 처리하면 되는건가?
+				+ self.KIWOOM.get_login_info 작동 안함, BALNK로 들어옴...??? 왜왜왜?
+				
+				"""
 				self.ACCOUNT__code_of_my_account = self.combo_ACCNO.currentText()
 				self.STOCK_IN_ATTENTION.accno = str(self.combo_ACCNO.currentText())
+
 				self.ACCOUNT__user_id = self.KIWOOM.get_login_info(["USER_ID"])
+				print(f'self.ACCOUNT__user_id : {self.ACCOUNT__user_id}')
+
 
 				# @ 모투인지 아닌지...
 				self.CHECK_1_RESULT__api_real_or_try = self.KIWOOM.get_server_gubun()
+				print(f'self.CHECK_1_RESULT__api_real_or_try : {self.CHECK_1_RESULT__api_real_or_try}')
 				
 				# @ 로그인 성공 정보 flag 올림
 				self.label_login_1.setText("접속상태 : 윈도우 성공 + 현재 접속 성공")
-				if self.ACCOUNT__code_of_my_account and self.ACCOUNT__user_id and self.CHECK_1_RESULT__api_real_or_try:
+				#if self.ACCOUNT__code_of_my_account and self.ACCOUNT__user_id and self.CHECK_1_RESULT__api_real_or_try:
+				if self.ACCOUNT__code_of_my_account and self.ACCOUNT__user_id :
 					self.label_account_info_ACCNO.setText('accnount No. : ' + str(self.ACCOUNT__code_of_my_account))
 					self.label_account_info_USERID.setText('user id No. : ' + str(self.ACCOUNT__user_id))
+
+
 					if self.CHECK_1_RESULT__api_real_or_try: # non null string value
 						self.statsbar_login_mode.showMessage('모의투자 모드')
 					else:
@@ -2310,7 +2387,10 @@ class pyq_object(QWidget, QObject):  # this is API
 			traceback.print_exc()
 	
 	def func_CHECK_STOCK_DISP__owning(self): # display만 담당
-		try:		
+		try:
+
+			self.FUNC_CHECK_STOCK__owning()
+
 			if self.CHECK_2_FLAG_STOCK__owning_stock_get_success == True:
 				# @ table update
 				#--------------------------------------------------------------------------------------
@@ -2335,8 +2415,15 @@ class pyq_object(QWidget, QObject):  # this is API
 							else:
 								tmp_col_search_field = tmp_dict_col_names[col]
 								tmp_row_search_field = tmp_dict_row_names[row-1] # stock code
-								self.table_owning_stocks.setItem(row, col, QTableWidgetItem(str(self.STOCK_DICTIONARY_NAMES__owning_stocks[tmp_row_search_field][tmp_col_search_field])))
-					
+								if tmp_col_search_field != "profit_rate":
+									self.table_owning_stocks.setItem(row, col, QTableWidgetItem(str(self.STOCK_DICTIONARY_NAMES__owning_stocks[tmp_row_search_field][tmp_col_search_field])))
+								else:
+									self.table_owning_stocks.setItem(row, col, QTableWidgetItem(str(
+										round(self.STOCK_DICTIONARY_NAMES__owning_stocks[tmp_row_search_field][
+											tmp_col_search_field],5) )))
+
+				else:
+					self.table_owning_stocks.clear()  # 먼저 table clear 함
 					
 					# --------------------------------------------------------------------------------------
 			else:
@@ -2823,10 +2910,15 @@ class pyq_object(QWidget, QObject):  # this is API
 								self.text_browser_request_action_result_print.setText('problem 매수 - 3')
 								# 최신 데이터가 없다
 							
-						else:
-							self.text_browser_request_action_result_print.setText('problem 매수 - 3')
-							return None # 함수 끝, 주문가능 몇개인지 알 수 없으므로...
-					return None # 한도 금액 이상 없어서 주문 취소
+						else: # 자동 매수 아니면! -> for test
+							if self.STOCK_IN_ATTENTION.state == "CHECK_3" or self.STOCK_IN_ATTENTION.state == "ERROR_SELL_ALL" :
+								self.text_browser_request_action_result_print.setText('problem 매수 - 4')
+								return None # 함수 끝, 주문가능 몇개인지 알 수 없으므로...
+							else:
+								self.text_browser_request_action_result_print.setText('수동 매수 - 1')
+
+					else:
+						return None # 한도 금액 이상 없어서 주문 취소
 				
 				elif self.STOCK_IN_ATTENTION.action == "매도": # self.STOCK_DICTIONARY_NAMES__owning_stocks
 					if self.STOCK_DICTIONARY__code_to_name[code] in self.STOCK_DICTIONARY_NAMES__owning_stocks: # 들고있지 않다면 return None
@@ -2873,7 +2965,7 @@ class pyq_object(QWidget, QObject):  # this is API
 			#####################
 			tmp_send_order_result = self.KIWOOM.send_order(string_name_for_req, self.SCREEN_NO.send_order, self.ACCOUNT__code_of_my_account, order_type_lookup[order_type], code, num, price, hoga_lookup[hoga], original_order_num)
 			print('setting -2 in FE FUNC_STOCK__do_action finished...')
-			self.FUNC_PYQT__rest_timer(0.05) # wait just in case
+			self.FUNC_PYQT__rest_timer(0.025) # wait just in case
 			print('setting -3 in FE run_buy finished...')
 			print('tmp_send_order_result :: ', tmp_send_order_result)
 				
@@ -2987,8 +3079,6 @@ class pyq_object(QWidget, QObject):  # this is API
 							############################
 							# AT 단에서 쓰기 위해 return 필요없음, ohlcv_2로 해결
 							############################
-							
-							
 
 
 						# @ BE reset 해줌
@@ -3224,6 +3314,9 @@ class pyq_object(QWidget, QObject):  # this is API
 			kosdoc_code_list = copy.deepcopy(self.STOCK_LIST__all_kosdq)
 			kosdoc_name_list = []
 
+			# @ skipp list
+			tmp_skipped_list = []
+
 			for code in kospi_code_list:
 				name = self.KIWOOM.get_master_code_name([code])
 				kospi_name_list.append(str(code) + " : " + str(name))
@@ -3234,6 +3327,8 @@ class pyq_object(QWidget, QObject):  # this is API
 					if "FOCUS" in name or"KOSEF" in name or  "SMART" in name or "KINDEX" in name or "TIGER" in name or "ARIRANG" in name or  "KBSTAR" in name or "KODEX" in name or "HANARO" in name or (int(code[0]) >= 5 ):
 						if code in self.MUST_WATCH_LIST:
 							kosdoc_name_list.append(str(code) + " : " + (name))
+						else:
+							tmp_skipped_list.append(str(code))
 					else:
 						kosdoc_name_list.append(str(code) + " : " + (name))
 				else:
@@ -3244,6 +3339,7 @@ class pyq_object(QWidget, QObject):  # this is API
 
 			self.STOCK_LIST__for_total_display = copy.deepcopy(kospi_name_list + kosdoc_name_list) # list 합치기 -> 전체
 			self.STOCK_LIST__for_total_display = copy.deepcopy(list(dict.fromkeys(self.STOCK_LIST__for_total_display))) # remove duplicates
+			self.STOCK_LIST__skipped = copy.deepcopy(tmp_skipped_list)
 
 			self.STOCK_DICTIONARY__name_to_code = {} # initialize before refresh
 			for stock_info in self.STOCK_LIST__for_total_display :
@@ -3265,6 +3361,7 @@ class pyq_object(QWidget, QObject):  # this is API
 			self.folder_path = os.getcwd()
 			self.pickle_folder_path = str(self.folder_path + '\\KIWOOM_API__STOCK_LIST_PICKLE').replace('/', '\\')
 			self.pickle_path = str(self.pickle_folder_path + '\\stock_list_pickle.p')
+			self.skipped_pickle_path = str(self.pickle_folder_path + '\\stock_list_pickle__skipped.p')
 			if os.path.isdir(self.pickle_folder_path):
 				pass
 			else:
@@ -3274,6 +3371,9 @@ class pyq_object(QWidget, QObject):  # this is API
 				with open(self.pickle_path, 'wb') as file:
 					pickle.dump(self.STOCK_LIST__for_total_display, file)
 					print('pickle stock list successfully saved...!')
+				with open(self.skipped_pickle_path, 'wb') as file:
+					pickle.dump(self.STOCK_LIST__skipped, file)
+					print('pickle stock skipped list successfully saved...!')
 			except Exception as e:
 				print('error in dumping pickle of total stock list : ', e)
 
@@ -3479,11 +3579,13 @@ class pyq_object(QWidget, QObject):  # this is API
 					tmp_list_db_codes_obj = self.SQLITE__cur_top.execute("SELECT name FROM sqlite_master WHERE type='table';") # fetch all table codes from DB, obj 생성됨
 					tmp_tmp_list_db_codes = copy.deepcopy(tmp_list_db_codes_obj.fetchall())
 
-					for code_item in tmp_tmp_list_db_codes:
-						if code_item[0] in self.STOCK_DICTIONARY__code_to_name: # 현재 종목 존재하는 경우에만
-							tmp_list_db_codes.append(code_item[0])
-						else:
-							tmp_list_db_codes.append(code_item[0])
+					# for code_item in tmp_tmp_list_db_codes:
+					# 	if code_item[0] in self.STOCK_DICTIONARY__code_to_name: # 현재 종목 존재하는 경우에만
+					# 		tmp_list_db_codes.append(code_item[0])
+					# 	else:
+					# 		tmp_list_db_codes.append(code_item[0])
+					for stock_code in self.STOCK_DICTIONARY__code_to_name:
+						tmp_list_db_codes.append(stock_code)
 					self.STOCK_IN_ATTENTION.stock_list_for_sqlite = copy.deepcopy(tmp_list_db_codes)  # 여기다 copy해서 넣음
 
 					print('length of tmp_list_db_codes :: ', len(tmp_list_db_codes))
@@ -3658,7 +3760,8 @@ class pyq_object(QWidget, QObject):  # this is API
 				'SQLITE': {},
 				'FILTER': {},
 				'BUDGET': {},
-				'OWNING': {}
+				'OWNING': {},
+				'AVERAGE_PRICE':{}
 			})  # SQLITE로 boolian True일 때 만 작업함 # SQLITE로 boolian True일 때 만 작업함 -> 여기서 reset해주고 다음 라인에서 다시 작업
 			try:
 				self.SQLITE__con_top.close()
@@ -4003,16 +4106,17 @@ class pyq_object(QWidget, QObject):  # this is API
 	"""
 	0 : 'WORKING',
 	1 : 'P32_OUTPUT',
-	2 : 'P32_SEND_READY',
-	3 : 'P32_READ_RECIEVE',
-	4 : 'P64_READ_READY',
+	2 : 'P32_TO_P64_SEND_READY',
+	3 : 'P64_TO_P32_READ_RECIEVE',
+	4 : 'P64_TO_P32_READ_READY',
 	5 : 'P64_INPUT',
-	6 : 'P64_SEND_RECIEVE'
+	6 : 'P32_TO_P64_SEND_RECIEVE'
 	"""
 	def AT_INIT_EVERYTHING(self):
 		"""
 		AT 용 공통변수 초기화 / 선언 해주는 부분
 		"""
+		print(f'start AT_INIT function')
 		try:
 			gc_start = time.time()
 			tmp_gc_return = gc.collect()
@@ -4028,8 +4132,8 @@ class pyq_object(QWidget, QObject):  # this is API
 		#self.TARGET_PROFIT = float(self.target_profit_rate)
 		self.FLAG__FIRST_TIME_REACHED_FILTER_STAGE = False # 처음 filter stage에서 수행되면 true로 올려서 자동 트레이딩 끝나면 init위한 flag	
 		self.AT_FLAG__very_first_init_func_called = True
-		self.AT_TUPLE__profit_record_watch = []
-		self.AT_TUPLE__profit_record_trans = []
+		self.AT_TUPLE__profit_record_watch = [] # watching 중인 것
+		self.AT_TUPLE__profit_record_trans = [] # trade 중인 것
 
 		# @ Single_stock 의 class variable 세팅
 		self.AT_FUNC__class_variable_func_assign()
@@ -4042,7 +4146,7 @@ class pyq_object(QWidget, QObject):  # this is API
 		Single_stock.SINGLE_CLASS_VAR__tuple_list_watch = self.AT_TUPLE__profit_record_watch
 		Single_stock.SINGLE_CLASS_VAR__tuple_list_trans = self.AT_TUPLE__profit_record_trans
 		Single_stock.SINGLE_CLASS_VAR__profit_rate_micro = self.STOCK_TARGET_MICRO_PROFIT
-		Single_stock.SINGLE_CLASS_VAR__profit_rate_overall = self.STOCK_TARGET_PROFIT
+		Single_stock.SINGLE_CLASS_VAR__profit_rate_minus_allowed = self.STOCK_TARGET_MINUS_ALLOWED_PROFIT
 		Single_stock.SINGLE_CLASS_VAR__fe_article = self.STOCK_DICTIONARY_NAME__article_dump 
 		# 이거 고쳐져야 한다.(64에서 필요정보만 가져오는 형식)
 
@@ -4060,19 +4164,21 @@ class pyq_object(QWidget, QObject):  # this is API
 			tmp_flag_comm_return = True
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'WORKING' : self.AT_FUNC__wake_up})) # article 포함되어있음 이부분
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_OUTPUT' :self.AT_FUNC__pickle_dump_for__ML}))
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_SEND_READY' : None})) # P32_SEND_READY
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_READ_RECIEVE' : None})) # P32_READ_RECIEVE
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_READ_READY' : None}))
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_TO_P64_SEND_READY' : None})) # P32_TO_P64_SEND_READY
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_TO_P32_READ_RECIEVE' : None})) # P64_TO_P32_READ_RECIEVE
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_TO_P32_READ_READY' : None}))
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_INPUT' : self.AT_FUNC__pickle_dump_from__ML}))
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_SEND_RECIEVE' : None}))
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_TO_P64_SEND_RECIEVE' : None}))
 			
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'WORKING+2': self.AT_FUNC__prediction_update__ONGOING, 'WORKING+3':self.AT_FUNC__update_profit_rank__ONGOING, 'WORKING+4': self.AT_FUNC__allocate_budget_for_each, 'WORKING+6':self.AT_FUNC__del_min_stock_data_after_init}))
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_OUTPUT' :self.AT_FUNC__pickle_dump_for__ML}))
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_SEND_READY' : None})) # P32_SEND_READY
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_READ_RECIEVE' : None})) # P32_READ_RECIEVE
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_READ_READY' : None}))
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_INPUT' : self.AT_FUNC__pickle_dump_from__ML})) # sell hold buy 실제로 받아옴
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_SEND_RECIEVE' : None}))
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_TO_P64_SEND_READY' : None})) # P32_TO_P64_SEND_READY
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_TO_P32_READ_RECIEVE' : None})) # P64_TO_P32_READ_RECIEVE
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_TO_P32_READ_READY' : None}))
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_INPUT' : self.AT_FUNC__pickle_dump_from__ML})) # sell hold buy 실제로 받아옴 -> budget, 등 받아온 후 계산되어야 하므로! 
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_TO_P64_SEND_RECIEVE' : None}))
+
+			print(f'tmp_list_comm_return of the list : {tmp_list_comm_return}')
 
 			for returns in tmp_list_comm_return:
 				if returns == 'COMM_FAIL':
@@ -4110,11 +4216,11 @@ class pyq_object(QWidget, QObject):  # this is API
 			# 전단계에서 받아온 ML의 주문서 존재
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'WORKING+1':self.AT_FUNC__article_bool__ONGOING, 'WORKING+4': self.AT_FUNC__prediction_update__ONGOING, 'WORKING+5':self.AT_FUNC__update_profit_rank__ONGOING, 'WORKING+6': self.AT_FUNC__allocate_budget_for_each, 'WORKING+9':self.AT_FUNC__automated_transaction, 'WORKING+7':self.AT_FUNC__sell_stocks_with_sell_flag, 'WORKING+3' : self.AT_FUNC__update_TOTAL_DICT__ONGOING})) # article 포함되어있음 이부분
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_OUTPUT' :self.AT_FUNC__pickle_dump_for__ML}))
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_SEND_READY' : None})) # P32_SEND_READY
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_READ_RECIEVE' : None})) # P32_READ_RECIEVE
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_READ_READY' : None}))
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_TO_P64_SEND_READY' : None})) # P32_TO_P64_SEND_READY
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_TO_P32_READ_RECIEVE' : None})) # P64_TO_P32_READ_RECIEVE
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_TO_P32_READ_READY' : None}))
 			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_INPUT' : self.AT_FUNC__pickle_dump_from__ML}))
-			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P64_SEND_RECIEVE' : None}))
+			tmp_list_comm_return.append(self.COMM_32.func_proceed(**{'P32_TO_P64_SEND_RECIEVE' : None}))
 
 			for returns in tmp_list_comm_return:
 				if returns == 'COMM_FAIL':
@@ -4204,15 +4310,24 @@ class pyq_object(QWidget, QObject):  # this is API
 				# @ owning 여부, unmet 여부, 실제 구입 전체가격
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
 					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['number_owned']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number = 0
 					
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__unmet_order:
 					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__unmet_number = self.STOCK_DICTIONARY_NAMES__unmet_order[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['unmet_order_num']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__unmet_number = 0
 					
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
 					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['buy_price'] # 해당 stcok에서 사용중인 금액
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought = 0
 					
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
-					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_profit = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['profit_rate'] # 해당 stock의 손익률
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_profit = float(self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['profit_rate'])
+					#int(self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['profit_rate'])/(100) # 해당 stock의 손익률
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_profit = 0
 
 						
 				# 3) article 존재 여부
@@ -4223,7 +4338,11 @@ class pyq_object(QWidget, QObject):  # this is API
 						self.TOTAL_DICT[stock_code].SINGLE_BOOL__article_exist = False
 				else:
 					self.TOTAL_DICT[stock_code].SINGLE_BOOL__article_exist = False
-						
+
+				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__average_price = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['average_price']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__average_price = 0
 					
 				# 5) dictionary stock min data 정합성
 				self.TOTAL_DICT[stock_code].SINGLE_BOOL__sqlite_date_consistancy = True
@@ -4242,9 +4361,11 @@ class pyq_object(QWidget, QObject):  # this is API
 				# 6) 전체 계산 표시해서, ML 단에서 쓸 수 있도록 함
 				# 		self.SINGLE_BOOL__article_exist = False # 결국 이거만 업데이트 되면 된다...
 				# 		self.SINGLE_BOOL__sqlite_date_consistancy = False
-				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['FILTER'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__start_watching #self.TOTAL_DICT[stock_code].SINGLE_BOOL__article_exist * self.TOTAL_DICT[stock_code].SINGLE_BOOL__sqlite_date_consistancy
+				#self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['FILTER'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__start_watching
+				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['FILTER'][stock_code] = True # 처음에 wakeup 이후 판단하려고
 				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['BUDGET'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed
 				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['OWNING'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number
+				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['AVERAGE_PRICE'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__average_price
 					
 
 			
@@ -4322,15 +4443,29 @@ class pyq_object(QWidget, QObject):  # this is API
 				# @ owning 여부, unmet 여부, 실제 구입 전체가격
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
 					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['number_owned']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number = 0
 				
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__unmet_order:
 					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__unmet_number = self.STOCK_DICTIONARY_NAMES__unmet_order[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['unmet_order_num']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__unmet_number = 0
 				
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
 					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['buy_price']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought = 0
 
 				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
-					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_profit = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['profit_rate'] # 해당 stock의 손익률
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_profit = float(self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['profit_rate'])
+					#int(self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['profit_rate'])/(100) # 해당 stock의 손익률
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_profit = 0
+
+				if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name in self.STOCK_DICTIONARY_NAMES__owning_stocks:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__average_price = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['average_price']
+				else:
+					self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__average_price = 0
 
 
 				# 3) article 존재 여부
@@ -4363,7 +4498,8 @@ class pyq_object(QWidget, QObject):  # this is API
 				# 6) 전체 계산 표시해서, ML 단에서 쓸 수 있도록 함
 				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['FILTER'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__start_watching #self.TOTAL_DICT[stock_code].SINGLE_BOOL__article_exist * self.TOTAL_DICT[stock_code].SINGLE_BOOL__sqlite_date_consistancy # * self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__start_watching
 				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['BUDGET'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed
-				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['OWNING'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number			
+				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['OWNING'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number
+				self.STOCK_DICTIONARY_FROM_BE__real_time_data_MIN['AVERAGE_PRICE'][stock_code] = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__average_price
 
 			# @ class update
 			self.AT_FUNC__class_variable_func_assign()
@@ -4468,134 +4604,147 @@ class pyq_object(QWidget, QObject):  # this is API
 		6:"자동금지"
 		7:"모니터링"} -> 모니터링, 코스피 지수 + 인버스 강제 예측 : 나중에 인버스 구매할 수도 있음, 코스피는 계속 예측하자
 		"""
+
+		
 		try:
 			tmp_tupe_of_order = [] # 파는거 먼저해서 sharing budget 먼저 확보하고 매수 진행하려고
-			for stock_code in self.TOTAL_DICT :
-				if self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__start_watching and self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__at_active and self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage == 4:
-					# sec데이터로 위험하면 sell
-					if stock_code not in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC: # 감시중이어야한다
-						self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage = 5 # 자동 트레이딩 벗어나서 보류로 넘어감
-						continue # 바로 다음 iteration
-					else: # in sec data
-						tmp_sec_date_hash = list(self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code].keys())
-						tmp_sec_date_hash.sort()
 
-						# @ hash값 최신 데이터 10초 통과여부 확인
-						if datetime.datetime.now() - datetime.datetime.strptime(tmp_sec_date_hash[-1], "%Y%m%d%H%M%S") <= datetime.timedelta(seconds=10):
+			# @ sell time check
+			tmp_time_check = True
 
-							# @ 가장 최신 값
-							tmp_latest_price = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][tmp_sec_date_hash[-1]]['price']
+			if tmp_time_check == True:
+				for stock_code in self.TOTAL_DICT :
+					# if self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__start_watching and self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__at_active and self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage == 4:
+					if self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG__DODO__at_active and self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage == 4:
+						# sec데이터로 위험하면 sell
+						if stock_code not in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC: # 감시중이어야한다
+							self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage = 5 # 자동 트레이딩 벗어나서 보류로 넘어감
+							continue # 바로 다음 iteration
+						else: # in sec data
+							tmp_sec_date_hash = list(self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code].keys())
+							tmp_sec_date_hash.sort()
 
-							# @ 가장 highest price
-							tmp_highest_price = 0
-							for date_stamp in tmp_sec_date_hash:
-								if date_stamp in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]: # 날짜값 있으면
-									if tmp_highest_price <= self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][date_stamp]['price']:
-										tmp_highest_price = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][date_stamp]['price']
+							# @ hash값 최신 데이터 10초 통과여부 확인
+							if datetime.datetime.now() - datetime.datetime.strptime(tmp_sec_date_hash[-1], "%Y%m%d%H%M%S") <= datetime.timedelta(seconds=10):
+
+								# @ 가장 최신 값
+								tmp_latest_price = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][tmp_sec_date_hash[-1]]['price']
+
+								# @ 가장 highest price
+								tmp_highest_price = 0
+								for date_stamp in tmp_sec_date_hash:
+									if date_stamp in self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code]: # 날짜값 있으면
+										if tmp_highest_price <= self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][date_stamp]['price']:
+											tmp_highest_price = self.STOCK_DICTIONARY_FROM_BE__real_time_data_SEC[stock_code][date_stamp]['price']
+										else:
+											pass
 									else:
 										pass
-								else:
-									pass
-							if tmp_highest_price != 0: # avoid zero division
-								if ((tmp_latest_price - tmp_highest_price) / (tmp_highest_price)) < self.STOCK_TARGET_MINUS_PROFIT : # -3퍼 순간 찍으면
-									self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage = 5 # 자동 트레이딩 벗어나서 보류로 넘어감
-									continue
-								else:
-									pass
-									############ 실제 트레이딩 정상적으로 들어와야 하는 부분 ##################################
-									########################################################################################
-									# 수익률 감소해서 팔아야 하는 것은 stage 단에서 관리
-									# 1) budget 확인
-									if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed < self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought : # 만족할 때 까지 매도
-										tmp_num_to_sell = 0
-										tmp_avg_price = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['average_price']
-										for i in range(self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number ): # 보유수량 iter
-											if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed >= ( -(i+1) * (tmp_avg_price) + self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought ):
-												tmp_num_to_sell = (i+1)
-												break
-										else: # break 없이 진입
-											tmp_num_to_sell = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number
-										#ㅋㅋ
-										tmp_tupe_of_order.append( (stock_code, tmp_num_to_sell, "매도", 1) )
-										# self.STOCK_IN_ATTENTION.code = stock_code
-										# self.STOCK_IN_ATTENTION.order_num = tmp_num_to_sell
-										# self.STOCK_IN_ATTENTION.action = "매도"
-										# self.FUNC_STOCK__do_action()
+								if tmp_highest_price != 0: # avoid zero division
+									if ((tmp_latest_price - tmp_highest_price) / (tmp_highest_price)) < self.STOCK_INSTANT_TARGET_MINUS_PROFIT : # -3퍼 순간 찍으면
+										self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage = 5 # 자동 트레이딩 벗어나서 보류로 넘어감
+										continue
+									else:
+										pass
+										############ 실제 트레이딩 정상적으로 들어와야 하는 부분 ##################################
+										########################################################################################
+										# 수익률 감소해서 팔아야 하는 것은 stage 단에서 관리
+										# 1) budget 확인
+										if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed < self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought : # 만족할 때 까지 매도
+											tmp_num_to_sell = 0
+											tmp_avg_price = self.STOCK_DICTIONARY_NAMES__owning_stocks[self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__name]['average_price']
+											for i in range(self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number ): # 보유수량 iter
+												if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed >= ( -(i+1) * (tmp_avg_price) + self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought ):
+													tmp_num_to_sell = (i+1)
+													break
+											else: # break 없이 진입
+												tmp_num_to_sell = self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__owning_number
+											#ㅋㅋ
+											tmp_tupe_of_order.append( (stock_code, tmp_num_to_sell, "매도", 1) )
+											# self.STOCK_IN_ATTENTION.code = stock_code
+											# self.STOCK_IN_ATTENTION.order_num = tmp_num_to_sell
+											# self.STOCK_IN_ATTENTION.action = "매도"
+											# self.FUNC_STOCK__do_action()
 
-									elif (self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed >= self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought) and (self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed < self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought + tmp_latest_price): # 예산 초과는 아닌데 살 금액은 모자른다
-										if stock_code in self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade']: # 있다면
-											# self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code] -> {action : , num :}
-											if self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'SELL':
+										elif (self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed >= self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought) and (self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed < self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought + tmp_latest_price): # 예산 초과는 아닌데 살 금액은 모자른다
+											if stock_code in self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade']: # 있다면
+												# self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code] -> {action : , num :}
+												if self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'SELL':
+													# self.STOCK_IN_ATTENTION.code = stock_code
+													# self.STOCK_IN_ATTENTION.order_num = self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num']
+													# self.STOCK_IN_ATTENTION.action = "매도"
+													# self.FUNC_STOCK__do_action()
+													tmp_tupe_of_order.append( (stock_code, self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num'], "매도", 1) )
+												elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'BUY':
+													continue
+												elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'HOLD':
+													continue
+
+											else: # should be unreachable
+												self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage = 5 # 자동 트레이딩 벗어나서 보류로 넘어감
+												continue
+
+										elif self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed >= self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought + tmp_latest_price: # 한개 이상 살 수 있음
+											pass
+											# ㅋㅋ
+											#여기서 몇개 구매 가능한지 계산해봐야됨!
+											#홀드, 바이, 셀 각각 대응도 코딩, 큰단위 구매랑 판매는 FUNC_STOCK__do_action 에서 서폿 되니깐 skip!
+											if self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'BUY':
+												tmp_possible_n = ((self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed - self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought) / tmp_latest_price)
+												tmp_request_n = self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num']
+												tmp_send_n = 0
+												if tmp_possible_n >= tmp_request_n:
+													tmp_send_n = tmp_request_n
+												else:
+													tmp_send_n = tmp_possible_n
+												# self.STOCK_IN_ATTENTION.code = stock_code
+												# self.STOCK_IN_ATTENTION.order_num = tmp_send_n
+												# self.STOCK_IN_ATTENTION.action = "매수"
+												# self.FUNC_STOCK__do_action()
+												tmp_tupe_of_order.append( (stock_code, tmp_send_n, "매수", 0) )
+												
+
+											elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'SELL':
 												# self.STOCK_IN_ATTENTION.code = stock_code
 												# self.STOCK_IN_ATTENTION.order_num = self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num']
 												# self.STOCK_IN_ATTENTION.action = "매도"
 												# self.FUNC_STOCK__do_action()
 												tmp_tupe_of_order.append( (stock_code, self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num'], "매도", 1) )
-											elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'BUY':
-												continue
+
 											elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'HOLD':
-												continue
+												pass
 
-										else: # should be unreachable
-											self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage = 5 # 자동 트레이딩 벗어나서 보류로 넘어감
-											continue
-
-									elif self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed >= self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought + tmp_latest_price: # 한개 이상 살 수 있음
-										pass
-										# ㅋㅋ
-										#여기서 몇개 구매 가능한지 계산해봐야됨!
-										#홀드, 바이, 셀 각각 대응도 코딩, 큰단위 구매랑 판매는 FUNC_STOCK__do_action 에서 서폿 되니깐 skip!
-										if self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'BUY':
-											tmp_possible_n = ((self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__allowed - self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_BUDGET__real_bought) / tmp_latest_price)
-											tmp_request_n = self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num']
-											tmp_send_n = 0
-											if tmp_possible_n >= tmp_request_n:
-												tmp_send_n = tmp_request_n
-											else:
-												tmp_send_n = tmp_possible_n
-											# self.STOCK_IN_ATTENTION.code = stock_code
-											# self.STOCK_IN_ATTENTION.order_num = tmp_send_n
-											# self.STOCK_IN_ATTENTION.action = "매수"
-											# self.FUNC_STOCK__do_action()
-											tmp_tupe_of_order.append( (stock_code, tmp_send_n, "매수", 0) )
-											
-
-										elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'SELL':
-											# self.STOCK_IN_ATTENTION.code = stock_code
-											# self.STOCK_IN_ATTENTION.order_num = self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num']
-											# self.STOCK_IN_ATTENTION.action = "매도"
-											# self.FUNC_STOCK__do_action()
-											tmp_tupe_of_order.append( (stock_code, self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['num'], "매도", 1) )
-
-										elif self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['trade'][stock_code]['action'] == 'HOLD':
-											pass
-
-									# 3) ML단 정보 이용
+										# 3) ML단 정보 이용
 
 
-							else: # should be unreachable but if it does
-								self.ERROR_DICTIONARY__backend_and_critical['error_critical'] = self.ERROR_DICTIONARY__backend_and_critical['error_critical'] + 1
+								else: # should be unreachable but if it does
+									self.ERROR_DICTIONARY__backend_and_critical['error_critical'] = self.ERROR_DICTIONARY__backend_and_critical['error_critical'] + 1
 
-						else: # SEC데이터가 10초를 넘김
-							pass
+							else: # SEC데이터가 10초를 넘김
+								pass
 
+					
+					else: # 자동 수행 단계가 아님
+						pass
 				
-				else: # 자동 수행 단계가 아님
-					pass
-			
-			# @ 주문서 작성 FOR loop 끝남
-			##############################################
+				# @ 주문서 작성 FOR loop 끝남
+				##############################################
 
-			# 1) 정렬
-			# 종목코드, trans 개수, action type, 소팅위한 번호
-			tmp_tupe_of_order = copy.deepcopy( sorted(tmp_tupe_of_order, key=lambda x : x[3], reverse=True) )
+				# 1) 정렬
+				# 종목코드, trans 개수, action type, 소팅위한 번호
+				tmp_tupe_of_order = copy.deepcopy( sorted(tmp_tupe_of_order, key=lambda x : x[3], reverse=True) )
 
-			# 2) 주문 수행
-			for tuple_item in tmp_tupe_of_order:
-				self.STOCK_IN_ATTENTION.code = tuple_item[0]
-				self.STOCK_IN_ATTENTION.order_num = tuple_item[1]
-				self.STOCK_IN_ATTENTION.action = tuple_item[2]
-				self.FUNC_STOCK__do_action()
+				# 2) 주문 수행
+				for tuple_item in tmp_tupe_of_order:
+					self.STOCK_IN_ATTENTION.code = tuple_item[0]
+					self.STOCK_IN_ATTENTION.order_num = tuple_item[1]
+					self.STOCK_IN_ATTENTION.action = tuple_item[2]
+					self.FUNC_STOCK__do_action()
+
+			else: # time is for sell
+				##############################################
+				##############################################
+				self.FUNC_STOCK__handle_sell_every_stock()
 
 		except Exception as e:
 			print('error in AT_FUNC__automated_transaction :: ', e)
@@ -4681,6 +4830,7 @@ class pyq_object(QWidget, QObject):  # this is API
 
 			# @ update AT list
 			self.AT_TUPLE__profit_record_trans.clear()
+
 			if len(self.AT_TUPLE__profit_record_watch) > self.STOCK_AT_MAX_NUM: # 최대 들고있을 개수
 				#self.AT_TUPLE__profit_record_trans = copy.deepcopy([]) # initialize
 				
@@ -4725,7 +4875,8 @@ class pyq_object(QWidget, QObject):  # this is API
 						self.TOTAL_DICT[stock_data].SINGLE_VARIABLE_BUDGET__allowed = 0
 						self.TOTAL_DICT[stock_data].SINGLE_CHECK_FLAG__DODO__sell_all = True # 자동 투자 한종목 매도 true
 					else: # 원래 자동트레이딩 상태 아니었음
-						pass
+						self.TOTAL_DICT[stock_data].SINGLE_VARIABLE_BUDGET__allowed = 0
+	
 
 
 		except Exception as e:
@@ -4756,7 +4907,9 @@ class pyq_object(QWidget, QObject):  # this is API
 			# @ 엎어 친다
 			self.AT_TUPLE__profit_record_watch = copy.deepcopy(tmp_list_records_to_watch) # 이걸로 관리를 해야할 것 같은데?
 			"""
+			# @ initialize
 			self.AT_TUPLE__profit_record_watch.clear()
+
 			tmp_list_of_record_watch = []
 			for stock_code in self.TOTAL_DICT :
 				tmp_list_of_record_watch.append( (stock_code, self.TOTAL_DICT[stock_code].SINGLE_VARIABLE_STOCK__expected_profit) )
@@ -4797,10 +4950,12 @@ class pyq_object(QWidget, QObject):  # this is API
 
 					tmp_list_data_of_future = [] # reset
 					for datetime_data_from_ML in tmp_datetime_data_list: # sorted!
-						datetime_data_from_ML__obj = datetime.datetime.strptime(datetime_data_from_ML, "%Y%m%d%H%M%S").replace(second=0, microsecond = 0)
+						datetime_data_from_ML__obj = datetime.datetime.strptime(datetime_data_from_ML, "%Y%m%d%H%M%S").replace(second=0, microsecond = 0) # obj로 변환
+
+						# 현재 시점으로부터 -10분까지 허용
 						if(      (tmp_datetime_now__obj - datetime_data_from_ML__obj <= datetime.timedelta(minutes=10))
 							and (datetime_data_from_ML__obj - tmp_datetime_now__obj <= datetime.timedelta(minutes=30))): # 미래 데이터
-							tmp_list_data_of_future.append(datetime_data_from_ML)
+							tmp_list_data_of_future.append(datetime_data_from_ML) # str time 넣음
 					
 					try:
 						datetime_data_from_ML__obj = None
@@ -4852,7 +5007,7 @@ class pyq_object(QWidget, QObject):  # this is API
 		코드를 넣으면, trade able인지, self.TOTAL_DICT 에 있으면 True 반환 else -> False
 		"""
 		if stock_code in self.TOTAL_DICT:
-			if self.TOTAL_DICT[stock_code].SINGLE_CHECK_FLAG_BOOL__result: #이게 true이면
+			if self.TOTAL_DICT[stock_code].SINGLE_VARIABLE__stage in [3, 4]: #이게 true이면
 				return True
 			else:
 				return False
@@ -4950,6 +5105,7 @@ class pyq_object(QWidget, QObject):  # this is API
 
 			if self.TEST == True:
 				if os.path.isfile(self.STOCK_DICTIONARY_FROM_ML__path_for_32bit):
+				#if True:
 					with open(self.STOCK_DICTIONARY_FROM_ML__path_for_32bit, 'rb') as file:
 						tmp_dictionary = copy.deepcopy(pickle.load(file))
 					print('AT_FUNC__pickle_dump_from__ML pickle dump successful!')
@@ -4967,7 +5123,7 @@ class pyq_object(QWidget, QObject):  # this is API
 				if 'prediction' in tmp_dictionary and 'trade' in tmp_dictionary and 'date' in tmp_dictionary:
 					if tmp_dictionary['prediction'] and tmp_dictionary['trade']: # 비지 않음
 						# datetime.datetime.strptime(datetime_data, "%Y%m%d%H%M%S")
-						if datetime.datetime.now() - datetime.datetime.strptime(tmp_dictionary['date'], "%Y%m%d%H%M%S") <= datetime.timedelta(minutes=1): #1분 차이이면 -> 64bit도 같이 도는 중이니깐 만족할 것임
+						if datetime.datetime.now() - datetime.datetime.strptime(tmp_dictionary['date'], "%Y%m%d%H%M%S") <= datetime.timedelta(minutes=3): #3분 차이 이하이면 -> 64bit도 같이 도는 중이니깐 만족할 것임
 							for stock_code in tmp_dictionary['prediction']: # prediction은 업데이트로, trade는 엎어치고
 								if stock_code in self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['prediction']:
 									self.STOCK_DICTIONARY_FROM_ML__real_time_data_MIN['prediction'][stock_code].update( tmp_dictionary['prediction'][stock_code] )
@@ -5024,18 +5180,20 @@ class Screen_no:
 	실시간 시세 데이터는 하나의 화면번호당, 100개 종목까지 등록 가능합니다!
 	:return:
 	"""
-	untouch_list = ["0101", "0001", "0002", "0003", "0004", "0005", "0006"]
+	untouch_list = ["0101", "0001", "0002", "0003", "0004", "0005", "0006", "0007"]
 	
 	unfilter_list = [] # create when calling the class
 	# ----------------------------------------------------
 	opt10081_req = "0101"
 	opt10080_req = "0101"
+	
 	balance_check_normal = "0001"
 	balance_check_with_order = "0002"
 	send_order = "0003"
 	check_owning_stocks = "0004"
 	stock_additional_info_tr = "0005"
 	check_unmet_order = "0006"
+	opt10017_req = "0007"
 	
 	hash_by_scrno_to_stock_code = {}
 
@@ -5177,7 +5335,7 @@ class Message:
 			action = "매도취소"
 		#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		if "정상처리" in dictionary['message']: #매도 성공
+		if "정상처리" in dictionary['message'] or "완료" in dictionary['message']: #매도 성공
 			result = "성공"
 		elif "실패" in dictionary['message'] or "확인하세요" in  dictionary['message'] or "않습니다" in dictionary['message']:
 			result = "실패"
@@ -5192,6 +5350,8 @@ class Message:
 			result = "성공"
 		if dictionary['message'] == '[00Z353] 모의투자 주문가능 수량을 확인하세요':
 			result = "실패"
+		'send_buy_order_req', 'trcode': 'KOA_NORMAL_BUY_KP_ORD', 'message': '[107066] 매수주문이 완료되었습니다.'}
+_on_receive_tr_data ac
 		"""
 
 		print(str(action + result))
@@ -5331,7 +5491,7 @@ class Machine_state(object):
 						if item_error == False:  # 무조건 return 값들 0 혹은 True로 맞춰야 한다
 							tmp_flag_error_sell_all = False
 				print('tmp_flag_1 :: ', tmp_flag_error_sell_all )
-				print('self.LIST__CHECK_1 :: ', self.LIST__ERROR_SELL_ALL)
+				print('self.LIST__ERROR_SELL_ALL :: ', self.LIST__ERROR_SELL_ALL)
 				if tmp_flag_error_sell_all == True : # state change ready
 					#self.run_FUNC__to_CHECK_1() # state change
 					return True
@@ -5519,7 +5679,7 @@ class Single_stock:
 	SINGLE_CLASS_VAR__tuple_list_watch = None
 	SINGLE_CLASS_VAR__tuple_list_trans = None
 	SINGLE_CLASS_VAR__profit_rate_micro = None
-	SINGLE_CLASS_VAR__profit_rate_overall = None
+	SINGLE_CLASS_VAR__profit_rate_minus_allowed = None
 	SINGLE_CLASS_VAR__fe_article = None
 
 	SINGLE_CLASS_FUNC_del_scrno = None
@@ -5528,7 +5688,7 @@ class Single_stock:
 
 	SINGLE_CLASS_POINTER__STOCK_IN_ATTENTION = None
 
-	__slots__ = ['SINGLE_VARIABLE__name', 'SINGLE_VARIABLE__stock_code', 'SINGLE_VARIABLE__stage', 'SINGLE_VARIBALE_DICTIONARY__stage_name', 'SINGLE_VARIABLE__owning_number', 'SINGLE_VARIABLE__unmet_number', 'SINGLE_VARIABLE_BUDGET__allowed', 'SINGLE_VARIABLE_BUDGET__real_bought', 'SINGLE_VARIABLE_BUDGET__real_profit', 'SINGLE_VARIABLE_STOCK__expected_profit', 'SINGLE_BOOL__article_exist', 'SINGLE_BOOL__sqlite_date_consistancy', 'SINGLE_CHECK_FLAG__DODO__start_watching',  'SINGLE_CHECK_FLAG__DODO__stop_watching', 'SINGLE_CHECK_FLAG__DODO__at_active', 'SINGLE_CHECK_FLAG__DODO__sell_all', 'SINGLE_CHECK_FLAG__DODO__db_check_needed', 'SINGLE_DATETIME_OBJ__last_data_consist_check', 'SINGLE_DATETIME_OBJ__last_AT_trade_on_check' ]
+	__slots__ = ['SINGLE_VARIABLE__name', 'SINGLE_VARIABLE__stock_code', 'SINGLE_VARIABLE__stage', 'SINGLE_VARIBALE_DICTIONARY__stage_name', 'SINGLE_VARIABLE__owning_number', 'SINGLE_VARIABLE__unmet_number', 'SINGLE_VARIABLE_BUDGET__allowed', 'SINGLE_VARIABLE_BUDGET__real_bought', 'SINGLE_VARIABLE_BUDGET__real_profit', 'SINGLE_VARIABLE_STOCK__expected_profit', 'SINGLE_BOOL__article_exist', 'SINGLE_BOOL__sqlite_date_consistancy', 'SINGLE_CHECK_FLAG__DODO__start_watching',  'SINGLE_CHECK_FLAG__DODO__stop_watching', 'SINGLE_CHECK_FLAG__DODO__at_active', 'SINGLE_CHECK_FLAG__DODO__sell_all', 'SINGLE_CHECK_FLAG__DODO__db_check_needed', 'SINGLE_DATETIME_OBJ__last_data_consist_check', 'SINGLE_DATETIME_OBJ__last_AT_trade_on_check' , 'SINGLE_VARIABLE_STOCK__average_price']
 
 	def __init__(self, name, code):
 		self.SINGLE_VARIABLE__name = str(name)
@@ -5552,7 +5712,7 @@ class Single_stock:
 		self.SINGLE_VARIABLE_BUDGET__real_bought = 0 # 실제 구매한 금액 총량
 		self.SINGLE_VARIABLE_BUDGET__real_profit = 0 # 실제 수익률 총량 -> 업데이트 FE단에서
 		self.SINGLE_VARIABLE_STOCK__expected_profit = 0 # 예상 수익률 : future 30분~ or 그이상 시간동안
-		
+		self.SINGLE_VARIABLE_STOCK__average_price = 0 #  평단가
 		
 
 		
@@ -5590,7 +5750,9 @@ class Single_stock:
 		"""
 		# @ common condition
 		if self.SINGLE_VARIABLE__stage == 7: #반드시 모니터링
-			self.SINGLE_CHECK_FLAG__DODO__start_watching = True
+			pass
+			#self.TEST
+			#self.SINGLE_CHECK_FLAG__DODO__start_watching = True
 		# if self.SINGLE_VARIABLE__stage == 7 and self.SINGLE_VARIABLE__owning_number != 0 : -> 차후 구현
 
 
@@ -5665,7 +5827,8 @@ class Single_stock:
 			self.SINGLE_VARIABLE__stage = 3
 		
 		# 4) 자동트레이딩이었는데 들고있다가 종목전체수익이 떨어지면 매도로 전환
-		elif self.SINGLE_VARIABLE__stage == 4 and self.SINGLE_VARIABLE__owning_number != 0 and self.SINGLE_VARIABLE_BUDGET__real_profit < Single_stock.SINGLE_CLASS_VAR__profit_rate_overall:
+		#elif self.SINGLE_VARIABLE__stage == 4 and self.SINGLE_VARIABLE__owning_number != 0 and self.SINGLE_VARIABLE_BUDGET__real_profit < Single_stock.SINGLE_CLASS_VAR__profit_rate_minus_allowed:
+		elif self.SINGLE_VARIABLE__stage == 4 and self.SINGLE_VARIABLE__owning_number != 0 and self.SINGLE_VARIABLE_BUDGET__real_profit < Single_stock.SINGLE_CLASS_VAR__profit_rate_minus_allowed:
 			self.SINGLE_CHECK_FLAG__DODO__stop_watching = True
 			self.SINGLE_VARIABLE__stage = 6 # sell all and dont touch for 30 minutes
 			self.SINGLE_DATETIME_OBJ__last_AT_trade_on_check = datetime.datetime.now() # 기록
@@ -5719,15 +5882,15 @@ class Bit_32:
 		self.dictionary_stage = {
 									0 : 'WORKING',
 									1 : 'P32_OUTPUT',
-									2 : 'P32_SEND_READY',
-									3 : 'P32_READ_RECIEVE',
-									4 : 'P64_READ_READY',
+									2 : 'P32_TO_P64_SEND_READY',
+									3 : 'P64_TO_P32_READ_RECIEVE',
+									4 : 'P64_TO_P32_READ_READY',
 									5 : 'P64_INPUT',
-									6 : 'P64_SEND_RECIEVE'
+									6 : 'P32_TO_P64_SEND_RECIEVE'
 		}
 		
-		self.comms_32_dictionary = {'P32_SEND_READY':False , 'P64_SEND_RECIEVE':False} # 32bit 파일 준비완료 알림 / 64에게 받았다고 알림
-		self.comms_64_dictionary = {'P64_SEND_READY':False , 'P32_SEND_RECIEVE':False} # 64bit 파일 준비완료 알림 / 32에게 받았다고 알림
+		self.comms_32_dictionary = {'P32_TO_P64_SEND_READY':False , 'P32_TO_P64_SEND_RECIEVE':False} # 32bit 파일 준비완료 알림 / 64에게 받았다고 알림
+		self.comms_64_dictionary = {'P64_TO_P32_SEND_READY':False , 'P64_TO_P32_SEND_RECIEVE':False} # 64bit 파일 준비완료 알림 / 32에게 받았다고 알림
 		
 		self.comms_send_path = None
 		self.comms_read_path = None
@@ -5760,7 +5923,8 @@ class Bit_32:
 						self.comms_64_dictionary = copy.deepcopy(pickle.load(file))
 					print('successful pickle read from Bit_64 - func_COMM_PICKLE__read_64')
 				else:
-					return 'AT_FAIL' ############이부분으로 comms stage이동 확인!
+					pass
+					#return 'AT_FAIL' ############이부분으로 comms stage이동 확인!
 			else:
 				with open(self.comms_read_path, 'rb') as file:
 					self.comms_64_dictionary = copy.deepcopy(pickle.load(file))
@@ -5802,11 +5966,11 @@ class Bit_32:
 		
 		0 : 'WORKING',
 		1 : 'P32_OUTPUT',
-		2 : 'P32_SEND_READY',
-		3 : 'P32_READ_RECIEVE',
-		4 : 'P64_READ_READY',
+		2 : 'P32_TO_P64_SEND_READY',
+		3 : 'P64_TO_P32_READ_RECIEVE',
+		4 : 'P64_TO_P32_READ_READY',
 		5 : 'P64_INPUT',
-		6 : 'P64_SEND_RECIEVE'
+		6 : 'P32_TO_P64_SEND_RECIEVE'
 		"""
 		def run_kwargs(kwargs, tmp_stage_string):
 			tmp_list_return = []
@@ -5820,6 +5984,7 @@ class Bit_32:
 								tmp_list_return.append(tmp_value) # execute function
 							except:
 								tmp_list_return.append('AT_FAIL')
+								traceback.print_exc()
 						else:
 							tmp_list_return.append('AT_SUCCESS') # dummy
 					else:
@@ -5853,29 +6018,29 @@ class Bit_32:
 			elif 'P32_OUTPUT' in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
 				tmp_return = run_kwargs(kwargs, tmp_stage_string)
 				
-			elif "P32_SEND_READY" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
+			elif "P32_TO_P64_SEND_READY" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
 				tmp_return = run_kwargs(kwargs, tmp_stage_string)
 				
-				self.comms_32_dictionary['P64_SEND_RECIEVE'] = False # P64_SEND_RECIEVE 사용 reset
-				self.comms_32_dictionary['P32_SEND_READY'] = True # 보낼 값
+				self.comms_32_dictionary['P32_TO_P64_SEND_RECIEVE'] = False # P32_TO_P64_SEND_RECIEVE 사용 reset
+				self.comms_32_dictionary['P32_TO_P64_SEND_READY'] = True # 보낼 값
 				tmp_return.append(self.func_COMM_PICKLE__send_32()) # 보내고 local에 기록하고
 				
 			
-			elif "P32_READ_RECIEVE" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
+			elif "P64_TO_P32_READ_RECIEVE" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
 				tmp_return = run_kwargs(kwargs, tmp_stage_string)
 				tmp_return.append(self.func_COMM_PICKLE__read_64())
 				if self.TEST == False:
 					if self.comms_64_dictionary['P32_SEND_RECIEVE'] == False: # 64에서 받은게 확인되어야 함
 						tmp_return.append('WAITING')
 					else:
-						self.comms_32_dictionary['P32_SEND_READY'] = False	# ram에서 init
+						self.comms_32_dictionary['P32_TO_P64_SEND_READY'] = False	# ram에서 init
 						tmp_return.append(self.func_COMM_PICKLE__send_32()) # 보내고 local에서도 init 기록하고
 						self.counter_wait = 0 # waiting 카운터 reset
 
 				else:
 					pass
 			
-			elif "P64_READ_READY" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
+			elif "P64_TO_P32_READ_READY" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
 				tmp_return = run_kwargs(kwargs, tmp_stage_string)
 				tmp_return.append(self.func_COMM_PICKLE__read_64())
 				if self.TEST == False:
@@ -5889,56 +6054,60 @@ class Bit_32:
 			elif "P64_INPUT" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
 				tmp_return = run_kwargs(kwargs, tmp_stage_string)
 				
-			elif "P64_SEND_RECIEVE" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
+			elif "P32_TO_P64_SEND_RECIEVE" in tmp_stage_string and tmp_stage_string in tmp_upper_stage:
 				tmp_return = run_kwargs(kwargs, tmp_stage_string)		
-				self.comms_32_dictionary['P64_SEND_RECIEVE'] = True
+				self.comms_32_dictionary['P32_TO_P64_SEND_RECIEVE'] = True
 				tmp_return.append(self.func_COMM_PICKLE__send_32())
 			else:
-				tmp_return = []
+				tmp_return.append('AT_STAGE_MISMATCH')
 				#tmp_return.append('WAITING')
 				
 			
 			# @ return 값 확인
 			tmp_stage_fail = False # fail이 나면 True, 다음 stage로 못 넘어가야 함
 			tmp_stage_repeat = False # True 나오면 다시 시작해야됨 stage를
+			tmp_stage_mismatch = False # 다른 stage에서 함수 call 되었을 때 확인
 			for return_value in tmp_return : 
 				if return_value == "AT_FAIL":
 					tmp_stage_fail = True
 					#break
-				else:
-					pass
-				
-				if return_value == "WAITING":
+				elif return_value == "WAITING":
 					tmp_stage_repeat = True
+				elif return_value == "AT_STAGE_MISMATCH":
+					tmp_stage_mismatch = True
 				else:
 					pass
 
+
 			print(f'tmp_return in bit32 comms :: {tmp_return}')
 			print('\n' * 2)
-				
-			if tmp_stage_fail == False : # fail 아니면 -> 이게 먼저 맞아
-				if tmp_stage_repeat == False : # repeat 하는게 아니면
-					tmp_list_stage = copy.deepcopy(list(self.dictionary_stage.keys()))
-					tmp_list_stage.sort()
-					if self.stage == tmp_list_stage[-1] : # 제일 마지막 stage
-						self.stage = tmp_list_stage[0]
-					else:
-						self.stage = self.stage + 1
-				else:
-					print('waiting for the response in AT - func_proceed :: ' + str(tmp_stage_string))
-					print(' ')
-					self.counter_wait = self.counter_wait + 1
-					if self.counter_wait >= self.NUM_OF_MAX_WAIT_IN_AT_STAGE:
-						self.counter_wait = 0
-						self.stage = 0
 			
-			else: # 반복으로 에러 띄울지 확인
-				print('\n' * 2)
-				self.counter_error = self.counter_error + 1
-				if self.counter_error >= self.NUM_OF_MAX_REPEAT_IN_AT_STAGE : # 허용 COMMS 에러 넘음
-					#self.ERROR_DICTIONARY__backend_and_critical['error_critical'] = self.ERROR_DICTIONARY__backend_and_critical['error_critical'] + 1
-					return 'COMM_FAIL'
-					
+			if tmp_stage_mismatch == False:
+				if tmp_stage_fail == False : # fail 아니면 -> 이게 먼저 맞아
+					if tmp_stage_repeat == False : # repeat 하는게 아니면
+						tmp_list_stage = copy.deepcopy(list(self.dictionary_stage.keys()))
+						tmp_list_stage.sort()
+						if self.stage == tmp_list_stage[-1] : # 제일 마지막 stage
+							self.stage = tmp_list_stage[0]
+						else:
+							self.stage = self.stage + 1
+					else:
+						print('waiting for the response in AT - func_proceed :: ' + str(tmp_stage_string))
+						print(' ')
+						self.counter_wait = self.counter_wait + 1
+						if self.counter_wait >= self.NUM_OF_MAX_WAIT_IN_AT_STAGE:
+							self.counter_wait = 0
+							self.stage = 0
+				
+				else: # 반복으로 에러 띄울지 확인
+					print('\n' * 2)
+					self.counter_error = self.counter_error + 1
+					if self.counter_error >= self.NUM_OF_MAX_REPEAT_IN_AT_STAGE : # 허용 COMMS 에러 넘음
+						#self.ERROR_DICTIONARY__backend_and_critical['error_critical'] = self.ERROR_DICTIONARY__backend_and_critical['error_critical'] + 1
+						return 'COMM_FAIL'
+			else: # mismatch인 경우 그냥 수행자체를 안한다
+				pass
+				return 'COMM_FAIL'
 			
 		except Exception as e:
 			print('error in AT - Stage 32 func_proceed :: ', e)

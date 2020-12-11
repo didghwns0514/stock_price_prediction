@@ -137,7 +137,7 @@ def on_receive_owning_stocks(kw: 'KiwoomAPI', rqname, trcode):
 		buy_price = kw.comm_get_data(trcode, "", rqname, i, "매입금액") # 이거 합산 다되어서 계산됨(진입시점마다의 가격)
 		access_price = kw.comm_get_data(trcode, "", rqname, i, "평가금액")
 		profit_price = kw.comm_get_data(trcode, "", rqname, i, "손익금액")
-		profit_rate = kw.comm_get_data(trcode, "", rqname, i, "손익율")
+		#profit_rate = kw.comm_get_data(trcode, "", rqname, i, "손익율")
 		
 		ohlcv[stock_name] = {} # double hash
 
@@ -148,7 +148,8 @@ def on_receive_owning_stocks(kw: 'KiwoomAPI', rqname, trcode):
 		ohlcv[stock_name]['buy_price']=float(buy_price.strip())
 		ohlcv[stock_name]['access_price']=float(access_price.strip())
 		ohlcv[stock_name]['profit_price']=float(profit_price.strip())
-		ohlcv[stock_name]['profit_rate']=float(profit_rate.strip())
+		#ohlcv[stock_name]['profit_rate']=float(profit_rate.strip())
+		ohlcv[stock_name]['profit_rate'] = float(profit_price.strip())/float(buy_price.strip())
 
 	
 
@@ -365,5 +366,20 @@ def on_recieve_unmet_order(kw: 'KiwoomAPI', rqname, trcode):
 		ohlcv[stock_name][order_num]['price'] = float(price.strip())
 	
 	return ohlcv
-	
+
+def on_receive_high_low_data(kw: 'KiwoomAPI', rqname, trcode):
+	ohlcv = {}
+	data_cnt = kw.get_repeat_cnt(trcode, rqname)
+
+	print('on_receive_high_low_data data_cnt :: ', data_cnt)
+
+	for i in range(data_cnt):
+		stock_code = str(kw.comm_get_data(trcode, "", rqname, 0, "종목코드")).strip()
+		stock_name = str(kw.comm_get_data(trcode, "", rqname, 0, "종목명")).strip()
+
+		ohlcv[stock_code] = stock_name
+
+	return ohlcv
+
+
 
