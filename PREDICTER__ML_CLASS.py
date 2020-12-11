@@ -15,6 +15,8 @@ from keras.models import Sequential, Model, load_model
 from keras.callbacks import CSVLogger, ModelCheckpoint, EarlyStopping
 from keras.optimizers import Adam
 from keras.layers import Dense, Dropout,  Activation, Flatten, Reshape, Input
+import keras.backend as K
+
 
 # @ sklearn model
 from sklearn.model_selection import train_test_split
@@ -73,6 +75,7 @@ class PrivTensorWrapper:
 
         ## load/build model
         self.PT__handle_mode()
+
     
     def PT__calc_state(self):
         """
@@ -112,11 +115,11 @@ class PrivTensorWrapper:
             self._MAIN_SESS.close()
             tf.keras.backend.clear_session()
         except Exception as e:
-            pl.pushLog(dst_folder='PREDICTER_ML_CLASS',module='PT__clear',exception=True, exception_msg=e)
+            pushLog(dst_folder='PREDICTER_ML_CLASS',module='PT__clear',exception=True, exception_msg=e,memo=f'session clear success')
             
 
     
-    
+    @pushLog(dst_folder='PREDICTER_ML_CLASS')
     def PT_CLS__save_model(self):
         """
         param : None
@@ -132,7 +135,7 @@ class PrivTensorWrapper:
                 self._MAIN_MODEL.save_weights(self._PT__save_file_location)
 
 
-
+    @pushLog(dst_folder='PREDICTER_ML_CLASS')
     def PT__handle_mode(self):
         """
         param : None
@@ -153,6 +156,8 @@ class PrivTensorWrapper:
                 with self._MAIN_SESS.as_default() as sess:
                     self._MAIN_MODEL = self.PT__build_model()
 
+
+    @pushLog(dst_folder='PREDICTER_ML_CLASS')
     def PT__build_model(self):
         """
         param : None
@@ -194,17 +199,41 @@ class PrivTensorWrapper:
                 else:
                     optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8)
 
-                model.compile(loss='mse', 
+                # model.compile(loss=tf.keras.losses.MeanAbsoluteP, 
+                #               optimizer=optimizer,
+                #               loss_weights=lw) # loss='mse'
+                model.compile(loss=self.PT__custom_loss, 
                               optimizer=optimizer,
-                              loss_weights=lw)
+                              loss_weights=lw) # loss='mse'
 
                 return model
+    
+    def PT__custom_loss(self, y_true, y_pred):
+
+        # https://brunch.co.kr/@chris-song/34
+        # https://uos-deep-learning.tistory.com/3
+        # https://stackoverflow.com/questions/49729522/why-is-the-mean-average-percentage-errormape-extremely-high
+
+        # y_true_f = K.flatten(y_true)
+        # y_pred_f = K.flatten(y_pred)
+        # length = K.intshape(y_true)[1]
+
+        # M  = (100 / length) * K.abs( 1 - K.sum(y_pred))
+        diff = K.abs((y_true - y_pred) / K.clip(K.abs(y_true),
+                                                K.epsilon(),
+                                                None))
+        return 100. * K.mean(diff, axis=-1)       
+        
+
+
 
 
     def PT__param_return(self, transfer=False):
         """
         parameter : switch per trainable
         return : Action - returns callbacks for keras
+        https://3months.tistory.com/424
+        https://snowdeer.github.io/machine-learning/2018/01/09/find-best-model/
         """
         early_stop, check_point, patience, epoch = None, None, None, None
 
@@ -218,7 +247,7 @@ class PrivTensorWrapper:
         early_stop = EarlyStopping(monitor='val_loss', 
                                     mode='min', 
                                     verbose=0, 
-                                    patience=patience)
+                                    patience=patience) # baseline = ~~ target value
         check_point = ModelCheckpoint(monitor='val_loss', 
                                       mode='min',
                                       verbose=0, 
@@ -261,13 +290,26 @@ class PrivTensorWrapper:
 
 
                 ## refresh accuracy
-                self._PT__model_accuracy
+                self._PT__model_accuracy = self.PT__acc_cal(Y_test, self._MAIN_MODEL.predict(X_test))
 
                 ## write accuracy
-                self._PT__save_score_txt_location
+                try:
+                    with open(self._PT__save_score_txt_location, 'w') as f:
+                        f.write(self._PT__model_accuracy)
+                except Exception as e:
+                    pushLog(dst_folder='PREDICTER__ML_CLASS', module='writing accuracy', exception=True, exception_msg=e, memo=f'fail to write model accuracy')
 
                 ## flag up
                 self._PT__initTrain = True
+    
+
+    def PT__acc_cal(self, y_true, y_pred):
+        # https://ebbnflow.tistory.com/123
+
+        # 특이값 많은 경우 mae 사용
+        # 아닌 경우 rmes 사용
+         return mean_squared_error(y_true, y_pred)
+
 
     def PT__predict_model(self, X_data):
 
@@ -276,8 +318,6 @@ class PrivTensorWrapper:
         rtn = self._MAIN_MODEL.predict(X_data) ## suppose is 2D list return
 
         return rtn[0]
-
-
 
     
 
@@ -321,6 +361,15 @@ class NestedGraph:
         param : stock_code
         return : Action - returns mean value of predictions as an ensemble
         """
+        pass
+
+
+    def NG__normalize_data(self, data):
+        """
+        param : data to be normalized,
+                input - CNN encoded + news + normalized original of 3 critical
+        """
+
         pass
 
 

@@ -60,7 +60,7 @@ class Stock_prediction:
 		self.nestgraph = PCLS.NestedGraph(shape_input=Stock_prediction.LENGTH__ALL_INPUT,
 		shape_output=Stock_prediction.LENGTH__ALL_OUTPUT)
 
-		self.options = Options(self.envs)
+		#self.options = Options(self.envs)
 		self.module = module
 
 
@@ -70,6 +70,9 @@ class Stock_prediction:
 										minute=0,
 										second=0,
 										mirosecond=0)
+
+
+	
 
 
 

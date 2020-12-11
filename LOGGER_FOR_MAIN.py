@@ -62,10 +62,13 @@ class _Log(object): # old styple
 
 
     @staticmethod
-    def write_normal(dest, lv='', module=''):
+    def write_normal(dest, lv='', module='', normal_memo=None):
         ## output
         out_str = ''
         out_str += f'running Function : {str(module)}'
+
+        if not normal_memo:
+            out_str += "\n" + f'normal memo : {str(normal_memo)}'
 
         ## leave log
         targ_dir = _Log.write_config(dest=dest, lv=lv, module=module)
@@ -128,7 +131,7 @@ class _Log(object): # old styple
 
 
 
-def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, excpt_memo=None):
+def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, memo=None):
 
     # print(f'in pushLog')
     # print(f'in pushLog parms : {dst_folder}')
@@ -143,7 +146,7 @@ def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, e
                 try:
                     #print('path_1')
                     ret = function(*args, **kwargs)
-                    _Log.write_normal(dest=dst_folder,lv=lv,module=function.__name__)
+                    _Log.write_normal(dest=dst_folder,lv=lv,module=function.__name__, normal_memo=memo)
 
 
                     return ret
@@ -160,25 +163,28 @@ def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, e
                             lv='WARNING',
                             module=module,
                             exception_msg=exception_msg,
-                            excpt_memo=excpt_memo)
+                            excpt_memo=memo)
 
 
 
 
-class Test:
-    NAME = 'TEST'
 
-    def __init__(self):
-        self.a1_result = None
-        
-
-    @pushLog(dst_folder='classNN')
-    def sub_test(self, a1):
-        print(f'a1  :  {a1}')
-        self.a1_result = a1
 
 
 if __name__ == '__main__':
+
+    class Test:
+        NAME = 'TEST'
+
+        def __init__(self):
+            self.a1_result = None
+            
+
+        @pushLog(dst_folder='classNN')
+        def sub_test(self, a1):
+            print(f'a1  :  {a1}')
+            self.a1_result = a1
+
     #logger = LogWrap()
 
     @pushLog(dst_folder='func_noArg')
