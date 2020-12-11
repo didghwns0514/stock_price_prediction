@@ -295,7 +295,7 @@ class PrivTensorWrapper:
                 ## write accuracy
                 try:
                     with open(self._PT__save_score_txt_location, 'w') as f:
-                        f.write(self._PT__model_accuracy)
+                        f.write(str(self._PT__model_accuracy))
                 except Exception as e:
                     pushLog(dst_folder='PREDICTER__ML_CLASS', module='writing accuracy', exception=True, exception_msg=e, memo=f'fail to write model accuracy')
 
