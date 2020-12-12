@@ -13,7 +13,7 @@ import time
 import traceback
 import pickle
 import datetime
-import sub_DATETIME_function as SUB_F
+import sub_function_configuration as SUB_F
 '''
 https://winterflower.github.io/2015/01/27/communication-between-two-python-scripts/
 
