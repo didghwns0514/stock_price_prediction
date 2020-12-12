@@ -37,7 +37,7 @@ import ENCODER__ML_MAIN as EN
 import DENOISER__ML_MAIN as DE
 import sub_function_configuration as SUB_F
 import PREDICTER__ML_CLASS as PCLS
-from LOGGER_FOR_MAIN import pushLog as pl
+from LOGGER_FOR_MAIN import pushLog
 
 
 
@@ -85,6 +85,9 @@ class Stock_prediction:
 									 minute=0,
 									 mirosecond=0)
 
+	def _checkArticle(self, stock_code):
+		pass
+
 
 
 def Session():
@@ -94,7 +97,7 @@ def Session():
 		sqlite_conTop = sqlite3.connect(db_loc)
 		sqlite_curTop = sqlite_conTop.cursor()
 
-		def wrapper(stock_code=None, get_codes=True):
+		def wrapper(_stock_code=None, get_codes=False):
 
 			if get_codes:
 				tmp_codes__obj = sqlite_curTop.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -104,7 +107,9 @@ def Session():
 				return tmp_codes
 
 			else:
+				stock_code = str(_stock_code)
 				assert stock_code != None
+
 				head_string = 'SELECT * FROM '
 				tmp_selected = "'" + str(stock_code) + "'"
 				tmp_df = pd.read_sql(head_string + tmp_selected, sqlite_conTop, index_col=None)
@@ -114,19 +119,26 @@ def Session():
 									    & (np.mean(tmp_df['volume'])>=500 )
 							           ].copy()
 					if rtn_df.empty : # 빈 데이터
-						return None
+						return pd.DataFrame() # return real empty df
 					else:
+						## change date to datetime
+						rtn_df['date'] = pd.to_datetime(rtn_df['date'],  format="%Y%m%d%H%M%S" )
+						print(f'stock code that was selected... : {stock_code}')
+						print(f'{rtn_df.head()}')
 						return rtn_df
 				else: # not enough data / or no data at all
-					return None
+					return pd.DataFrame() # return real empty df
 
 		return wrapper
 
 
+	def sweep_date(df, start_date, end_date):
+		pass
+
 
 	# # @ import for db
-	# import sqlite3
-	# import pickle
+	import sqlite3
+
 	
 	#@ stock prediction wrapper class
 	#sp = Stock_prediction(module=True)
@@ -147,7 +159,7 @@ def Session():
 
 	# @ Sqlite object
 	sqlite_closure = sqlite_capture(dir_db__file)
-	sqlite_closure(get_codes=True)
+	list_of_codes = sqlite_closure(get_codes=True)
 
 
 	#####################
@@ -160,6 +172,42 @@ def Session():
 	with open(dir_pickle_skipped__file, 'rb') as file:
 		pickle_visited_list = copy.deepcopy(pickle.load(file))
 	#####################
+
+	df__kospi = sqlite_closure(_stock_code=str(226490))
+	df__dollar = sqlite_closure(_stock_code=str(261250))
+	MUST_WATCH_LIST = ["226490", "261250"] # "252670"
+	"""                KODEX 코스피, KODEX 미국달러선물 레버리지, KODEX 200선물 인버스 2X"""
+
+
+	for stock_code in list_of_codes:
+		pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', exception=True, memo=f'entered stock : {str(stock_code)}')
+		if stock_code in MUST_WATCH_LIST:
+			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', exception=True, memo=f'stock code in MUST_WATCH_LIST')
+			continue
+
+		main_Stk_df = sqlite_closure(_stock_code=str(stock_code))
+
+		if main_Stk_df.empty:
+			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', exception=True, memo=f'stock code did not match standards, returned None type')
+			continue
+		mainStk_datetime_st__obj = main_Stk_df.date.min() + datetime.timedelta(days=3)
+		mainStk_datetime_end__obj = main_Stk_df.date.max() - datetime.timedelta(days=1)
+
+		## search stock name in the article
+		tmp_filter = [ pickle_article[key][0] for key, value \
+					            in zip(pickle_article.keys(),
+									   pickle_article.values()) \
+						            if  pickle_article[key][0] == stock_code]
+		print(f'tmp_filter : {tmp_filter}')
+		if not tmp_filter:
+			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', memo=f'stock code not found in the article pickle hash dataS')
+			continue
+
+	print(f'total execution finished!')
+
+
+
+
 
 
 
