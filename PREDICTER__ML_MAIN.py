@@ -86,6 +86,12 @@ class Stock_prediction:
 									 mirosecond=0)
 
 	def _checkArticle(self, stock_code):
+		"""
+
+		:param : var :: stock_code
+		         to look up article pickle for the stock
+		:return:
+		"""
 		pass
 
 
@@ -103,7 +109,6 @@ def Session():
 				tmp_codes__obj = sqlite_curTop.execute("SELECT name FROM sqlite_master WHERE type='table';")
 				tmp_codes = tmp_codes__obj.fetchall()
 				tmp_codes = [ list(value)[0] for value in tmp_codes ]
-
 				return tmp_codes
 
 			else:
@@ -180,16 +185,25 @@ def Session():
 
 
 	for stock_code in list_of_codes:
-		pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', exception=True, memo=f'entered stock : {str(stock_code)}')
+		pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
+				exception=True,
+				memo=f'entered stock : {str(stock_code)}')
+
+		# @ skip must watch list
 		if stock_code in MUST_WATCH_LIST:
-			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', exception=True, memo=f'stock code in MUST_WATCH_LIST')
+			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
+					exception=True,
+					memo=f'stock code in MUST_WATCH_LIST')
 			continue
 
+		# @ check empty dataframe
 		main_Stk_df = sqlite_closure(_stock_code=str(stock_code))
-
 		if main_Stk_df.empty:
-			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', exception=True, memo=f'stock code did not match standards, returned None type')
+			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
+					exception=True,
+					memo=f'stock code did not match standards, returned None type')
 			continue
+
 		mainStk_datetime_st__obj = main_Stk_df.date.min() + datetime.timedelta(days=3)
 		mainStk_datetime_end__obj = main_Stk_df.date.max() - datetime.timedelta(days=1)
 
@@ -200,8 +214,13 @@ def Session():
 						            if  pickle_article[key][0] == stock_code]
 		print(f'tmp_filter : {tmp_filter}')
 		if not tmp_filter:
-			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN', memo=f'stock code not found in the article pickle hash dataS')
+			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
+					memo=f'stock code not found in the article pickle hash dataS')
 			continue
+
+		#################################
+		# If all has passed
+		#################################
 
 	print(f'total execution finished!')
 
