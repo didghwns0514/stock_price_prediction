@@ -2,6 +2,37 @@ import datetime
 #import copy
 
 
+def FUNC_dtSwtich(datetime_item):
+    """
+
+    :param datetime_item: datetime either string or datetime object
+    :return: converts to each cases and returns
+    """
+    if isinstance(datetime_item, str):
+        return datetime.datetime.strptime(datetime_item, '%Y%m%d%H%M%S')
+
+    elif isinstance(datetime_item, datetime.date):
+        return datetime_item.strftime('%Y%m%d%H%M%S')
+
+def FUNC_dtRect(datetime_obj, string_time=None):
+    """
+
+    :param datetime_obj: datetime object to strip second and microsecond
+    :return: returns rectified time object in datetime format
+    """
+    if string_time != None:
+        assert isinstance(datetime_obj, datetime.date)
+        assert isinstance(string_time, str)
+
+        h, m = string_time.split(':')
+
+        return datetime_obj.replace(hour=int(h), minute=int(m), second=0, microsecond=0)
+    else:
+        return datetime_obj.replace(second=0, microsecond=0)
+
+
+
+
 def FUNC_return_datetime_obj__backward(datetime_now__obj_, hours_back):
     """
     dont include time, 'NOW' in the return
@@ -11,9 +42,9 @@ def FUNC_return_datetime_obj__backward(datetime_now__obj_, hours_back):
     tmp_list_for_return_ = None # for ram!
     
     tmp_total_minutes_back = 60 * hours_back
-    datetime_now__obj = datetime_now__obj_.replace(second=0, microsecond=0) #- datetime.timedelta(minutes=1)
-    datetime_today_fix_start__obj = datetime_now__obj_.replace(hour=9, minute=0, second=0, microsecond=0)
-    datetime_today_fix_end__obj = datetime_now__obj_.replace(hour=15, minute=30, second=0, microsecond=0)
+    datetime_now__obj = FUNC_dtRect(datetime_now__obj_)#datetime_now__obj_.replace(second=0, microsecond=0) #- datetime.timedelta(minutes=1)
+    datetime_today_fix_start__obj = FUNC_dtRect(datetime_now__obj_, "9:00")#datetime_now__obj_.replace(hour=9, minute=0, second=0, microsecond=0)
+    datetime_today_fix_end__obj = FUNC_dtRect(datetime_now__obj_,"15:30") #datetime_now__obj_.replace(hour=15, minute=30, second=0, microsecond=0)
     
     # @ adjust today's date
     if datetime_now__obj < datetime_today_fix_start__obj:

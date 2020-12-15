@@ -8,15 +8,15 @@
 #
 import time
 import numpy as np
-import random
+# import random
 import tensorflow as tf
 import os
 import copy
 import pickle
 import datetime
-import math
-import datetime
-from matplotlib import pyplot as plt
+# import math
+#
+# from matplotlib import pyplot as plt
 
 #from tensorflow.examples.tutorials.mnist import input_data
 #import matplotlib.pyplot as plt
@@ -42,129 +42,155 @@ class Autoencoder:
 	# 100 여개 기사까지 커버치기
 	NAME = 'Autoencoder'
 
-	def __init__(self, module = True):
+	def __init__(self, module = True, simple=True):
 
-		self.options = Options(self.envs)
+		if not simple: # simple 하면 계산만 해서 돌려주기
+			self.options = Options(self.envs)
 
-		# @ 초기 세팅
-		############################################################
-		############################################################
-		# 완전 초기화 용
-		from tensorflow.python.client import device_lib
-		print(device_lib.list_local_devices())
+			# @ 초기 세팅
+			############################################################
+			############################################################
+			# 완전 초기화 용
+			from tensorflow.python.client import device_lib
+			print(device_lib.list_local_devices())
 
-		self.config = tf.ConfigProto(
-			device_count={'GPU': 0}
-		)
-		self.test_query = None
-		# @ Initial environment setting
-		if module == False:
-			print('trainable... applied')
-			self.test_query = int(input('want to save test NN : 0 ... else : 1 '))
-			if int(self.test_query) != 0 and int(self.test_query) != 1:
-				raise ValueError('Wrong test_query input..! ')
-		else:
-			print('test only... applied')
-			self.test_query = 1 #테스트용!
-			self.options.DROP_OUT = 1
-
-		if tf.test.gpu_device_name():
-			print('GPU found')
-		else:
-			print("No GPU found")
-			
-		self.module = module
-
-
-		# https://bretahajek.com/2017/04/importing-multiple-tensorflow-models-graphs/
-		# https://excelsior-cjh.tistory.com/151
-		self.GRAPH = tf.Graph()
-		# print('self.GRAPH 가 기본 그래프인가? : ', self.GRAPH is tf.get_default_graph())
-		# self.GRAPH.as_default()
-		# print('self.GRAPH 가 기본 그래프인가? : ', self.GRAPH is tf.get_default_graph())
-
-		self.score_dir = str(os.getcwd() + "\\ENCODER__FFNN_ENCODER")
-		self.score_dir_txt = str(self.score_dir) + "\\fnn_encoder_score.txt"
-
-		self.curr_dir_folder = str(os.getcwd() + "\\ENCODER__checkpoints-FNN_Encoder")
-		self.curr_dir = os.path.join(self.curr_dir_folder, "fnn_encoder-DQN")
-		
-		with self.GRAPH.as_default() as g:
+			self.config = tf.ConfigProto(
+				device_count={'GPU': 0}
+			)
+			self.test_query = None
+			# @ Initial environment setting
 			if module == False:
-				#self.sess = tf.Session(config=self.config)
-				self.sess = tf.Session(graph=g)
+				print('trainable... applied')
+				self.test_query = int(input('want to save test NN : 0 ... else : 1 '))
+				if int(self.test_query) != 0 and int(self.test_query) != 1:
+					raise ValueError('Wrong test_query input..! ')
 			else:
-				self.sess = tf.Session(config=self.config, graph=g)
-				#self.sess = tf.Session()
+				print('test only... applied')
+				self.test_query = 1 #테스트용!
+				self.options.DROP_OUT = 1
 
-		with self.GRAPH.as_default() as g:
-			with self.sess.as_default() as sess:
-				### for cells
-				############################################################
-				############################################################
-				self.L2_REG = tf.contrib.layers.l2_regularizer(scale = self.options.L2_REGULARIZATION)
+			if tf.test.gpu_device_name():
+				print('GPU found')
+			else:
+				print("No GPU found")
 
-
-				# @ W / B 를 stack 별로 설정
-				self.W1_E = tf.Variable(self.xavier_initializer([self.options.INPUT_DATA_DIM * self.options.INPUT_VERTICAL_DIM, self.options.HIDDEN_CELL_1_DIM]), name=self.NAME+'W1_E')
-				self.B1_E = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_1_DIM]), name=self.NAME+'B1_E')
-				self.W2_E = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_1_DIM, self.options.HIDDEN_CELL_2_DIM]), name=self.NAME+'W2_E')
-				self.B2_E = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_2_DIM]), name=self.NAME+'B2_E')
-				self.W3_F = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_2_DIM, self.options.FINAL_CODING_LAYER]), name=self.NAME+'W3_F')
-				self.B3_F = tf.Variable(self.xavier_initializer([self.options.FINAL_CODING_LAYER]), name=self.NAME+'B3_F')
-
-				self.W3_D = tf.transpose(self.W3_F)
-				self.B3_D = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_2_DIM]), name=self.NAME+'B3_D')
-				self.W2_D = tf.transpose(self.W2_E)
-				self.B2_D = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_1_DIM]), name=self.NAME+'B2_D')
-				self.W1_D = tf.transpose(self.W1_E)
-				self.B1_D = tf.Variable(self.xavier_initializer([self.options.INPUT_DATA_DIM * self.options.INPUT_VERTICAL_DIM]), name=self.NAME+'B1_D')
+			self.module = module
 
 
-				# fetch the layers
-				self.observation, self.encoding, self.hypothesis = self.build_value_net()
+			# https://bretahajek.com/2017/04/importing-multiple-tensorflow-models-graphs/
+			# https://excelsior-cjh.tistory.com/151
+			self.GRAPH = tf.Graph()
+			# print('self.GRAPH 가 기본 그래프인가? : ', self.GRAPH is tf.get_default_graph())
+			# self.GRAPH.as_default()
+			# print('self.GRAPH 가 기본 그래프인가? : ', self.GRAPH is tf.get_default_graph())
 
-				# @ LOSS
-				# self.reconstruction_loss = tf.reduce_sum(tf.pow(tf.subtract( self.observation, self.hypothesis ),tf.subtract( self.observation, self.hypothesis )))
+			self.score_dir = str(os.getcwd() + "\\ENCODER__FFNN_ENCODER")
+			self.score_dir_txt = str(self.score_dir) + "\\fnn_encoder_score.txt"
 
-				self.reconstruction_loss = tf.reduce_mean(tf.square( self.observation - self.hypothesis))
-				#self.reconstruction_loss = tf.reduce_mean(self.observation - self.hypothesis)
-				self.reg_loss = self.L2_REG(self.W1_E) + self.L2_REG(self.W2_E) + self.L2_REG(self.W3_F)
-				self.loss_tot = self.reconstruction_loss + self.reg_loss
-				self.optimizer = tf.train.AdamOptimizer(self.options.LR)
-				self.train = self.optimizer.minimize(self.loss_tot)
-				#self.rmse = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.answer, self.predictions)))
+			self.curr_dir_folder = str(os.getcwd() + "\\ENCODER__checkpoints-FNN_Encoder")
+			self.curr_dir = os.path.join(self.curr_dir_folder, "fnn_encoder-DQN")
 
-				self.saver = tf.train.Saver(save_relative_paths=True)
+			with self.GRAPH.as_default() as g:
+				if module == False:
+					#self.sess = tf.Session(config=self.config)
+					self.sess = tf.Session(graph=g)
+				else:
+					self.sess = tf.Session(config=self.config, graph=g)
+					#self.sess = tf.Session()
 
-				# @ Initialize
-				sess.run(tf.global_variables_initializer())
-				self.load_model()  # if necessary
-
-		# @ Used variables
-		self.input_queue = None
-		self.output_queue = None
-
-		self.global_step = 0
-
-		# @ model score
-		self.content = None
-		# self.curr_dir_f = None
-		self.lv_score_board_fix = None
-		self.score_board_value = None
-		self.score_now_max = None
-		
-		self.score = None
-		self.score_list = [] # 이것을 계산해서 self.score에 기록
-		self.err_list = []
+			with self.GRAPH.as_default() as g:
+				with self.sess.as_default() as sess:
+					### for cells
+					############################################################
+					############################################################
+					self.L2_REG = tf.contrib.layers.l2_regularizer(scale = self.options.L2_REGULARIZATION)
 
 
+					# @ W / B 를 stack 별로 설정
+					self.W1_E = tf.Variable(self.xavier_initializer([self.options.INPUT_DATA_DIM * self.options.INPUT_VERTICAL_DIM, self.options.HIDDEN_CELL_1_DIM]), name=self.NAME+'W1_E')
+					self.B1_E = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_1_DIM]), name=self.NAME+'B1_E')
+					self.W2_E = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_1_DIM, self.options.HIDDEN_CELL_2_DIM]), name=self.NAME+'W2_E')
+					self.B2_E = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_2_DIM]), name=self.NAME+'B2_E')
+					self.W3_F = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_2_DIM, self.options.FINAL_CODING_LAYER]), name=self.NAME+'W3_F')
+					self.B3_F = tf.Variable(self.xavier_initializer([self.options.FINAL_CODING_LAYER]), name=self.NAME+'B3_F')
 
-		self.init_model() # 추가했는데... 오류나올수도..
+					self.W3_D = tf.transpose(self.W3_F)
+					self.B3_D = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_2_DIM]), name=self.NAME+'B3_D')
+					self.W2_D = tf.transpose(self.W2_E)
+					self.B2_D = tf.Variable(self.xavier_initializer([self.options.HIDDEN_CELL_1_DIM]), name=self.NAME+'B2_D')
+					self.W1_D = tf.transpose(self.W1_E)
+					self.B1_D = tf.Variable(self.xavier_initializer([self.options.INPUT_DATA_DIM * self.options.INPUT_VERTICAL_DIM]), name=self.NAME+'B1_D')
 
-		self.return_answer = None
-		self.err = None
-	
+
+					# fetch the layers
+					self.observation, self.encoding, self.hypothesis = self.build_value_net()
+
+					# @ LOSS
+					# self.reconstruction_loss = tf.reduce_sum(tf.pow(tf.subtract( self.observation, self.hypothesis ),tf.subtract( self.observation, self.hypothesis )))
+
+					self.reconstruction_loss = tf.reduce_mean(tf.square( self.observation - self.hypothesis))
+					#self.reconstruction_loss = tf.reduce_mean(self.observation - self.hypothesis)
+					self.reg_loss = self.L2_REG(self.W1_E) + self.L2_REG(self.W2_E) + self.L2_REG(self.W3_F)
+					self.loss_tot = self.reconstruction_loss + self.reg_loss
+					self.optimizer = tf.train.AdamOptimizer(self.options.LR)
+					self.train = self.optimizer.minimize(self.loss_tot)
+					#self.rmse = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.answer, self.predictions)))
+
+					self.saver = tf.train.Saver(save_relative_paths=True)
+
+					# @ Initialize
+					sess.run(tf.global_variables_initializer())
+					self.load_model()  # if necessary
+
+			# @ Used variables
+			self.input_queue = None
+			self.output_queue = None
+
+			self.global_step = 0
+
+			# @ model score
+			self.content = None
+			# self.curr_dir_f = None
+			self.lv_score_board_fix = None
+			self.score_board_value = None
+			self.score_now_max = None
+
+			self.score = None
+			self.score_list = [] # 이것을 계산해서 self.score에 기록
+			self.err_list = []
+
+
+
+			self.init_model() # 추가했는데... 오류나올수도..
+
+			self.return_answer = None
+			self.err = None
+
+
+		else: # simple model for calculation
+			pass
+
+	def FUNC_SIMPLE__read_article(self, article_loc, specific_time, stock_name):
+
+		with open(article_loc, 'wb') as file:
+
+			pickle_file = pickle.load(file)
+
+			target=None
+			for stock_names in pickle_file:
+				if stock_names == stock_name:
+					target = stock_names
+					break
+			else:
+				return None # if none is matched
+
+			rtn = parse_four_days(specific_time=specific_time,
+								  stock_name=stock_name,
+								  pickle_data=pickle_file)
+
+			return rtn
+
+
 	def build_value_net(self): # W/B 생성 후 묶어주는 부분
 		# observation and prediction already defined above
 		if self.test_query == 1:
@@ -484,7 +510,11 @@ def reshaper(list_obj):
 
 
 def return_exp(value):
-	#return (-(math.exp(-value)) + 1) * 20
+	"""
+
+	:param value:
+	:return: set the return value to flat out in 20
+	"""
 	if value <= 120:
 		return value/6
 	if value > 120:

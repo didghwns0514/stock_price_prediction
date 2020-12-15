@@ -62,7 +62,7 @@ class Stock_prediction:
 	def __init__(self, module=True):
 
 		# @ previous declarations
-		self.AGENT_SUB__encoder = EN.Autoencoder(module=True)
+		self.AGENT_SUB__encoder = EN.Autoencoder(module=True,simple=True)
 		self.AGENT_SUB__denoiser = DE.Denoiser(module=True)
 		self.nestgraph = PCLS.NestedGraph(shape_input=Stock_prediction.LENGTH__ALL_INPUT,
 		shape_output=Stock_prediction.LENGTH__ALL_OUTPUT)
@@ -85,14 +85,15 @@ class Stock_prediction:
 									 minute=0,
 									 mirosecond=0)
 
-	def _checkArticle(self, stock_code):
+	def _checkArticle(self, stock_code, article_loc, specific_time):
 		"""
 
 		:param : var :: stock_code
 		         to look up article pickle for the stock
 		:return:
 		"""
-		pass
+		self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
+														  specific_time=specific_time)
 
 
 
@@ -146,7 +147,7 @@ def Session():
 
 	
 	#@ stock prediction wrapper class
-	#sp = Stock_prediction(module=True)
+	sp = Stock_prediction(module=True)
 
 	## current working python directory
 	current_wd = os.getcwd().replace('/', '\\')

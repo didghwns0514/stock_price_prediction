@@ -96,6 +96,7 @@ class Denoiser:
 		else:
 			self.FUNC_BUILD__layers()
 
+
 	def FUNC_BUILD__layers(self):
 		"""
 		https://towardsdatascience.com/autoencoders-for-the-compression-of-stock-market-data-28e8c1a2da3e
