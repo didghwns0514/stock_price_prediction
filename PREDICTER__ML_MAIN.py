@@ -80,10 +80,12 @@ class Stock_prediction:
 			_datetime_obj = datetime_obj
 		else:
 			_datetime_obj = datetime.datetime.now()
-		return _datetime_obj.replace(hour=0,
-									 second=0,
-									 minute=0,
-									 mirosecond=0)
+
+		return SUB_F.FUNC_dtRect(_datetime_obj, "00:00")
+		# return _datetime_obj.replace(hour=0,
+		# 							 second=0,
+		# 							 minute=0,
+		# 							 mirosecond=0)
 
 	def _checkArticle(self, stock_code, article_loc, specific_time):
 		"""
@@ -139,6 +141,15 @@ def Session():
 
 
 	def sweep_date(df, start_date, end_date):
+		"""
+
+		:param df: dataframe input
+		:param start_date:
+		:param end_date:
+		:return:
+		"""
+
+
 		pass
 
 
@@ -209,6 +220,7 @@ def Session():
 		mainStk_datetime_end__obj = main_Stk_df.date.max() - datetime.timedelta(days=1)
 
 		## search stock name in the article
+		"""
 		tmp_filter = [ pickle_article[key][0] for key, value \
 					            in zip(pickle_article.keys(),
 									   pickle_article.values()) \
@@ -218,9 +230,10 @@ def Session():
 			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
 					memo=f'stock code not found in the article pickle hash dataS')
 			continue
+		"""
 
 		#################################
-		# If all has passed
+		# If all has passed : start from here!
 		#################################
 
 	print(f'total execution finished!')

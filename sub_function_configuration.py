@@ -42,9 +42,9 @@ def FUNC_return_datetime_obj__backward(datetime_now__obj_, hours_back):
     tmp_list_for_return_ = None # for ram!
     
     tmp_total_minutes_back = 60 * hours_back
-    datetime_now__obj = FUNC_dtRect(datetime_now__obj_)#datetime_now__obj_.replace(second=0, microsecond=0) #- datetime.timedelta(minutes=1)
-    datetime_today_fix_start__obj = FUNC_dtRect(datetime_now__obj_, "9:00")#datetime_now__obj_.replace(hour=9, minute=0, second=0, microsecond=0)
-    datetime_today_fix_end__obj = FUNC_dtRect(datetime_now__obj_,"15:30") #datetime_now__obj_.replace(hour=15, minute=30, second=0, microsecond=0)
+    datetime_now__obj = FUNC_dtRect(datetime_now__obj_)
+    datetime_today_fix_start__obj = FUNC_dtRect(datetime_now__obj_, "9:00")
+    datetime_today_fix_end__obj = FUNC_dtRect(datetime_now__obj_,"15:30")
     
     # @ adjust today's date
     if datetime_now__obj < datetime_today_fix_start__obj:
@@ -59,45 +59,37 @@ def FUNC_return_datetime_obj__backward(datetime_now__obj_, hours_back):
     
     # @ already inside today's window coverage
     if tmp_minutes_to_goback <= 0:
-        #print('FUNC_return_datetime_obj - 1')
-        # [start, end] for each day
         tmp_list_for_return.append([datetime_now__obj - datetime.timedelta(minutes=tmp_total_minutes_back), datetime_now__obj])
         return tmp_list_for_return
     
     else:
-        #print('FUNC_return_datetime_obj - 2')
-        tmp_list_for_return.append([datetime_now__obj.replace(hour=9, minute=0, second=0, microsecond=0), datetime_now__obj])
-        
+        tmp_list_for_return.append( [FUNC_dtRect(datetime_now__obj,"9:00"),
+                                     datetime_now__obj])
         tmp_list_for_return = func_sub_iteratior(tmp_minutes_to_goback, datetime_today_fix_start__obj, tmp_list_for_return)
-        #print(f'tmp_list_for_return_ in FUNC_return_datetime_obj : {tmp_list_for_return}')
-    
-        #print(f'retrieved return list of datetimes : {tmp_list_for_return}')
         return tmp_list_for_return
 
 def func_sub_iteratior(miutes_left, before_datetime_start__obj, return_list):
     TOTAL_DAY_MINUTE_NUMBER = 391 # stock day's window in minutes
-    #return_list = copy.deepcopy(return_list_)
     
-    tmp_before_datetime__obj = before_datetime_start__obj.replace(hour=9, minute=0, second=0, microsecond=0)
+    tmp_before_datetime__obj = FUNC_dtRect(before_datetime_start__obj, "9:00")
     tmp_target_datetime__obj = tmp_before_datetime__obj
-    while (tmp_target_datetime__obj.weekday()) in [5, 6] or (tmp_before_datetime__obj.weekday() == tmp_target_datetime__obj.weekday()):
+    while (tmp_target_datetime__obj.weekday()) in [5, 6] or \
+          (tmp_before_datetime__obj.weekday() == tmp_target_datetime__obj.weekday()):
         # 월, 화, 수, 목, 금, 토, 일
         # 0,  1,  2,  3, 4, 5,  6
         tmp_target_datetime__obj = tmp_target_datetime__obj - datetime.timedelta(days=1)
     
     if miutes_left <= TOTAL_DAY_MINUTE_NUMBER:
-        #print('func_sub_iteratior - 1')
-        #print(f'minutes left in the last : {miutes_left}')
-        return_list.append( [ tmp_target_datetime__obj.replace(hour=15, minute=30, second=0, microsecond=0) - datetime.timedelta(minutes=miutes_left) , tmp_target_datetime__obj.replace(hour=15, minute=30, second=0, microsecond=0) ] )
-        #print(f'return_list in func_sub_iteratior : {return_list}')
+        return_list.append( [ FUNC_dtRect(tmp_target_datetime__obj,"15:30") - datetime.timedelta(minutes=miutes_left) ,
+                              FUNC_dtRect(tmp_target_datetime__obj,"15:30")] )
         return return_list
     
     else:
-        #print('func_sub_iteratior - 2')
         tmp_minutes_left = miutes_left - TOTAL_DAY_MINUTE_NUMBER
-        return_list.append( [ tmp_target_datetime__obj.replace(hour=9, minute=0, second=0, microsecond=0) , tmp_target_datetime__obj.replace(hour=15, minute=30, second=0, microsecond=0) ] )
+        return_list.append( [ FUNC_dtRect(tmp_target_datetime__obj,"9:00") ,
+                              FUNC_dtRect(tmp_target_datetime__obj, "15:30") ] )
         
-        return func_sub_iteratior(tmp_minutes_left, tmp_target_datetime__obj.replace(hour=9, minute=0, second=0, microsecond=0), return_list )
+        return func_sub_iteratior(tmp_minutes_left, FUNC_dtRect(tmp_target_datetime__obj,"9:00"), return_list )
 
         
 if __name__ == '__main__':
@@ -116,7 +108,7 @@ if __name__ == '__main__':
     datetime_tmp = datetime_tmp.replace(month=months, day=days, hour=hours, minute=minutes)
     print(f'created date stamp : {datetime_tmp}')
 
-    tmp_return = FUNC_return_datetime_obj(datetime_tmp, hours_back)
+    tmp_return = FUNC_return_datetime_obj__backward(datetime_tmp, hours_back)
     print(f'returned list : {tmp_return}')
     print(f'\n')
     print(f'hours back in total minutes : {hours_back*60}')
