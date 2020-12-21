@@ -38,6 +38,8 @@ import DENOISER__ML_MAIN as DE
 import sub_function_configuration as SUB_F
 import PREDICTER__ML_CLASS as PCLS
 from LOGGER_FOR_MAIN import pushLog
+from DATA_OPERATION import *
+
 
 
 
@@ -116,6 +118,8 @@ class Stock_prediction:
 
 def Session():
 
+
+
 	def sqlite_capture(db_loc):
 
 		sqlite_conTop = sqlite3.connect(db_loc)
@@ -155,7 +159,7 @@ def Session():
 		return wrapper
 
 
-	def sweep_date(df, start_date, end_date, hours_back = int(13)):
+	def sweep_day(df, start_date, end_date, hours_back = int(13), minute_forward = int(30),_type='data'):
 		"""
 
 		:param df: dataframe input
@@ -164,21 +168,32 @@ def Session():
 		:return:
 		"""
 
+		assert _type in ['data', 'answer']
+
 		tmp_dt_start = start_date
 		tmp_dt_sweep = start_date
 		tmp_dt_end = end_date
+		return_hash = None
 
 		while tmp_dt_sweep <= tmp_dt_end:
 
 			## calculate back
 			tmp_backwards = SUB_F.FUNC_datetime_backward(
-				datetime_now__obj=tmp_dt_sweep,
+				datetime_now__obj_=tmp_dt_sweep,
 				hours_back=hours_back
 			)
-			retun_hash =
-
+			if _type == 'answer':
+				return_hash = SQ__parse_answer(ori_df_whole=df,
+											  dt_now__obj=tmp_dt_sweep,
+											  minute_forward=minute_forward)
+			else:
+				return_hash = SQ__parse_sqData(ori_df_whole=df,
+											   dt_now__obj=tmp_dt_sweep,
+											   hours_duration_back=hours_back)
 			## right now
 			tmp_dt_sweep += datetime.timedelta(minutes=1)
+
+			yield return_hash
 
 
 
