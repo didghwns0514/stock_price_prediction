@@ -159,13 +159,16 @@ def Session():
 		return wrapper
 
 
-	def sweep_day(df, start_date, end_date, hours_back = int(13), minute_forward = int(30),_type='data'):
+	def sweep_day(df, start_date, end_date,
+				  hours_back = int(13), minute_forward = int(30), _type='data',
+				  min_dur=int(1)):
 		"""
 
 		:param df: dataframe input
 		:param start_date:
 		:param end_date:
-		:return:
+		:return: yields hashs until stopiteration exception
+			=> except StopIteration:: happends at the end of the function
 		"""
 
 		assert _type in ['data', 'answer']
@@ -191,7 +194,7 @@ def Session():
 											   dt_now__obj=tmp_dt_sweep,
 											   hours_duration_back=hours_back)
 			## right now
-			tmp_dt_sweep += datetime.timedelta(minutes=1)
+			tmp_dt_sweep += datetime.timedelta(minutes=min_dur)
 
 			yield return_hash
 
