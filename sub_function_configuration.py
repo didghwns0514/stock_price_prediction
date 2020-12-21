@@ -2,17 +2,18 @@ import datetime
 #import copy
 
 
-def FUNC_dtSwtich(datetime_item):
+def FUNC_dtSwtich(datetime_item, string_method='%Y%m%d%H%M%S'):
     """
 
     :param datetime_item: datetime either string or datetime object
     :return: converts to each cases and returns
     """
     if isinstance(datetime_item, str):
-        return datetime.datetime.strptime(datetime_item, '%Y%m%d%H%M%S')
+        return datetime.datetime.strptime(datetime_item, string_method)
 
     elif isinstance(datetime_item, datetime.date):
-        return datetime_item.strftime('%Y%m%d%H%M%S')
+        return datetime_item.strftime(string_method)
+
 
 def FUNC_dtRect(datetime_obj, string_time=None):
     """
@@ -33,7 +34,9 @@ def FUNC_dtRect(datetime_obj, string_time=None):
 
 
 
-def FUNC_return_datetime_obj__backward(datetime_now__obj_, hours_back):
+
+
+def FUNC_datetime_backward(datetime_now__obj_, hours_back):
     """
     dont include time, 'NOW' in the return
     """
@@ -67,6 +70,7 @@ def FUNC_return_datetime_obj__backward(datetime_now__obj_, hours_back):
                                      datetime_now__obj])
         tmp_list_for_return = func_sub_iteratior(tmp_minutes_to_goback, datetime_today_fix_start__obj, tmp_list_for_return)
         return tmp_list_for_return
+
 
 def func_sub_iteratior(miutes_left, before_datetime_start__obj, return_list):
     TOTAL_DAY_MINUTE_NUMBER = 391 # stock day's window in minutes
@@ -108,7 +112,7 @@ if __name__ == '__main__':
     datetime_tmp = datetime_tmp.replace(month=months, day=days, hour=hours, minute=minutes)
     print(f'created date stamp : {datetime_tmp}')
 
-    tmp_return = FUNC_return_datetime_obj__backward(datetime_tmp, hours_back)
+    tmp_return = FUNC_datetime_backward(datetime_tmp, hours_back)
     print(f'returned list : {tmp_return}')
     print(f'\n')
     print(f'hours back in total minutes : {hours_back*60}')

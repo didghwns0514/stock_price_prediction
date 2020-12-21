@@ -540,7 +540,7 @@ class Bit_64(threading.Thread):
 		FUNC_Bit64__fill_missing_data_in_dict 사용해서 합치기!
 		""" 
 
-		return SUB_F.FUNC_return_datetime_obj__backward(datetime_obj_now, hours_duration_back )
+		return SUB_F.FUNC_datetime_backward(datetime_obj_now, hours_duration_back )
 
 	def FUNC_Bit64__fill_missing_data_in_dict(self, dictionary, start_time_obj, end_time_obj):
 

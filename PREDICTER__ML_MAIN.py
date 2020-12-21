@@ -48,7 +48,8 @@ class Stock_prediction:
 	NAME = 'stock_prediction_'
 
 	## Must watch list
-	WATCH_LIST = ["226490", "261250", "252670"]
+	WATCH_LIST = ["226490", "261250" ]#, "252670"]
+	# KODEX 코스피, KODEX 미국달러선물 레버리지, KODEX 200선물 인버스 2X
 
 	LENGTH__MINUTE_DATA = int(60 * 4) # 3 data used, stock / kospi / dollar-mearchant
 	LENGTH__NEWS_ENCODED = int(20)
@@ -56,6 +57,8 @@ class Stock_prediction:
 						+ int(LENGTH__NEWS_ENCODED) \
 						+ int(1200)
 	LENGTH__ALL_OUTPUT = int(30)
+
+	HOURS_WATCH = int(13)
 
 
 
@@ -87,15 +90,27 @@ class Stock_prediction:
 		# 							 minute=0,
 		# 							 mirosecond=0)
 
-	def _checkArticle(self, stock_code, article_loc, specific_time):
+	def _checkArticle(self, stock_code, specific_time,
+					  article_loc=None, article_pickle=None):
 		"""
 
-		:param : var :: stock_code
-		         to look up article pickle for the stock
-		:return:
+		:param stock_code: stock_code
+		:param specific_time: time now to retrieve article of net 5days
+		:param article_loc:
+		:param article_pickle:
+		 -> will check article_loc and article_pickle if both are None
+		:return: wrapper for reading article, returns calculated result
 		"""
-		self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
+
+		rtn = self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
+														  article_pickle=article_pickle,
+														  stock_code=stock_code,
 														  specific_time=specific_time)
+
+		return rtn
+
+	def _checkStock(self):
+		pass
 
 
 
@@ -140,7 +155,7 @@ def Session():
 		return wrapper
 
 
-	def sweep_date(df, start_date, end_date):
+	def sweep_date(df, start_date, end_date, hours_back = int(13)):
 		"""
 
 		:param df: dataframe input
@@ -149,8 +164,23 @@ def Session():
 		:return:
 		"""
 
+		tmp_dt_start = start_date
+		tmp_dt_sweep = start_date
+		tmp_dt_end = end_date
 
-		pass
+		while tmp_dt_sweep <= tmp_dt_end:
+
+			## calculate back
+			tmp_backwards = SUB_F.FUNC_datetime_backward(
+				datetime_now__obj=tmp_dt_sweep,
+				hours_back=hours_back
+			)
+			retun_hash =
+
+			## right now
+			tmp_dt_sweep += datetime.timedelta(minutes=1)
+
+
 
 
 	# # @ import for db
@@ -216,25 +246,21 @@ def Session():
 					memo=f'stock code did not match standards, returned None type')
 			continue
 
-		mainStk_datetime_st__obj = main_Stk_df.date.min() + datetime.timedelta(days=3)
-		mainStk_datetime_end__obj = main_Stk_df.date.max() - datetime.timedelta(days=1)
+		mainStk_dt_start__obj = main_Stk_df.date.min() + datetime.timedelta(days=3)
+		mainStk_dt_end__obj = main_Stk_df.date.max() - datetime.timedelta(days=1)
 
-		## search stock name in the article
-		"""
-		tmp_filter = [ pickle_article[key][0] for key, value \
-					            in zip(pickle_article.keys(),
-									   pickle_article.values()) \
-						            if  pickle_article[key][0] == stock_code]
-		print(f'tmp_filter : {tmp_filter}')
-		if not tmp_filter:
-			pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
-					memo=f'stock code not found in the article pickle hash dataS')
-			continue
-		"""
 
 		#################################
 		# If all has passed : start from here!
 		#################################
+		while mainStk_dt_start__obj <= mainStk_dt_end__obj:
+			tmp_dt_start__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"9:00")
+
+
+
+
+			# add day
+			mainStk_dt_start__obj += datetime.timedelta(days=1)
 
 	print(f'total execution finished!')
 
