@@ -132,6 +132,15 @@ class _Log(object): # old styple
 
 
 def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, memo=None):
+    """
+    :param dst_folder: top folder that will be used to save files 
+    :param lv: level of logger, [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+    :param module: function name, if "exception True", needs function name as input
+    :param exception: to log under exception wrapping
+    :param exception_msg: exception message to be saved
+    :param memo: if "exception True", additional message / else message is saved under 'INFO' level
+    :return: if "exception True", log is saved / else returns wrapper function -> used as decorator  
+    """
 
     # print(f'in pushLog')
     # print(f'in pushLog parms : {dst_folder}')

@@ -29,6 +29,9 @@ from sklearn.multioutput import MultiOutputRegressor
 # @ logger
 from LOGGER_FOR_MAIN import pushLog
 
+# @ dt operation
+from sub_function_configuration import *
+
 
 class PrivTensorWrapper:
 
@@ -343,52 +346,57 @@ class NestedGraph:
 		self.output_shape = shape_output
 
 
-	def NG__clear(self):
+	def NG__clear(self, _today_date):
 		"""
 		param : None
+		:param today_date : date value of datetime object
 		return : Action - clean the model from the memory
 						- clean the class variable dictionary
 		"""
-
-		self.NG__clear_keras()
-		self.NG__clear_data()
+		today_date = FUNC_dtRect(_today_date, "00:00")
+		self.NG__clear_keras(_today_date=today_date)
+		self.NG__clear_data(_today_date=today_date)
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
-	def NG__clear_keras(self):
+	def NG__clear_keras(self, _today_date):
 		"""
 		param : None
+		:param _today_date : date value of datetime object
 		return : Action - clears keras graphs
 		"""
 		for day in NestedGraph.LOOKUP:
-			for stock_code in  NestedGraph.LOOKUP[day]:
-				for _class in NestedGraph.LOOKUP[day][stock_code]:
-					_class.PT__clear() # clear session / graph in keras
+			if FUNC_dtRect(_today_date, "00:00") != day:
+				for stock_code in  NestedGraph.LOOKUP[day]:
+					for _class in NestedGraph.LOOKUP[day][stock_code]:
+						_class.PT__clear() # clear session / graph in keras
 
-				# clear stock_codes in day key
-				del NestedGraph.LOOKUP[day][stock_code]
+					# clear stock_codes in day key
+					del NestedGraph.LOOKUP[day][stock_code]
 
-			# clear day in the lookup table
-			del NestedGraph.LOOKUP[day]
+				# clear day in the lookup table
+				del NestedGraph.LOOKUP[day]
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
-	def NG__clear_data(self):
+	def NG__clear_data(self, _today_date):
 		"""
 		param : None
+		:param _today_date : date value of datetime object
 		return : Action - clear data savings for training
 				 var :: self.LOOKUP_data
 		"""
 		for day in NestedGraph.LOOKUP_data:
-			for stock_code in NestedGraph.LOOKUP_data[day]:
-				for datset in NestedGraph.LOOKUP_data[day][stock_code]:
+			if FUNC_dtRect(_today_date, "00:00") != day:
+				for stock_code in NestedGraph.LOOKUP_data[day]:
+					for datset in NestedGraph.LOOKUP_data[day][stock_code]:
 
-					# delete dataset
-					del NestedGraph.LOOKUP_data[day][stock_code][datset]
+						# delete dataset
+						del NestedGraph.LOOKUP_data[day][stock_code][datset]
 
-				# delete stock code
-				del NestedGraph.LOOKUP_data[day][stock_code]
-			
-			# delete day
-			del NestedGraph.LOOKUP_data[day]
+					# delete stock code
+					del NestedGraph.LOOKUP_data[day][stock_code]
+
+				# delete day
+				del NestedGraph.LOOKUP_data[day]
 				
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -451,11 +459,16 @@ class NestedGraph:
 		return rtn
 	
 
-	def NG__check_graph(self, stock_code, day):
+	def NG__check_graph(self, stock_code, _day):
 		"""
 		param : stock_code, day - day value from datetime lib
 		return : Action - fills up self.LOOKUP dictionary
 		"""
+
+		day = FUNC_dtRect(_day, "00:00")
+
+		## reset outdated graph / data
+		self.NG__clear(_today_date=day)
 
 		if day not in NestedGraph.LOOKUP:
 			NestedGraph.LOOKUP[day] = {}

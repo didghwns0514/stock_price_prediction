@@ -111,14 +111,20 @@ class Stock_prediction:
 
 		return rtn
 
-	def _checkStock(self):
-		pass
+	def _checkStock(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today,
+					hash_answer=None):
+		"""
+		:param stock_code: stock_code
+		:param hash_stock: hash data of stock
+		:param hash_kospi: hash data of kospi
+		:param hash_dollar: hash data of dollar
+		:param _today: datetime obj of date only
+		:param hash_answer: 
+		"""
 
 
 
 def Session():
-
-
 
 	def sqlite_capture(db_loc):
 
@@ -159,7 +165,7 @@ def Session():
 		return wrapper
 
 
-	def sweep_day(df, start_date, end_date,
+	def sweep_day(df, stock_code, start_date, end_date,
 				  hours_back = int(13), minute_forward = int(30), _type='data',
 				  min_dur=int(1)):
 		"""
@@ -178,13 +184,11 @@ def Session():
 		tmp_dt_end = end_date
 		return_hash = None
 
+		print(f'begin parsing stock_code : {stock_code}')
+
 		while tmp_dt_sweep <= tmp_dt_end:
 
-			## calculate back
-			tmp_backwards = SUB_F.FUNC_datetime_backward(
-				datetime_now__obj_=tmp_dt_sweep,
-				hours_back=hours_back
-			)
+			## get hash
 			if _type == 'answer':
 				return_hash = SQ__parse_answer(ori_df_whole=df,
 											  dt_now__obj=tmp_dt_sweep,
@@ -196,7 +200,9 @@ def Session():
 			## right now
 			tmp_dt_sweep += datetime.timedelta(minutes=min_dur)
 
-			yield return_hash
+			yield return_hash, tmp_dt_sweep
+
+		print(f'ended parsing stock_code : {stock_code}')
 
 
 
@@ -206,7 +212,7 @@ def Session():
 
 	
 	#@ stock prediction wrapper class
-	sp = Stock_prediction(module=True)
+	prediction_agent = Stock_prediction(module=True)
 
 	## current working python directory
 	current_wd = os.getcwd().replace('/', '\\')
@@ -244,6 +250,7 @@ def Session():
 	"""                KODEX 코스피, KODEX 미국달러선물 레버리지, KODEX 200선물 인버스 2X"""
 
 
+
 	for stock_code in list_of_codes:
 		pushLog(dst_folder='SESSION__PREDICTER__ML_MAIN',
 				exception=True,
@@ -273,8 +280,87 @@ def Session():
 		#################################
 		while mainStk_dt_start__obj <= mainStk_dt_end__obj:
 			tmp_dt_start__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"9:00")
+			tmp_dt_end__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"15:30")
+
+			f_kospi = sweep_day(df=df__kospi,
+						stock_code=str(226490),
+						start_date=tmp_dt_start__obj,
+						end_date=tmp_dt_end__obj,
+						_type='data',
+						)
+
+			f_dollar = sweep_day(df=df__dollar,
+						stock_code=str(261250),
+						start_date=tmp_dt_start__obj,
+						end_date=tmp_dt_end__obj,
+						_type='data',
+						)
+
+			f_ans = sweep_day(df=main_Stk_df,
+						stock_code=stock_code,
+						start_date=tmp_dt_start__obj,
+						end_date=tmp_dt_end__obj,
+						_type='answer',
+						)
+			f_data = sweep_day(df=main_Stk_df,
+						stock_code=stock_code,
+						start_date=tmp_dt_start__obj,
+						end_date=tmp_dt_end__obj,
+						_type='data',
+						)
 
 
+			while True:
+				try:
+					hash_kospi, t1 = f_kospi.__next__()
+					hash_dollar, t2 = f_dollar.__next__()
+					hash_ans, t3 = f_ans.__next__()
+					hash_data, t4 = f_data.__next__()
+
+					if len(list(set([t1,t2,t3,t4]))) != 1:
+						pushLog(dst_folder='PREDICTER__ML_MAIN', 
+						        lv='ERROR',
+								module='Session', 
+								exception=True,
+								memo=f'time stamp different by generators')
+						break
+
+					rtn_article = prediction_agent._checkArticle(stock_code=stock_code,
+													specific_time=t1,
+													article_pickle=pickle_article)
+					if not rtn_article:
+						## add day -> no article exsists!
+						mainStk_dt_start__obj += datetime.timedelta(days=1)
+						pushLog(dst_folder='PREDICTER__ML_MAIN', 
+						        lv='ERROR',
+								module='Session', 
+								exception=True,
+								memo=f'no article exists in the date ~ net 5days before')
+						break
+					
+					## noramlly passed all exceptions
+					################################################
+					prediction_agent.nestgraph.NG__check_graph(stock_code=stock_code,
+															  _day=t1)
+
+
+					## add success log
+					################################################
+					pushLog(dst_folder='PREDICTER__ML_MAIN', 
+							lv='INFO',
+							module='Session', 
+							exception=True,
+							memo=f'date used : {str(t1)} \
+								  \n- normally passed')
+
+				except StopIteration as se:
+					pushLog(dst_folder='PREDICTER__ML_MAIN', 
+							lv='ERROR',
+							module='Session', 
+							exception=True,
+							exception_msg=str(se),
+							memo=f'StopIteration exception')
+					break
 
 
 			# add day
