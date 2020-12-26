@@ -32,6 +32,19 @@ def FUNC_dtRect(datetime_obj, string_time=None):
         return datetime_obj.replace(second=0, microsecond=0)
 
 
+def FUNC_dtLIST_str_sort(items, string_method='%Y%m%d%H%M%S'):
+    """
+
+    :param items: list containing str datetime
+    :param string_method:
+    :return:
+    """
+
+    tmp_dt_converted = list(map(FUNC_dtSwtich, items))
+    tmp_sorted = sorted(tmp_dt_converted)
+    tmp_reconverted = list(map(FUNC_dtSwtich, tmp_sorted))
+
+    return tmp_reconverted
 
 
 

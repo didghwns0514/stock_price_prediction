@@ -33,8 +33,6 @@ import sqlite3
 
 
 # @ outside module
-import ENCODER__ML_MAIN as EN
-import DENOISER__ML_MAIN as DE
 import sub_function_configuration as SUB_F
 import PREDICTER__ML_CLASS as PCLS
 from LOGGER_FOR_MAIN import pushLog
@@ -53,9 +51,9 @@ class Stock_prediction:
 	WATCH_LIST = ["226490", "261250" ]#, "252670"]
 	# KODEX 코스피, KODEX 미국달러선물 레버리지, KODEX 200선물 인버스 2X
 
-	LENGTH__MINUTE_DATA = int(60 * 4) # 3 data used, stock / kospi / dollar-mearchant
-	LENGTH__NEWS_ENCODED = int(20)
-	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 3) \
+	LENGTH__MINUTE_DATA = int((60 * 4) * 2) # 3 data used, stock / kospi / dollar-mearchant
+	LENGTH__NEWS_ENCODED = int(1)
+	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 1) + int(1*2) \
 						+ int(LENGTH__NEWS_ENCODED) \
 						+ int(1200)
 	LENGTH__ALL_OUTPUT = int(30)
@@ -67,10 +65,10 @@ class Stock_prediction:
 	def __init__(self, module=True):
 
 		# @ previous declarations
-		self.AGENT_SUB__encoder = EN.Autoencoder(module=True,simple=True)
-		self.AGENT_SUB__denoiser = DE.Denoiser(module=True)
 		self.nestgraph = PCLS.NestedGraph(shape_input=Stock_prediction.LENGTH__ALL_INPUT,
-		shape_output=Stock_prediction.LENGTH__ALL_OUTPUT)
+										  shape_output=Stock_prediction.LENGTH__ALL_OUTPUT,
+										  minute_length=Stock_prediction.LENGTH__MINUTE_DATA,
+										  predict_length=Stock_prediction.LENGTH__ALL_OUTPUT)
 
 		#self.options = Options(self.envs)
 		self.module = module
@@ -92,24 +90,8 @@ class Stock_prediction:
 		# 							 minute=0,
 		# 							 mirosecond=0)
 
-	def _checkArticle(self, stock_code, specific_time,
-					  article_loc=None, article_pickle=None):
-		"""
 
-		:param stock_code: stock_code
-		:param specific_time: time now to retrieve article of net 5days
-		:param article_loc:
-		:param article_pickle:
-		 -> will check article_loc and article_pickle if both are None
-		:return: wrapper for reading article, returns calculated result
-		"""
 
-		rtn = self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
-														  article_pickle=article_pickle,
-														  stock_code=stock_code,
-														  specific_time=specific_time)
-
-		return rtn
 
 	def _checkStock(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today,
 					hash_answer=None):
@@ -121,6 +103,22 @@ class Stock_prediction:
 		:param _today: datetime obj of date only
 		:param hash_answer: 
 		"""
+		self.nestgraph.NG__wrapper(stock_code=stock_code,
+								   _day=_today,
+								   stk_hashData=hash_stock,
+								   kospi_hashData=hash_kospi,
+								   dollar_hashData=hash_dollar
+								   )
+
+	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
+
+		self._checkStock(stock_code=stock_code,
+						   hash_stock=hash_stock,
+						   hash_kospi=hash_kospi,
+						   hash_dollar=hash_dollar,
+						   _today=_today,
+						   hash_answer=None)
+
 
 
 
@@ -314,10 +312,10 @@ def Session():
 				try:
 					hash_kospi, t1 = f_kospi.__next__()
 					hash_dollar, t2 = f_dollar.__next__()
-					hash_ans, t3 = f_ans.__next__()
-					hash_data, t4 = f_data.__next__()
+					hash_data, t3 = f_data.__next__()
+					#hash_ans, t4 = f_ans.__next__()
 
-					if len(list(set([t1,t2,t3,t4]))) != 1:
+					if len(list(set([t1,t2,t3]))) != 1:
 						pushLog(dst_folder='PREDICTER__ML_MAIN', 
 						        lv='ERROR',
 								module='Session', 
@@ -325,23 +323,24 @@ def Session():
 								memo=f'time stamp different by generators')
 						break
 
-					rtn_article = prediction_agent._checkArticle(stock_code=stock_code,
-													specific_time=t1,
-													article_pickle=pickle_article)
-					if not rtn_article:
-						## add day -> no article exsists!
-						mainStk_dt_start__obj += datetime.timedelta(days=1)
-						pushLog(dst_folder='PREDICTER__ML_MAIN', 
-						        lv='ERROR',
-								module='Session', 
-								exception=True,
-								memo=f'no article exists in the date ~ net 5days before')
-						break
+					# rtn_article = prediction_agent._checkArticle(stock_code=stock_code,
+					# 								specific_time=t1,
+					# 								article_pickle=pickle_article)
+					# if not rtn_article:
+					# 	## add day -> no article exsists!
+					# 	mainStk_dt_start__obj += datetime.timedelta(days=1)
+					# 	pushLog(dst_folder='PREDICTER__ML_MAIN',
+					# 	        lv='ERROR',
+					# 			module='Session',
+					# 			exception=True,
+					# 			memo=f'no article exists in the date ~ net 5days before')
+					# 	break
 					
 					## noramlly passed all exceptions
 					################################################
-					prediction_agent.nestgraph.NG__check_graph(stock_code=stock_code,
-															  _day=t1)
+					# prediction_agent.nestgraph.NG__wrapper(stock_code=stock_code,
+					# 										  _day=t1)
+					prediction_agent._stock_op_wrapper()
 
 
 					## add success log

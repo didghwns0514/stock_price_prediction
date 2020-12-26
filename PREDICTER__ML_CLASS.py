@@ -2,11 +2,10 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = '-1' # turn off gpu setting
 
-import pickle
-import numpy as np
 
-# @ xgboost
-import xgboost
+import numpy as np
+import collections
+
 
 # @ tensorflow
 import tensorflow as tf
@@ -28,6 +27,10 @@ from sklearn.multioutput import MultiOutputRegressor
 
 # @ logger
 from LOGGER_FOR_MAIN import pushLog
+
+# @ other modules
+import ENCODER__ML_MAIN as EN
+import DENOISER__ML_MAIN as DE
 
 # @ dt operation
 from sub_function_configuration import *
@@ -332,7 +335,7 @@ class NestedGraph:
 	MAX_NUM_OF_ENSEM = 2
 	LOOKUP_data = {}
 
-	def __init__(self, shape_input, shape_output):
+	def __init__(self, shape_input, shape_output, minute_length, predict_length):
 
 		## locations
 		self.AT_SAVE_PATH__folder = str(os.getcwd() + "\\PREDICTER__MODEL_SAVE")
@@ -341,9 +344,16 @@ class NestedGraph:
 		else:
 			os.mkdir(self.AT_SAVE_PATH__folder)
 
+
+		## load other modules
+		self.AGENT_SUB__encoder = EN.Autoencoder(module=True, simple=True)
+		self.AGENT_SUB__denoiser = DE.Denoiser(module=True)
+
 		## in / out shapes
 		self.input_shape = shape_input
 		self.output_shape = shape_output
+		self.minute_length = minute_length
+		self.predict_length = predict_length
 
 
 	def NG__clear(self, _today_date):
@@ -388,6 +398,7 @@ class NestedGraph:
 			if FUNC_dtRect(_today_date, "00:00") != day:
 				for stock_code in NestedGraph.LOOKUP_data[day]:
 					for datset in NestedGraph.LOOKUP_data[day][stock_code]:
+						# -> dataset here as class
 
 						# delete dataset
 						del NestedGraph.LOOKUP_data[day][stock_code][datset]
@@ -412,18 +423,6 @@ class NestedGraph:
 		tmp_list = np.asarray(tmp_list)
 
 		return np.mean(tmp_list, axis=1)
-
-
-	def NG__normalize_data(self, X_data_list, Y_data_list):
-		"""
-		param : data to be normalized,
-				input - CNN encoded + news + normalized original of 3 critical
-					  - save data for training!
-					  var :: self.LOOKUP_data
-					  => 위에서 해야 될 듯?
-		"""
-
-		pass
 
 
 	def NG__allocater(self, stock_code):
@@ -457,12 +456,12 @@ class NestedGraph:
 			 output_shape=self.output_shape)
 
 		return rtn
-	
 
-	def NG__check_graph(self, stock_code, _day):
+
+	def NG__check_prep(self, stock_code, _day):
 		"""
-		param : stock_code, day - day value from datetime lib
-		return : Action - fills up self.LOOKUP dictionary
+		:param : stock_code, day - day value from datetime lib
+		:return : Action - fills up self.LOOKUP dictionary
 		"""
 
 		day = FUNC_dtRect(_day, "00:00")
@@ -470,6 +469,8 @@ class NestedGraph:
 		## reset outdated graph / data
 		self.NG__clear(_today_date=day)
 
+
+		## allocate graph
 		if day not in NestedGraph.LOOKUP:
 			NestedGraph.LOOKUP[day] = {}
 		
@@ -479,3 +480,191 @@ class NestedGraph:
 		if len(NestedGraph.LOOKUP[day][stock_code])  \
 			 < self.MAX_NUM_OF_ENSEM:
 				NestedGraph.LOOKUP[day][stock_code].append(self.NG__allocater(stock_code=stock_code))
+
+		## allocate data class
+		if day not in NestedGraph.LOOKUP_data:
+			NestedGraph.LOOKUP_data[day] = {}
+
+		if stock_code not in NestedGraph.LOOKUP_data[day]:
+			NestedGraph.LOOKUP_data[day][stock_code] = Dataset(stock_code=stock_code)
+
+
+	def NG__wrapper(self, stock_code, _day,
+					stk_hashData=None,
+					kospi_hashData=None,
+					dollar_hashData=None):
+
+		# @ rect day
+		day = FUNC_dtRect(_day, "00:00")
+
+		# @ prepare containers
+		self.NG__check_prep(stock_code=stock_code, 
+							_day=day)
+
+		## assert stock code existance
+		assert stock_code in NestedGraph.LOOKUP_data[day]
+		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
+
+		if stk_hashData != None:
+			data_class.DATA__stk_update(new_data=stk_hashData)
+
+		if kospi_hashData != None:
+			data_class.DATA__kospi_update(new_data=kospi_hashData)
+
+		if dollar_hashData != None:
+			data_class.DATA__dollar_update(new_data=dollar_hashData)
+
+
+	def NG__dataCalculate(self, stock_code, _day, article_hash):
+		"""
+
+		:param stock_code: stock_code
+		:param _day: original dat / wo rectified
+		:param article_pickle: article pickle
+		:return:
+		"""
+		# @ rect day
+		day = FUNC_dtRect(_day, "00:00")
+
+		## assert stock code existance
+		assert stock_code in NestedGraph.LOOKUP_data[day]
+		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
+
+		key__stkData = list(data_class._stk_dataset.keys())
+		key__X_data = list(data_class._X_data.keys())
+
+		## update needed datetime as list
+		update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
+		for i in range(self.minute_length, len(update_needed)-self.predict_length, 1 ):
+
+			## skip existing datetime str if exists
+			if data_class.DATA__check_existance(update_needed[i]):
+				continue
+
+
+			rtn_article = self.NG__checkArticle(stock_code=stock_code,
+												specific_time=update_needed[i],
+												article_pickle=article_hash)
+			rtn_X, rtn_Y = data_class.DATA__make_stock_set(update_needed[i-self.minute_length:i],
+														   update_needed[i:i+self.predict_length],
+														   check_data_int=self.minute_length,
+														   check_answer_int=self.predict_length)
+			rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
+			rtn_kospi
+			rtn_dollar
+
+
+	def NG__checkArticle(self, stock_code, specific_time,
+					  article_loc=None, article_pickle=None):
+		"""
+
+		:param stock_code: stock_code
+		:param specific_time: time now to retrieve article of net 5days
+		:param article_loc:
+		:param article_pickle:
+		 -> will check article_loc and article_pickle if both are None
+		:return: wrapper for reading article, returns calculated result
+		"""
+
+		rtn = self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
+																article_pickle=article_pickle,
+																stock_code=stock_code,
+																specific_time=specific_time)
+
+		return rtn
+
+
+class Dataset:
+	
+	def __init__(self, stock_code):
+		self._stock_code = stock_code
+		self._stk_dataset = {}
+		self._kospi_dataset={}
+		self._dollar_dataset = {}
+		self._article_dataset = {}
+
+		self._X_data = {}
+		self._Y_data = {}
+
+	def DATA__make_stock_set(self, date_list_data, date_list_ans, check_data_int, check_answer_int):
+		"""
+		:param string:
+		:param datetime_str:
+		:param minute_data:
+		:param answer:
+		:param main_stock:
+		:return:
+		"""
+
+		assert len(date_list_data) * 2 == check_data_int
+		assert len(date_list_ans) == check_answer_int
+
+		rtn_list_data = []
+		tmp_data_price = [ ( self._stk_dataset[date]['price'] / self._stk_dataset[date_list_data[0]]['price']) - 1 for  \
+					  n, date in enumerate(date_list_data) ]
+		tmp_data_volume = [  self._stk_dataset[date]['volume'] for n, date in enumerate(date_list_data) ]
+		rtn_list_data.extend(tmp_data_price)
+		rtn_list_data.extend(tmp_data_volume)
+
+
+		rtn_list_answer = []
+		tmp_answer_price = [ ( self._stk_dataset[date]['price'] / self._stk_dataset[date_list_data[0]]['price']) - 1 for  \
+					  n, date in enumerate(date_list_ans) ]
+
+		assert len(rtn_list_data) == len(date_list_data) * 2
+		assert len(tmp_answer_price) == len(date_list_ans)
+
+		return rtn_list_data, tmp_answer_price
+
+
+
+
+
+
+
+	def DATA__check_existance(self, datetime_str):
+
+		if datetime_str in self._X_data:
+			return False
+		else:
+			return True
+
+
+	def DATA__stk_update(self, new_data:dict):
+		"""
+		:param new_data : input from outside, type dict
+		:return : Action - update new data on interest stock _stk_dataset instance
+		"""
+		assert isinstance(new_data, dict)
+		self._stk_dataset.update(new_data)
+
+
+	def DATA__kospi_update(self, new_data:dict):
+		"""
+		:param new_data : input from outside, type dict
+		:return : Action - update new data on interest stock _kospi_dataset instance
+		"""
+		assert isinstance(new_data, dict)
+		self._kospi_dataset.update(new_data)
+
+
+	def DATA__dollar_update(self, new_data:dict):
+		"""
+		:param new_data : input from outside, type dict
+		:return : Action - update new data on interest stock _dollar_dataset instance
+		"""
+		assert isinstance(new_data, dict)
+		self._dollar_dataset.update(new_data)
+
+
+	def DATA__article_update(self, new_data:float, _day):
+		"""
+		:param new_data : input from outside, type float
+		:return : Action - update new data on interest stock _article_dataset instance
+		"""
+		assert isinstance(new_data, float) or isinstance(new_data, int)
+		_day_str = FUNC_dtSwtich(datetime_item=_day)
+		self._article_dataset.update({_day_str : new_data})
+
+
+
