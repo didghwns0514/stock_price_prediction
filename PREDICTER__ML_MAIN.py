@@ -93,8 +93,7 @@ class Stock_prediction:
 
 
 
-	def _checkStock(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today,
-					hash_answer=None):
+	def _checkStock(self, stock_code, hash_stock, hash_kospi, hash_dollar, hash_article, _today):
 		"""
 		:param stock_code: stock_code
 		:param hash_stock: hash data of stock
@@ -110,6 +109,10 @@ class Stock_prediction:
 								   dollar_hashData=hash_dollar
 								   )
 
+		self.nestgraph.NG__dataCalculate(stock_code=stock_code,
+										 _day=_today,
+										 article_hash=hash_article)
+
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
 		self._checkStock(stock_code=stock_code,
@@ -117,7 +120,7 @@ class Stock_prediction:
 						   hash_kospi=hash_kospi,
 						   hash_dollar=hash_dollar,
 						   _today=_today,
-						   hash_answer=None)
+						   hash_article=hash_article)
 
 
 

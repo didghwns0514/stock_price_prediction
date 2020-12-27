@@ -537,21 +537,41 @@ class NestedGraph:
 		update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
 		for i in range(self.minute_length, len(update_needed)-self.predict_length, 1 ):
 
+
+			tmp_totContainer = []
+
 			## skip existing datetime str if exists
 			if data_class.DATA__check_existance(update_needed[i]):
 				continue
 
-
 			rtn_article = self.NG__checkArticle(stock_code=stock_code,
 												specific_time=update_needed[i],
 												article_pickle=article_hash)
+			if rtn_article == None: # no article exists
+				continue
+			data_class.DATA__article_update(new_data=rtn_article,
+											_day=update_needed[i])
+
 			rtn_X, rtn_Y = data_class.DATA__make_stock_set(update_needed[i-self.minute_length:i],
 														   update_needed[i:i+self.predict_length],
 														   check_data_int=self.minute_length,
 														   check_answer_int=self.predict_length)
 			rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
-			rtn_kospi
-			rtn_dollar
+			rtn_kospi = data_class.DATA__make_sub_set(subset_type='kospi')
+			rtn_dollar = data_class.DATA__make_sub_set(subset_type='dollar')
+
+
+			## contain values
+			tmp_totContainer.extend(rtn_X)
+			tmp_totContainer.extend(rtn_X_decoded)
+			tmp_totContainer.extend(rtn_kospi)
+			tmp_totContainer.extend(rtn_dollar)
+
+			## append data
+			data_class.DATA__wrap_container(x_container=tmp_totContainer,
+											y_container=rtn_Y,
+											datetime_str=update_needed[i])
+
 
 
 	def NG__checkArticle(self, stock_code, specific_time,
@@ -575,41 +595,65 @@ class NestedGraph:
 
 
 class Dataset:
-	
+
+	_kospi_dataset = {}
+	_dollar_dataset = {}
+
+
 	def __init__(self, stock_code):
 		self._stock_code = stock_code
 		self._stk_dataset = {}
-		self._kospi_dataset={}
-		self._dollar_dataset = {}
+		#self._kospi_dataset = {}
+		#self._dollar_dataset = {}
 		self._article_dataset = {}
+
+		self._ratio_dataset = {} # start data[0] record
 
 		self._X_data = {}
 		self._Y_data = {}
 
+
+	def DATA__wrap_container(self, x_container, y_container, datetime_str):
+		"""
+
+		:param x_container: x value to append to _X_data
+		:param y_container: y vale to append to _Y_data
+		:return:
+		"""
+		if datetime_str in self._X_data or datetime_str in self._Y_data:
+			return
+
+		self._X_data[datetime_str] = x_container
+		self._Y_data[datetime_str] = y_container
+
+
+
 	def DATA__make_stock_set(self, date_list_data, date_list_ans, check_data_int, check_answer_int):
 		"""
-		:param string:
-		:param datetime_str:
-		:param minute_data:
-		:param answer:
-		:param main_stock:
+
+		:param date_list_data: original stock parse date list
+		:param date_list_ans: original stock parse answer list
+		:param check_data_int: to check length of parsed data
+		:param check_answer_int: to check length of parsed answer
 		:return:
 		"""
 
 		assert len(date_list_data) * 2 == check_data_int
 		assert len(date_list_ans) == check_answer_int
 
+		standard_first_val = self._stk_dataset[date_list_data[0]]['price']
+
 		rtn_list_data = []
-		tmp_data_price = [ ( self._stk_dataset[date]['price'] / self._stk_dataset[date_list_data[0]]['price']) - 1 for  \
-					  n, date in enumerate(date_list_data) ]
+		tmp_data_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
+					         n, date in enumerate(date_list_data) ]
 		tmp_data_volume = [  self._stk_dataset[date]['volume'] for n, date in enumerate(date_list_data) ]
 		rtn_list_data.extend(tmp_data_price)
 		rtn_list_data.extend(tmp_data_volume)
 
 
 		rtn_list_answer = []
-		tmp_answer_price = [ ( self._stk_dataset[date]['price'] / self._stk_dataset[date_list_data[0]]['price']) - 1 for  \
-					  n, date in enumerate(date_list_ans) ]
+		tmp_answer_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
+					           n, date in enumerate(date_list_ans) ]
 
 		assert len(rtn_list_data) == len(date_list_data) * 2
 		assert len(tmp_answer_price) == len(date_list_ans)
@@ -618,12 +662,39 @@ class Dataset:
 
 
 
+	def DATA__make_sub_set(self, subset_type):
+		"""
 
+		:param subset_type:
+		:return:
+		"""
+		assert subset_type in ['kospi', 'dollar']
+
+		def return_market_status(hash):
+
+			assert len(list(hash.keys())) > 0
+
+			## 1st layer
+			price = []
+			for dt in hash:
+				price.append(hash[dt]['price'])
+
+			return sum(price) / len(price)
+
+		if subset_type == 'kospi':
+			return return_market_status(Dataset._kospi_dataset)
+
+		elif subset_type == "dollar":
+			return return_market_status(Dataset._dollar_dataset)
 
 
 
 	def DATA__check_existance(self, datetime_str):
+		"""
 
+		:param datetime_str: specific datetime to check
+		:return: if the datetime exists, returns False / else True
+		"""
 		if datetime_str in self._X_data:
 			return False
 		else:
