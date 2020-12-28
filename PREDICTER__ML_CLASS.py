@@ -126,6 +126,7 @@ class PrivTensorWrapper:
 		try:
 			self._MAIN_SESS.close()
 			tf.keras.backend.clear_session()
+			PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code] =- 1
 		except Exception as e:
 			pushLog(dst_folder='PREDICTER__ML_CLASS',module='PT__clear',exception=True, exception_msg=e,memo=f'session clear success')
 			
@@ -266,8 +267,13 @@ class PrivTensorWrapper:
 		return early_stop, check_point, epoch
 
 
-
+	@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def PT__train_model(self, X, Y):
+
+		ensemble_num = PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code]
+		pushLog(dst_folder='PREDICTER__ML_CLASS',
+				module='PT__train_model',
+				memo=f'ensemble_num : {ensemble_num}')
 
 		X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.15)
 
@@ -416,13 +422,36 @@ class NestedGraph:
 		param : stock_code
 		return : Action - returns mean value of predictions as an ensemble
 		"""
+
 		tmp_list = []
-		for stock_code in NestedGraph.LOOKUP:
-			tmp_list.append(NestedGraph.LOOKUP[stock_code].PT__predict_model(X_data))
+		for day in NestedGraph.LOOKUP:
+			assert stock_code in NestedGraph.LOOKUP[day]
+
+			for stock_class in NestedGraph.LOOKUP[day][stock_code]:
+				tmp_list.append(stock_class.PT__predict_model(X_data))
 		
 		tmp_list = np.asarray(tmp_list)
 
 		return np.mean(tmp_list, axis=1)
+
+
+	def NG__training_wrapper(self, stock_code):
+		"""
+
+		:param stock_code: stock_code
+		:return: trains the graphs
+		"""
+
+		for day in NestedGraph.LOOKUP:
+			assert stock_code in NestedGraph.LOOKUP[day]
+			assert stock_code in NestedGraph.LOOKUP_data[day]
+
+			data_class = NestedGraph.LOOKUP_data[day][stock_code]
+			X, Y = data_class.DATA__get_container()
+
+			for stock_class in NestedGraph.LOOKUP[day][stock_code]:
+				stock_class.PT__train_model(X=X, Y=Y)
+
 
 
 	def NG__allocater(self, stock_code):
@@ -613,12 +642,26 @@ class Dataset:
 		self._Y_data = {}
 
 
+	def DATA__get_container(self):
+		"""
+
+		:return: get _X / _Y for training
+		"""
+		tmp_X = [ data for key1, key2, data in zip(self._X_data.keys(), self._Y_data.keys(), self._X_data.values()) \
+				  if key1 == key2]
+
+		tmp_Y = [ data for key1, key2, data in zip(self._Y_data.keys(), self._X_data.keys(), self._Y_data.values()) \
+				  if key1 == key2]
+
+		return tmp_X, tmp_Y
+
+
 	def DATA__wrap_container(self, x_container, y_container, datetime_str):
 		"""
 
 		:param x_container: x value to append to _X_data
 		:param y_container: y vale to append to _Y_data
-		:return:
+		:return: add _X / _Y dictionary it's new values
 		"""
 		if datetime_str in self._X_data or datetime_str in self._Y_data:
 			return
@@ -635,7 +678,7 @@ class Dataset:
 		:param date_list_ans: original stock parse answer list
 		:param check_data_int: to check length of parsed data
 		:param check_answer_int: to check length of parsed answer
-		:return:
+		:return: create X, Y data partials from current stcok data
 		"""
 
 		assert len(date_list_data) * 2 == check_data_int
@@ -666,7 +709,7 @@ class Dataset:
 		"""
 
 		:param subset_type:
-		:return:
+		:return: make calculation based on mean values of kospi and dollar
 		"""
 		assert subset_type in ['kospi', 'dollar']
 
@@ -674,12 +717,17 @@ class Dataset:
 
 			assert len(list(hash.keys())) > 0
 
+			tmp_hash_key_srted = FUNC_dtLIST_str_sort(list(hash.keys()))
+
 			## 1st layer
 			price = []
-			for dt in hash:
+			for dt in tmp_hash_key_srted:
 				price.append(hash[dt]['price'])
 
-			return sum(price) / len(price)
+			mean = sum(price) / len(price)
+			latest_price = price[-1]
+
+			return (latest_price - mean) / mean
 
 		if subset_type == 'kospi':
 			return return_market_status(Dataset._kospi_dataset)

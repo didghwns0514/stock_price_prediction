@@ -40,6 +40,8 @@ def FUNC_dtLIST_str_sort(items, string_method='%Y%m%d%H%M%S'):
     :return:
     """
 
+    assert all( [ isinstance(data, str) for data in items ])
+
     tmp_dt_converted = list(map(FUNC_dtSwtich, items))
     tmp_sorted = sorted(tmp_dt_converted)
     tmp_reconverted = list(map(FUNC_dtSwtich, tmp_sorted))

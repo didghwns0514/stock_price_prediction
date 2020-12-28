@@ -113,6 +113,10 @@ class Stock_prediction:
 										 _day=_today,
 										 article_hash=hash_article)
 
+		self.nestgraph.NG__training_wrapper(stock_code=stock_code)
+
+		프리딕터 wrapper로 예측 수행
+
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
 		self._checkStock(stock_code=stock_code,
