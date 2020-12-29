@@ -601,6 +601,47 @@ class NestedGraph:
 											y_container=rtn_Y,
 											datetime_str=update_needed[i])
 
+	def NG__get_prediction_set(self, stock_code, _day,article_hash):
+		"""
+
+		:param stock_code: stock_code
+		:param _day: actual datetime value of "now" for prediction
+		:return: return the following data correct for _day variable
+		"""
+
+		# @ rect day
+		day = FUNC_dtRect(_day, "00:00")
+
+		## assert stock code existance
+		assert stock_code in NestedGraph.LOOKUP_data[day]
+		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
+		key__stkData = list(data_class._stk_dataset.keys())
+
+		tmp_totContainer = []
+
+		rtn_article = self.NG__checkArticle(stock_code=stock_code,
+											specific_time=_day,
+											article_pickle=article_hash)
+		if rtn_article == None:  # no article exists
+			return
+
+		## update needed datetime as list
+		update_needed = FUNC_dtLIST_str_sort(key__stkData)
+
+		rtn_X = data_class.DATA__get_prediction(update_needed[len(update_needed) - self.minute_length:],
+													   check_data_int=self.minute_length)
+		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
+		rtn_kospi = data_class.DATA__make_sub_set(subset_type='kospi')
+		rtn_dollar = data_class.DATA__make_sub_set(subset_type='dollar')
+
+		## contain values
+		tmp_totContainer.extend(rtn_X)
+		tmp_totContainer.extend(rtn_X_decoded)
+		tmp_totContainer.extend(rtn_kospi)
+		tmp_totContainer.extend(rtn_dollar)
+
+		return tmp_totContainer
+
 
 
 	def NG__checkArticle(self, stock_code, specific_time,
@@ -640,6 +681,31 @@ class Dataset:
 
 		self._X_data = {}
 		self._Y_data = {}
+
+
+	def DATA__get_prediction(self, date_list_data, check_data_int):
+		"""
+
+		:param date_list_data: date list to attrive back
+		:param check_data_int:to check length of parsed data
+		:return: create data
+		"""
+		assert len(date_list_data) * 2 == check_data_int
+
+		standard_first_val = self._stk_dataset[date_list_data[0]]['price']
+
+		rtn_list_data = []
+		tmp_data_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
+					         n, date in enumerate(date_list_data) ]
+		tmp_data_volume = [  self._stk_dataset[date]['volume'] for n, date in enumerate(date_list_data) ]
+		rtn_list_data.extend(tmp_data_price)
+		rtn_list_data.extend(tmp_data_volume)
+
+		assert len(rtn_list_data) == len(date_list_data) * 2
+
+		return  rtn_list_data
+
+
 
 
 	def DATA__get_container(self):
