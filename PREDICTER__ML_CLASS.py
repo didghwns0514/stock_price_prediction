@@ -43,6 +43,27 @@ class PrivTensorWrapper:
 	GET_WEIGHTED_LOSS = True
 	NUM_BATCH = int(100) # Batch size
 
+	VERBOSE = int(1)
+
+	TRAIN_DICT = {
+		'initialized' : {
+			'patience': int(50),
+			'epoch' : int(100),
+			'baseline' : None
+		},
+		'loaded' : {
+			'patience': int(10),
+			'epoch': int(50),
+			'baseline': None
+		},
+		'trained' : {
+			'patience': int(10),
+			'epoch': int(50),
+			'baseline': None
+		}
+	}
+
+
 
 	def __init__(self,
 				stock_code,
@@ -51,7 +72,7 @@ class PrivTensorWrapper:
 				model_score_txt_lc,
 				input_shape,
 				output_shape,
-				loading_bool = False):
+				loading_bool=False):
 
 		# cnter for model numbers
 		if stock_code not in PrivTensorWrapper.PT_CREATION_DIC_CNT:
@@ -82,7 +103,9 @@ class PrivTensorWrapper:
 		
 
 		self._MAIN_GRAPH = tf.Graph()
-		self._MAIN_SESS = tf.Session(config=self._PT__config)
+		with self._MAIN_GRAPH.as_default() as g:
+			self._MAIN_SESS = tf.Session(config=self._PT__config,
+										 graph=g)
 		self._MAIN_MODEL = None
 
 		## load/build model
@@ -129,7 +152,11 @@ class PrivTensorWrapper:
 			tf.keras.backend.clear_session()
 			PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code] =- 1
 		except Exception as e:
-			pushLog(dst_folder='PREDICTER__ML_CLASS',module='PT__clear',exception=True, exception_msg=e,memo=f'session clear success')
+			pushLog(dst_folder='PREDICTER__ML_CLASS',
+					module='PT__clear',
+					exception=True,
+					exception_msg=e,
+					memo=f'session clear success')
 			
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -163,17 +190,14 @@ class PrivTensorWrapper:
 				with self._MAIN_SESS.as_default() as sess:
 					self._PT__ifLoaded = True
 					self._MAIN_MODEL = load_model(self._PT__save_file_location)
-					print(f'1a'*10)
 					self._MAIN_MODEL.summary()
-					print(f'1b' * 10)
+
 
 		else:
 			with self._MAIN_GRAPH.as_default() as g:
 				with self._MAIN_SESS.as_default() as sess:
 					self._MAIN_MODEL = self.PT__build_model()
-					print(f'2a' * 10)
 					self._MAIN_MODEL.summary()
-					print(f'2b' * 10)
 
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -192,17 +216,21 @@ class PrivTensorWrapper:
 				lw = None
 				if PrivTensorWrapper.GET_WEIGHTED_LOSS: # diffrentiated loss
 					#lw = list(range(self._output_shape, 0, -1))
-					lw = {index:weight for index, weight in enumerate(range(30, 0, -1))}
+					#lw = {index:weight for index, weight in enumerate(range(30, 0, -1))}
+					pass
 				else:
 					#lw = [1 for _ in range(0, self._output_shape,1)]
-					lw = {index: 1 for index, weight in enumerate(range(30, 0, -1))}
+					#lw = {index: 1 for index, weight in enumerate(range(30, 0, -1))}
+					pass
 
 				## build model
+					# Input(shape=(self._input_shape,1),
+					# 	  name=self.NAME + 'Inputs_1'),
 				model = Sequential([
-					Input(shape=(self._input_shape,1),
-						  name=self.NAME + 'Inputs_1'),
+
 					Dense(120, 
 						  activation='relu',
+						  input_shape=(self._input_shape,),
 						  name=self.NAME + 'Dense_1'),
 					Dense(120, 
 						  activation='relu', 
@@ -210,7 +238,7 @@ class PrivTensorWrapper:
 					Dense(120, 
 						  activation='relu', 
 						  name=self.NAME + 'Dense_3'),
-					Dense(self._output_shape, 
+					Dense(self._output_shape,
 						  activation='relu', 
 						  name=self.NAME + 'trainable')
 				])
@@ -230,8 +258,7 @@ class PrivTensorWrapper:
 				# 			  optimizer=optimizer,
 				# 			  loss_weights=lw) # loss='mse'
 				model.compile(loss=self.PT__custom_loss,
-							  optimizer=optimizer,
-							  class_weight=lw) # loss='mse'
+							  optimizer=optimizer) # loss='mse'
 
 				return model
 
@@ -241,51 +268,61 @@ class PrivTensorWrapper:
 		# https://brunch.co.kr/@chris-song/34
 		# https://uos-deep-learning.tistory.com/3
 		# https://stackoverflow.com/questions/49729522/why-is-the-mean-average-percentage-errormape-extremely-high
+		# https://towardsdatascience.com/how-to-create-a-custom-loss-function-keras-3a89156ec69b
 
 		# y_true_f = K.flatten(y_true)
 		# y_pred_f = K.flatten(y_pred)
 		# length = K.intshape(y_true)[1]
+		with self._MAIN_GRAPH.as_default() as g:
+			with self._MAIN_SESS.as_default() as sess:
 
-		if PrivTensorWrapper.GET_WEIGHTED_LOSS:
-			pass
+				tot_sum = int((int(self._output_shape)) * (int(self._output_shape + 1)) / 2)
+				lw = None
+				if PrivTensorWrapper.GET_WEIGHTED_LOSS:
+					lw = [ num / tot_sum for num in range(int(self._output_shape), 0, -1)]
 
-		# M  = (100 / length) * K.abs( 1 - K.sum(y_pred))
-		diff = K.abs((y_true - y_pred) / K.clip(K.abs(y_true),
-												K.epsilon(),
-												None))
-		return 100. * K.mean(diff, axis=-1)       
+				# M  = (100 / length) * K.abs( 1 - K.sum(y_pred))
+				diff = K.abs((y_true - y_pred) / K.clip(K.abs(y_true),
+														K.epsilon(),
+														None))
+
+				diff = diff * lw
+
+				return 100. * K.mean(diff, axis=-1)
 
 
-	def PT__param_return(self, transfer=False):
+	def PT__param_return(self):
 		"""
 		parameter : switch per trainable
 		return : Action - returns callbacks for keras
 		https://3months.tistory.com/424
 		https://snowdeer.github.io/machine-learning/2018/01/09/find-best-model/
 		"""
-		early_stop, check_point, patience, epoch = None, None, None, None
+		with self._MAIN_GRAPH.as_default() as g:
+			with self._MAIN_SESS.as_default() as sess:
 
-		if transfer:
-			patience = int(10)
-			epoch = int(50)
-		else:
-			patience = int(50)
-			epoch = int(100)
-			
-		early_stop = EarlyStopping(monitor='val_loss', 
-									mode='min', 
-									verbose=0, 
-									patience=patience) # baseline = ~~ target value
-		check_point = ModelCheckpoint(monitor='val_loss', 
-									  mode='min',
-									  verbose=0, 
-									  save_best_only=True, 
-									  filepath=self._PT__save_file_location)
-		
-		return early_stop, check_point, epoch
+				early_stop, check_point, patience, epoch = None, None, None, None
+
+				assert self._PT__model_state != None
+				assert self._PT__model_state in PrivTensorWrapper.TRAIN_DICT
+
+				train_Dict = PrivTensorWrapper.TRAIN_DICT[self._PT__model_state]
+
+				early_stop = EarlyStopping(monitor='val_loss',
+											mode='min',
+											verbose=PrivTensorWrapper.VERBOSE,
+											patience=train_Dict['patience'],
+										    baseline=train_Dict['baseline']) # baseline = ~~ target value
+				check_point = ModelCheckpoint(monitor='val_loss',
+											  mode='min',
+											  verbose=PrivTensorWrapper.VERBOSE,
+											  save_best_only=True,
+											  filepath=self._PT__save_file_location)
+
+				return early_stop, check_point, train_Dict['epoch']
 
 
-	#@pushLog(dst_folder='PREDICTER__ML_CLASS')
+	@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def PT__train_model(self, X, Y):
 
 		ensemble_num = PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code]
@@ -295,10 +332,11 @@ class PrivTensorWrapper:
 
 		X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.15)
 
-		X_train = np.array(X_train).reshape(-1, self._input_shape, 1)
-		X_test = np.array(X_test).reshape(-1, self._input_shape, 1)
-		Y_train = np.array(Y_train).reshape(-1, self._output_shape, 1)
-		Y_test = np.array(Y_test).reshape(-1, self._output_shape, 1)
+
+		X_train = np.array(X_train).reshape(-1, self._input_shape)
+		X_test = np.array(X_test).reshape(-1, self._input_shape)
+		Y_train = np.array(Y_train).reshape(-1, self._output_shape)
+		Y_test = np.array(Y_test).reshape(-1, self._output_shape)
 
 
 		with self._MAIN_GRAPH.as_default() as g:
@@ -313,7 +351,7 @@ class PrivTensorWrapper:
 						else:
 							layer.trainable = False
 
-				early_stop, check_point, epoch = self.PT__param_return(transfer=self._PT__ifLoaded)
+				early_stop, check_point, epoch = self.PT__param_return()
 
 				self._MAIN_HISTORY = \
 					self._MAIN_MODEL.fit(X_train, 
@@ -321,7 +359,7 @@ class PrivTensorWrapper:
 										epochs=epoch,
 										batch_size=PrivTensorWrapper.NUM_BATCH,
 										shuffle=True,
-										verbose=0,
+										verbose=PrivTensorWrapper.VERBOSE,
 										validation_data=(X_test, Y_test),
 										callbacks=[early_stop,check_point])
 				## calculate state change
@@ -537,6 +575,8 @@ class NestedGraph:
 		if len(NestedGraph.LOOKUP[day][stock_code])  \
 			 < self.MAX_NUM_OF_ENSEM:
 				NestedGraph.LOOKUP[day][stock_code].append(self.NG__allocater(stock_code=stock_code))
+
+		pass
 
 		## allocate data class
 		if day not in NestedGraph.LOOKUP_data:
