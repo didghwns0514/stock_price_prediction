@@ -87,6 +87,7 @@ class PrivTensorWrapper:
 
 		## load/build model
 		self.PT__handle_mode()
+		pass
 
 	
 	def PT__calc_state(self):
@@ -162,11 +163,17 @@ class PrivTensorWrapper:
 				with self._MAIN_SESS.as_default() as sess:
 					self._PT__ifLoaded = True
 					self._MAIN_MODEL = load_model(self._PT__save_file_location)
+					print(f'1a'*10)
+					self._MAIN_MODEL.summary()
+					print(f'1b' * 10)
 
 		else:
 			with self._MAIN_GRAPH.as_default() as g:
 				with self._MAIN_SESS.as_default() as sess:
 					self._MAIN_MODEL = self.PT__build_model()
+					print(f'2a' * 10)
+					self._MAIN_MODEL.summary()
+					print(f'2b' * 10)
 
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -178,20 +185,24 @@ class PrivTensorWrapper:
 						- trainable layer for transfer learning named!
 							=> this changes learning rate in the optimizer
 		"""
+
 		with self._MAIN_GRAPH.as_default() as g:
 			with self._MAIN_SESS.as_default() as sess:
 				
 				lw = None
 				if PrivTensorWrapper.GET_WEIGHTED_LOSS: # diffrentiated loss
-					lw = list(range(self._output_shape, 0, -1))
+					#lw = list(range(self._output_shape, 0, -1))
+					lw = {index:weight for index, weight in enumerate(range(30, 0, -1))}
 				else:
-					lw = [1 for _ in range(0, self._output_shape,1)]
+					#lw = [1 for _ in range(0, self._output_shape,1)]
+					lw = {index: 1 for index, weight in enumerate(range(30, 0, -1))}
 
 				## build model
 				model = Sequential([
+					Input(shape=(self._input_shape,1),
+						  name=self.NAME + 'Inputs_1'),
 					Dense(120, 
-						  activation='relu', 
-						  input_shape=[self._input_shape], 
+						  activation='relu',
 						  name=self.NAME + 'Dense_1'),
 					Dense(120, 
 						  activation='relu', 
@@ -214,9 +225,13 @@ class PrivTensorWrapper:
 				# model.compile(loss=tf.keras.losses.MeanAbsoluteP, 
 				#               optimizer=optimizer,
 				#               loss_weights=lw) # loss='mse'
-				model.compile(loss=self.PT__custom_loss, 
+
+				# model.compile(loss=self.PT__custom_loss,
+				# 			  optimizer=optimizer,
+				# 			  loss_weights=lw) # loss='mse'
+				model.compile(loss=self.PT__custom_loss,
 							  optimizer=optimizer,
-							  loss_weights=lw) # loss='mse'
+							  class_weight=lw) # loss='mse'
 
 				return model
 
@@ -230,6 +245,9 @@ class PrivTensorWrapper:
 		# y_true_f = K.flatten(y_true)
 		# y_pred_f = K.flatten(y_pred)
 		# length = K.intshape(y_true)[1]
+
+		if PrivTensorWrapper.GET_WEIGHTED_LOSS:
+			pass
 
 		# M  = (100 / length) * K.abs( 1 - K.sum(y_pred))
 		diff = K.abs((y_true - y_pred) / K.clip(K.abs(y_true),
@@ -267,7 +285,7 @@ class PrivTensorWrapper:
 		return early_stop, check_point, epoch
 
 
-	@pushLog(dst_folder='PREDICTER__ML_CLASS')
+	#@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def PT__train_model(self, X, Y):
 
 		ensemble_num = PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code]
@@ -276,6 +294,12 @@ class PrivTensorWrapper:
 				memo=f'ensemble_num : {ensemble_num}')
 
 		X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.15)
+
+		X_train = np.array(X_train).reshape(-1, self._input_shape, 1)
+		X_test = np.array(X_test).reshape(-1, self._input_shape, 1)
+		Y_train = np.array(Y_train).reshape(-1, self._output_shape, 1)
+		Y_test = np.array(Y_test).reshape(-1, self._output_shape, 1)
+
 
 		with self._MAIN_GRAPH.as_default() as g:
 			with self._MAIN_SESS.as_default() as sess:
@@ -439,7 +463,7 @@ class NestedGraph:
 		"""
 
 		:param stock_code: stock_code
-		:return: trains the graphs
+		:return: Action - trains the graphs // if data was preped, returns according booleans
 		"""
 
 		for day in NestedGraph.LOOKUP:
@@ -450,7 +474,11 @@ class NestedGraph:
 			X, Y = data_class.DATA__get_container()
 
 			for stock_class in NestedGraph.LOOKUP[day][stock_code]:
-				stock_class.PT__train_model(X=X, Y=Y)
+				if X and Y : # non empty containers!
+					stock_class.PT__train_model(X=X, Y=Y)
+					return True
+				else:
+					return False
 
 
 
@@ -544,12 +572,13 @@ class NestedGraph:
 			data_class.DATA__dollar_update(new_data=dollar_hashData)
 
 
-	def NG__dataCalculate(self, stock_code, _day, article_hash):
+	def NG__dataCalculate(self, stock_code, _day, article_hash, article_check):
 		"""
 
 		:param stock_code: stock_code
 		:param _day: original dat / wo rectified
 		:param article_pickle: article pickle
+		:param article_check: either to check article existance or not
 		:return:
 		"""
 		# @ rect day
@@ -562,6 +591,11 @@ class NestedGraph:
 		key__stkData = list(data_class._stk_dataset.keys())
 		key__X_data = list(data_class._X_data.keys())
 
+		## debuggers
+		debug__data_skip = 0
+		debug__article = 0
+		debug__passed = 0
+
 		## update needed datetime as list
 		update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
 		for i in range(self.minute_length, len(update_needed)-self.predict_length, 1 ):
@@ -571,13 +605,19 @@ class NestedGraph:
 
 			## skip existing datetime str if exists
 			if data_class.DATA__check_existance(update_needed[i]):
+				debug__data_skip += 1
 				continue
 
 			rtn_article = self.NG__checkArticle(stock_code=stock_code,
 												specific_time=update_needed[i],
 												article_pickle=article_hash)
-			if rtn_article == None: # no article exists
-				continue
+			if rtn_article == None : # no article exists
+				if article_check :
+					debug__article += 1
+					continue
+				else:
+					# get dummy article
+					rtn_article = self.NG__makeDummyArticle()
 			data_class.DATA__article_update(new_data=rtn_article,
 											_day=update_needed[i])
 
@@ -589,17 +629,22 @@ class NestedGraph:
 			rtn_kospi = data_class.DATA__make_sub_set(subset_type='kospi')
 			rtn_dollar = data_class.DATA__make_sub_set(subset_type='dollar')
 
+			debug__passed += 1
 
 			## contain values
 			tmp_totContainer.extend(rtn_X)
 			tmp_totContainer.extend(rtn_X_decoded)
 			tmp_totContainer.extend(rtn_kospi)
 			tmp_totContainer.extend(rtn_dollar)
+			tmp_totContainer.extend([rtn_article])
 
 			## append data
 			data_class.DATA__wrap_container(x_container=tmp_totContainer,
 											y_container=rtn_Y,
 											datetime_str=update_needed[i])
+		pushLog(dst_folder='PREDICTER__ML_CLASS',
+				lv='INFO', module='NG__dataCalculate', exception=True,
+				memo=f'stock_code : {stock_code} \ndebug__passed : {debug__passed}, debug__article : {debug__article}, debug__data_skip : {debug__data_skip}')
 
 	def NG__get_prediction_set(self, stock_code, _day,article_hash):
 		"""
@@ -639,6 +684,7 @@ class NestedGraph:
 		tmp_totContainer.extend(rtn_X_decoded)
 		tmp_totContainer.extend(rtn_kospi)
 		tmp_totContainer.extend(rtn_dollar)
+		tmp_totContainer.extend([rtn_article])
 
 		return tmp_totContainer
 
@@ -659,7 +705,18 @@ class NestedGraph:
 		rtn = self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
 																article_pickle=article_pickle,
 																stock_code=stock_code,
-																specific_time=specific_time)
+																_specific_time=specific_time)
+
+		return rtn
+
+
+	def NG__makeDummyArticle(self):
+		"""
+
+		:return: incase dummy return needed, process it and return.
+		"""
+
+		rtn = self.AGENT_SUB__encoder.FUNC_SIMPLE__dummy_calc()
 
 		return rtn
 
@@ -747,7 +804,7 @@ class Dataset:
 		:return: create X, Y data partials from current stcok data
 		"""
 
-		assert len(date_list_data) * 2 == check_data_int
+		assert len(date_list_data) == check_data_int
 		assert len(date_list_ans) == check_answer_int
 
 		standard_first_val = self._stk_dataset[date_list_data[0]]['price']
@@ -793,7 +850,7 @@ class Dataset:
 			mean = sum(price) / len(price)
 			latest_price = price[-1]
 
-			return (latest_price - mean) / mean
+			return [(latest_price - mean) / mean]
 
 		if subset_type == 'kospi':
 			return return_market_status(Dataset._kospi_dataset)
@@ -809,10 +866,13 @@ class Dataset:
 		:param datetime_str: specific datetime to check
 		:return: if the datetime exists, returns False / else True
 		"""
+		tmp_bool = False
 		if datetime_str in self._X_data:
-			return False
+			tmp_bool = True
 		else:
-			return True
+			tmp_bool = False
+
+		return tmp_bool
 
 
 	def DATA__stk_update(self, new_data:dict):

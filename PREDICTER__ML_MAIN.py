@@ -51,9 +51,12 @@ class Stock_prediction:
 	WATCH_LIST = ["226490", "261250" ]#, "252670"]
 	# KODEX 코스피, KODEX 미국달러선물 레버리지, KODEX 200선물 인버스 2X
 
-	LENGTH__MINUTE_DATA = int((60 * 4) * 2) # 3 data used, stock / kospi / dollar-mearchant
+	## article strict match
+	ARTICLE_CHECK = False
+
+	LENGTH__MINUTE_DATA = int((60 * 4)) # 3 data used, stock / kospi / dollar-mearchant
 	LENGTH__NEWS_ENCODED = int(1)
-	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 1) + int(1*2) \
+	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 2) + int(1*2) \
 						+ int(LENGTH__NEWS_ENCODED) \
 						+ int(1200)
 	LENGTH__ALL_OUTPUT = int(30)
@@ -111,18 +114,20 @@ class Stock_prediction:
 
 		self.nestgraph.NG__dataCalculate(stock_code=stock_code,
 										 _day=_today,
-										 article_hash=hash_article)
+										 article_hash=hash_article,
+										 article_check=Stock_prediction.ARTICLE_CHECK)
 
-		self.nestgraph.NG__training_wrapper(stock_code=stock_code)
+		bool_trainable = self.nestgraph.NG__training_wrapper(stock_code=stock_code)
 
-		rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
-																  _day=_today,
-																  article_hash=hash_article)
+		if bool_trainable:
+			rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
+																	  _day=_today,
+																	  article_hash=hash_article)
+			rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
+																  X_data=rtn_dataForPredic)
+			return rtn_predicted
 
-		rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
-															  X_data=rtn_dataForPredic)
-
-		input('???check!')
+		pass
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
@@ -308,12 +313,13 @@ def Session():
 						_type='data',
 						)
 
-			f_ans = sweep_day(df=main_Stk_df,
-						stock_code=stock_code,
-						start_date=tmp_dt_start__obj,
-						end_date=tmp_dt_end__obj,
-						_type='answer',
-						)
+			# f_ans = sweep_day(df=main_Stk_df,
+			# 			stock_code=stock_code,
+			# 			start_date=tmp_dt_start__obj,
+			# 			end_date=tmp_dt_end__obj,
+			# 			_type='answer',
+			# 			)
+
 			f_data = sweep_day(df=main_Stk_df,
 						stock_code=stock_code,
 						start_date=tmp_dt_start__obj,
@@ -354,7 +360,12 @@ def Session():
 					################################################
 					# prediction_agent.nestgraph.NG__wrapper(stock_code=stock_code,
 					# 										  _day=t1)
-					prediction_agent._stock_op_wrapper()
+					prediction_agent._stock_op_wrapper(stock_code=stock_code,
+													   hash_stock=hash_data,
+													   hash_kospi=hash_kospi,
+													   hash_dollar=hash_dollar,
+													   _today=t1,
+													   hash_article=pickle_article)
 
 
 					## add success log

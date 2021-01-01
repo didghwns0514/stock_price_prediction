@@ -36,11 +36,11 @@ class Autoencoder:
 
 		pass
 
-	def FUNC_SIMPLE__read_article(self, specific_time, stock_code,
+	def FUNC_SIMPLE__read_article(self, _specific_time, stock_code,
 								  article_loc=None, article_pickle=None,hours_back=int(13)):
 		"""
 
-		:param specific_time: specific time to parse 4 days
+		:param _specific_time: specific time to parse 4 days
 		:param stock_code: stock code to search through
 		:param article_loc: pickle file location
 		:param article_pickle: if input can be itself hash of article, the hash
@@ -57,7 +57,7 @@ class Autoencoder:
 		def search_name(pickled, code):
 			target_name = None
 			for stock_names in pickled:  # first hash is stock name
-				tmp_stock_code = pickle_file[stock_names][0]
+				tmp_stock_code = article_pickle[stock_names][0]
 				if tmp_stock_code == code:
 					target_name = stock_names
 					break
@@ -68,6 +68,8 @@ class Autoencoder:
 
 		rtn = None
 		srch_name = None
+		specific_time = FUNC_to_dtObject(_specific_time)
+
 		if article_loc != None and article_pickle == None:
 			with open(article_loc, 'wb') as file:
 				pickle_file = pickle.load(file)
@@ -76,6 +78,7 @@ class Autoencoder:
 									  stock_name=srch_name,
 									  pickle_data=pickle_file)
 				rtn = self.FUNC_SIMPLE__calculate(tmp_rtn)
+
 		elif article_loc == None and article_pickle != None:
 			srch_name = search_name(pickled=article_pickle, code=stock_code)
 			tmp_rtn = parse_four_days(specific_time=specific_time,
@@ -93,8 +96,14 @@ class Autoencoder:
 		:param : rtn_list : input from FUNC_SIMPLE__read_article
 		:return: None if None type or nothing in the list
 		"""
-		if rtn_list != None or len(rtn_list) == 0:
+		if rtn_list == None:
 			return None
+		else:
+			if isinstance(rtn_list, list):
+				if len(rtn_list) == 0:
+					return None
+			else:
+				return None
 
 		tmp_filtered = np.asarray( [ time * score for time, score in rtn_list] )
 		mean, std = norm.fit(tmp_filtered)
@@ -103,6 +112,16 @@ class Autoencoder:
 			mean = 0
 
 		return mean
+
+
+	def FUNC_SIMPLE__dummy_calc(self):
+		"""
+
+		:return: for dummy article return with None, create dummy variable
+		"""
+
+		return 0
+
 
 	
 def zero_padding(list_obj):
@@ -160,7 +179,7 @@ def parse_four_days(specific_time, stock_name, pickle_data,
 				tmp_time_delta = time_now__obj - article_time__obj
 				tmp_duration_in_hour = return_exp( tmp_time_delta.total_seconds() / (60*60), days = n_days )
 				tmp_result_list.append( [tmp_duration_in_hour, (tmp_article_list[i][1] + 1)*0.5 ] )
-				# 점수 10~20사이로 세팅, 10이 lowest, 20가 maximum socre
+				# 점수 0~1사이로 세팅, 10이 lowest, 20가 maximum socre
 
 	if judge_zero_article_bool == True:
 		if len(tmp_result_list) == 0:

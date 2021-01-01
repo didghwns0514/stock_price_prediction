@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from functools import wraps
 
 """
 https://towardsdatascience.com/using-wrappers-to-log-in-python-ccffe4c46b54
@@ -89,7 +90,8 @@ class _Log(object): # old styple
         else:
             out_str += "\n" + f'error messag : {str(error_msg)}'
         
-        _Log.DICT_SUB_LOGGER[targ_dir].error(out_str, exc_info=bool( True * error_msg))
+        #_Log.DICT_SUB_LOGGER[targ_dir].error(out_str, exc_info=bool( True * error_msg))
+        _Log.DICT_SUB_LOGGER[targ_dir].error(out_str)
         
 
     
@@ -151,6 +153,7 @@ def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, m
             # print(f'in wrap1')
             # print(f'in wrap1 function : {function}')
 
+            @wraps(function)
             def wrap2(*args, **kwargs):
                 try:
                     #print('path_1')
