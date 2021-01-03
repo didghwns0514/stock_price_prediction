@@ -476,7 +476,7 @@ class NestedGraph:
 
 				# delete day
 				del NestedGraph.LOOKUP_data[day]
-				
+
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def NG__prediction_wrapper(self, stock_code, X_data):
@@ -573,7 +573,7 @@ class NestedGraph:
 			NestedGraph.LOOKUP[day][stock_code] = []
 		
 		if len(NestedGraph.LOOKUP[day][stock_code])  \
-			 < self.MAX_NUM_OF_ENSEM:
+			 < NestedGraph.MAX_NUM_OF_ENSEM:
 				NestedGraph.LOOKUP[day][stock_code].append(self.NG__allocater(stock_code=stock_code))
 
 		pass
@@ -686,6 +686,7 @@ class NestedGraph:
 				lv='INFO', module='NG__dataCalculate', exception=True,
 				memo=f'stock_code : {stock_code} \ndebug__passed : {debug__passed}, debug__article : {debug__article}, debug__data_skip : {debug__data_skip}')
 
+
 	def NG__get_prediction_set(self, stock_code, _day,article_hash):
 		"""
 
@@ -702,6 +703,9 @@ class NestedGraph:
 		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
 		key__stkData = list(data_class._stk_dataset.keys())
 
+		## check _day existance in the dataset hash
+		assert FUNC_dtSwtich(_day) in data_class._stk_dataset
+
 		tmp_totContainer = []
 
 		rtn_article = self.NG__checkArticle(stock_code=stock_code,
@@ -713,8 +717,9 @@ class NestedGraph:
 		## update needed datetime as list
 		update_needed = FUNC_dtLIST_str_sort(key__stkData)
 
-		rtn_X = data_class.DATA__get_prediction(update_needed[len(update_needed) - self.minute_length:],
-													   check_data_int=self.minute_length)
+		rtn_X = data_class.DATA__get_prediction( \
+			               update_needed[len(update_needed) - self.minute_length:],
+						   check_data_int=self.minute_length)
 		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
 		rtn_kospi = data_class.DATA__make_sub_set(subset_type='kospi')
 		rtn_dollar = data_class.DATA__make_sub_set(subset_type='dollar')
