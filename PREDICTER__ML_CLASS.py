@@ -671,6 +671,9 @@ class NestedGraph:
 
 			debug__passed += 1
 
+			## add date into the set
+			data_class.DATA__add_dateToSet(update_needed[i])
+
 			## contain values
 			tmp_totContainer.extend(rtn_X)
 			tmp_totContainer.extend(rtn_X_decoded)
@@ -687,7 +690,7 @@ class NestedGraph:
 				memo=f'stock_code : {stock_code} \ndebug__passed : {debug__passed}, debug__article : {debug__article}, debug__data_skip : {debug__data_skip}')
 
 
-	def NG__get_prediction_set(self, stock_code, _day,article_hash):
+	def NG__get_prediction_set(self, stock_code, _day, article_hash):
 		"""
 
 		:param stock_code: stock_code
@@ -704,7 +707,8 @@ class NestedGraph:
 		key__stkData = list(data_class._stk_dataset.keys())
 
 		## check _day existance in the dataset hash
-		assert FUNC_dtSwtich(_day) in data_class._stk_dataset
+		targ_date = FUNC_dtSwtich(_day)
+		assert targ_date in data_class._stk_dataset
 
 		tmp_totContainer = []
 
@@ -781,6 +785,8 @@ class Dataset:
 
 		self._ratio_dataset = {} # start data[0] record
 
+		self._datetime_list = list()
+
 		self._X_data = {}
 		self._Y_data = {}
 
@@ -806,6 +812,14 @@ class Dataset:
 		assert len(rtn_list_data) == len(date_list_data) * 2
 
 		return  rtn_list_data
+
+
+	def DATA__add_dateToSet(self, datetime_item):
+		"""
+
+		:return: Action - add datetime object into the list
+		"""
+		self._datetime_list.append(datetime_item)
 
 
 

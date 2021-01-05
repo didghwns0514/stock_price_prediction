@@ -131,12 +131,15 @@ class Stock_prediction:
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
+
 		self._checkStock(stock_code=stock_code,
 						   hash_stock=hash_stock,
 						   hash_kospi=hash_kospi,
 						   hash_dollar=hash_dollar,
 						   _today=_today,
 						   hash_article=hash_article)
+
+
 
 
 
@@ -196,8 +199,8 @@ def Session():
 
 		assert _type in ['data', 'answer']
 
-		tmp_dt_start = start_date
-		tmp_dt_sweep = start_date
+		tmp_dt_start = copy.deepcopy(start_date)
+		tmp_dt_sweep = copy.deepcopy(start_date)
 		tmp_dt_end = end_date
 		return_hash = None
 
@@ -214,10 +217,11 @@ def Session():
 				return_hash = SQ__parse_sqData(ori_df_whole=df,
 											   dt_now__obj=tmp_dt_sweep,
 											   hours_duration_back=hours_back)
-			## right now
-			tmp_dt_sweep += datetime.timedelta(minutes=min_dur)
 
 			yield return_hash, tmp_dt_sweep
+
+			## right now -> update after yield keyword
+			tmp_dt_sweep += datetime.timedelta(minutes=min_dur)
 
 		print(f'ended parsing stock_code : {stock_code}')
 
@@ -360,6 +364,12 @@ def Session():
 					################################################
 					# prediction_agent.nestgraph.NG__wrapper(stock_code=stock_code,
 					# 										  _day=t1)
+
+					if SQ_check_opDay(t1):
+						print(f'weekday, proceeding...!')
+					else:
+						print(f'weekend, skipping...!')
+						break
 					prediction_agent._stock_op_wrapper(stock_code=stock_code,
 													   hash_stock=hash_data,
 													   hash_kospi=hash_kospi,
