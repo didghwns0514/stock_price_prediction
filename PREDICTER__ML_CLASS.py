@@ -78,6 +78,9 @@ class PrivTensorWrapper:
 		if stock_code not in PrivTensorWrapper.PT_CREATION_DIC_CNT:
 			PrivTensorWrapper.PT_CREATION_DIC_CNT[stock_code] = 0
 		PrivTensorWrapper.PT_CREATION_DIC_CNT[stock_code] += 1
+		"""
+		PT_CREATION_DIC_CNT -> starts from 1
+		"""
 
 		## configuration per instance
 		#----------------------------------------
@@ -187,11 +190,14 @@ class PrivTensorWrapper:
 
 		## get active model
 		if os.path.isfile(self._PT__save_file_location) and \
-			PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code]==0:
+			PrivTensorWrapper.PT_CREATION_DIC_CNT[self._PT__stock_code]==1:
 			with self._MAIN_GRAPH.as_default() as g:
 				with self._MAIN_SESS.as_default() as sess:
 					self._PT__ifLoaded = True
-					self._MAIN_MODEL = load_model(self._PT__save_file_location)
+					#self._MAIN_MODEL = load_model(self._PT__save_file_location)
+					self._MAIN_MODEL = load_model(self._PT__save_file_location,
+												  custom_objects={'PT__custom_loss':self.PT__custom_loss})
+					print(f'model has been loaded!')
 					self._MAIN_MODEL.summary()
 
 
@@ -199,6 +205,7 @@ class PrivTensorWrapper:
 			with self._MAIN_GRAPH.as_default() as g:
 				with self._MAIN_SESS.as_default() as sess:
 					self._MAIN_MODEL = self.PT__build_model()
+					print(f'model has been built!')
 					self._MAIN_MODEL.summary()
 
 
