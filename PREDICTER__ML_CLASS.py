@@ -110,7 +110,9 @@ class PrivTensorWrapper:
 
 		## load/build model
 		self.PT__handle_mode()
-		pass
+
+		## calc model state
+		self.PT__calc_state()
 
 	
 	def PT__calc_state(self):
@@ -478,7 +480,7 @@ class NestedGraph:
 				del NestedGraph.LOOKUP_data[day]
 
 
-	@pushLog(dst_folder='PREDICTER__ML_CLASS')
+	#@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def NG__prediction_wrapper(self, stock_code, X_data):
 		"""
 		param : stock_code

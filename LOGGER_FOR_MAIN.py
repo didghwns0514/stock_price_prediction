@@ -2,6 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from functools import wraps
+import traceback
 
 """
 https://towardsdatascience.com/using-wrappers-to-log-in-python-ccffe4c46b54
@@ -165,6 +166,8 @@ def pushLog(dst_folder, lv='', module='', exception=False, exception_msg=None, m
 
                 except Exception as e:
                     _Log.write_error(dest=dst_folder,lv='ERROR',module=function.__name__, error_msg=e)
+                    traceback.print_exc()
+                    raise RuntimeError('error found!')
 
             return wrap2
         return wrap1    
