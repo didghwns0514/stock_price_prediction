@@ -621,6 +621,23 @@ class NestedGraph:
 			data_class.DATA__dollar_update(new_data=dollar_hashData)
 
 
+	def NG__check_article_first(self, stock_code, _day, article_hash, article_check):
+		"""
+
+		:param stock_code: stock_code
+		:param _day: original dat / wo rectified
+		:param article_pickle: article pickle
+		:param article_check: either to check article existance or not
+		:return:
+		"""
+		# @ rect day
+		day = FUNC_dtRect(_day, "00:00")
+		
+		여기 고쳐야함
+		
+		## update needed datetime as list
+		update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
+
 	def NG__dataCalculate(self, stock_code, _day, article_hash, article_check):
 		"""
 
@@ -725,7 +742,7 @@ class NestedGraph:
 											specific_time=_day,
 											article_pickle=article_hash)
 		if rtn_article == None:  # no article exists
-			return
+			return None
 
 		## update needed datetime as list
 		update_needed = FUNC_dtLIST_str_sort(key__stkData)

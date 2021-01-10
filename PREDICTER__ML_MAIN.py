@@ -120,14 +120,20 @@ class Stock_prediction:
 		bool_trainable = self.nestgraph.NG__training_wrapper(stock_code=stock_code)
 
 		if bool_trainable:
+
 			rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
 																	  _day=_today,
 																	  article_hash=hash_article)
-			rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
-																  X_data=rtn_dataForPredic)
-			return rtn_predicted
+			if rtn_dataForPredic != None:
+				rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
+																	  X_data=rtn_dataForPredic)
+				return rtn_predicted
 
-		pass
+			else:
+				print(f'rtn_dataForPredic if None : {rtn_dataForPredic}')
+
+		else:
+			print(f'bool_trainable is false : {bool_trainable}')
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
