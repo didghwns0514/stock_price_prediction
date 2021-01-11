@@ -105,35 +105,43 @@ class Stock_prediction:
 		:param _today: datetime obj of date only
 		:param hash_answer: 
 		"""
-		self.nestgraph.NG__wrapper(stock_code=stock_code,
-								   _day=_today,
-								   stk_hashData=hash_stock,
-								   kospi_hashData=hash_kospi,
-								   dollar_hashData=hash_dollar
-								   )
+		if self.nestgraph.NG__check_article_first(stock_code=stock_code,
+												  _day=_today,
+												  article_hash=hash_article,
+												  article_check=Stock_prediction.ARTICLE_CHECK):
 
-		self.nestgraph.NG__dataCalculate(stock_code=stock_code,
-										 _day=_today,
-										 article_hash=hash_article,
-										 article_check=Stock_prediction.ARTICLE_CHECK)
+			self.nestgraph.NG__wrapper(stock_code=stock_code,
+									   _day=_today,
+									   stk_hashData=hash_stock,
+									   kospi_hashData=hash_kospi,
+									   dollar_hashData=hash_dollar
+									   )
 
-		bool_trainable = self.nestgraph.NG__training_wrapper(stock_code=stock_code)
+			self.nestgraph.NG__dataCalculate(stock_code=stock_code,
+											 _day=_today,
+											 article_hash=hash_article,
+											 article_check=Stock_prediction.ARTICLE_CHECK)
 
-		if bool_trainable:
+			bool_trainable = self.nestgraph.NG__training_wrapper(stock_code=stock_code)
 
-			rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
-																	  _day=_today,
-																	  article_hash=hash_article)
-			if rtn_dataForPredic != None:
-				rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
-																	  X_data=rtn_dataForPredic)
-				return rtn_predicted
+			if bool_trainable:
+
+				rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
+																		  _day=_today,
+																		  article_hash=hash_article)
+				if rtn_dataForPredic != None:
+					rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
+																		  X_data=rtn_dataForPredic)
+					return rtn_predicted
+
+				else:
+					print(f'rtn_dataForPredic if None : {rtn_dataForPredic}')
 
 			else:
-				print(f'rtn_dataForPredic if None : {rtn_dataForPredic}')
+				print(f'bool_trainable is false : {bool_trainable}')
 
 		else:
-			print(f'bool_trainable is false : {bool_trainable}')
+			maybe a class as a return and do a type check here?
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
