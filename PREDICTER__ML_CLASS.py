@@ -451,17 +451,29 @@ class NestedGraph:
 		:param _today_date : date value of datetime object
 		return : Action - clears keras graphs
 		"""
+
+		del_list__day = []
 		for day in NestedGraph.LOOKUP:
+
 			if FUNC_dtRect(_today_date, "00:00") != day:
+				del_list__day.append(day)
+
+				del_list__stkcode = []
 				for stock_code in  NestedGraph.LOOKUP[day]:
+					del_list__stkcode.append(stock_code)
+
+					# clear session / graph in keras
 					for _class in NestedGraph.LOOKUP[day][stock_code]:
-						_class.PT__clear() # clear session / graph in keras
+						_class.PT__clear()
 
-					# clear stock_codes in day key
-					del NestedGraph.LOOKUP[day][stock_code]
+				# clear stock_codes in day key
+				for d_stock_code in del_list__stkcode:
+					del NestedGraph.LOOKUP[day][d_stock_code]
 
-				# clear day in the lookup table
-				del NestedGraph.LOOKUP[day]
+		# clear day in the lookup table
+		for d_day in del_list__day:
+				del NestedGraph.LOOKUP[d_day]
+
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def NG__clear_data(self, _today_date):
@@ -471,20 +483,23 @@ class NestedGraph:
 		return : Action - clear data savings for training
 				 var :: self.LOOKUP_data
 		"""
+		del_list__day = []
 		for day in NestedGraph.LOOKUP_data:
+
 			if FUNC_dtRect(_today_date, "00:00") != day:
+				del_list__day.append(day)
+
+				del_list__stkcode = []
 				for stock_code in NestedGraph.LOOKUP_data[day]:
-					for datset in NestedGraph.LOOKUP_data[day][stock_code]:
-						# -> dataset here as class
+					del_list__stkcode.append(stock_code)
 
-						# delete dataset
-						del NestedGraph.LOOKUP_data[day][stock_code][datset]
+				# delete stock code and dataset inside
+				for d_stock_code in del_list__stkcode:
+					del NestedGraph.LOOKUP_data[day][d_stock_code]
 
-					# delete stock code
-					del NestedGraph.LOOKUP_data[day][stock_code]
-
-				# delete day
-				del NestedGraph.LOOKUP_data[day]
+		# delete day
+		for d_day in del_list__day:
+				del NestedGraph.LOOKUP_data[d_day]
 
 
 	#@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -580,12 +595,17 @@ class NestedGraph:
 		
 		if stock_code not in NestedGraph.LOOKUP[day]:
 			NestedGraph.LOOKUP[day][stock_code] = []
-		
-		if len(NestedGraph.LOOKUP[day][stock_code])  \
-			 < NestedGraph.MAX_NUM_OF_ENSEM:
-				NestedGraph.LOOKUP[day][stock_code].append(self.NG__allocater(stock_code=stock_code))
 
-		pass
+		## make keras graph
+		for trys in range(NestedGraph.MAX_NUM_OF_ENSEM):
+			prd_made = len(NestedGraph.LOOKUP[day][stock_code])
+			print(f'prd_made : {prd_made}')
+			if  prd_made < NestedGraph.MAX_NUM_OF_ENSEM:
+				NestedGraph.LOOKUP[day][stock_code].append(self.NG__allocater(stock_code=stock_code))
+				print(f'passed prep!')
+			else:
+				pass
+				print(f'skipped prep!')
 
 		## allocate data class
 		if day not in NestedGraph.LOOKUP_data:

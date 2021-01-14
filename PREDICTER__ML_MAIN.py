@@ -106,10 +106,11 @@ class Stock_prediction:
 		:param _today: datetime obj of date only
 		:param hash_answer: 
 		"""
-		if self.nestgraph.NG__check_article_first(stock_code=stock_code,
-												  _day=_today,
-												  article_hash=hash_article,
-												  article_check=Stock_prediction.ARTICLE_CHECK):
+		artc_rtn = self.nestgraph.NG__check_article_first(stock_code=stock_code,
+											   _day=_today,
+											   article_hash=hash_article,
+											   article_check=Stock_prediction.ARTICLE_CHECK)
+		if artc_rtn:
 
 			self.nestgraph.NG__wrapper(stock_code=stock_code,
 									   _day=_today,
@@ -144,6 +145,7 @@ class Stock_prediction:
 				return ['Not-traininable', None]
 
 		else:
+			print(f'check article is false : {artc_rtn}')
 			return ['No-article', None]
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
@@ -321,6 +323,11 @@ def Session():
 			tmp_dt_start__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"9:00")
 			tmp_dt_end__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"15:30")
 
+			print('\n'*2)
+			print(f'=#'*20)
+			print(f'tmp_dt_start__obj : {tmp_dt_start__obj}')
+			print(f'tmp_dt_end__obj : {tmp_dt_end__obj}')
+
 			f_kospi = sweep_day(df=df__kospi,
 						stock_code=str(226490),
 						start_date=tmp_dt_start__obj,
@@ -398,8 +405,12 @@ def Session():
 					if ReturnWrap._type(_type='PREDICTER_TEST', rtn_val=rtn) == 'Predictable':
 						pass
 
-					else:
+					else: # unpredictable
 						break
+
+					log, data = rtn ## data 분석 proceed -> plot graph
+
+
 
 
 					## add success log
