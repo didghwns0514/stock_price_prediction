@@ -37,6 +37,7 @@ import sub_function_configuration as SUB_F
 import PREDICTER__ML_CLASS as PCLS
 from LOGGER_FOR_MAIN import pushLog
 from DATA_OPERATION import *
+from RETURN_WRAPPER import ReturnWrap
 
 
 
@@ -132,21 +133,23 @@ class Stock_prediction:
 				if rtn_dataForPredic != None:
 					rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
 																		  X_data=rtn_dataForPredic)
-					return rtn_predicted
+					return ['Predictable', rtn_predicted]
 
 				else:
 					print(f'rtn_dataForPredic if None : {rtn_dataForPredic}')
+					return ['No-prediction_set', None]
 
 			else:
 				print(f'bool_trainable is false : {bool_trainable}')
+				return ['Not-traininable', None]
 
 		else:
-			maybe a class as a return and do a type check here?
+			return ['No-article', None]
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
 
-		self._checkStock(stock_code=stock_code,
+		rtn = self._checkStock(stock_code=stock_code,
 						   hash_stock=hash_stock,
 						   hash_kospi=hash_kospi,
 						   hash_dollar=hash_dollar,
@@ -154,6 +157,7 @@ class Stock_prediction:
 						   hash_article=hash_article)
 
 
+		return rtn
 
 
 
@@ -384,12 +388,18 @@ def Session():
 					else:
 						print(f'weekend, skipping...!')
 						break
-					prediction_agent._stock_op_wrapper(stock_code=stock_code,
+					rtn = prediction_agent._stock_op_wrapper(stock_code=stock_code,
 													   hash_stock=hash_data,
 													   hash_kospi=hash_kospi,
 													   hash_dollar=hash_dollar,
 													   _today=t1,
 													   hash_article=pickle_article)
+
+					if ReturnWrap._type(_type='PREDICTER_TEST', rtn_val=rtn) == 'Predictable':
+						pass
+
+					else:
+						break
 
 
 					## add success log
