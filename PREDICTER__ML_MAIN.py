@@ -372,23 +372,6 @@ def Session():
 								memo=f'time stamp different by generators')
 						break
 
-					# rtn_article = prediction_agent._checkArticle(stock_code=stock_code,
-					# 								specific_time=t1,
-					# 								article_pickle=pickle_article)
-					# if not rtn_article:
-					# 	## add day -> no article exsists!
-					# 	mainStk_dt_start__obj += datetime.timedelta(days=1)
-					# 	pushLog(dst_folder='PREDICTER__ML_MAIN',
-					# 	        lv='ERROR',
-					# 			module='Session',
-					# 			exception=True,
-					# 			memo=f'no article exists in the date ~ net 5days before')
-					# 	break
-					
-					## noramlly passed all exceptions
-					################################################
-					# prediction_agent.nestgraph.NG__wrapper(stock_code=stock_code,
-					# 										  _day=t1)
 
 					if SQ_check_opDay(t1):
 						print(f'weekday, proceeding...!')
@@ -403,7 +386,7 @@ def Session():
 													   hash_article=pickle_article)
 
 					if ReturnWrap._type(_type='PREDICTER_TEST', rtn_val=rtn) == 'Predictable':
-						pass
+						print(f'predictable!')
 
 					else: # unpredictable
 						break

@@ -4,7 +4,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '-1' # turn off gpu setting
 
 
 import numpy as np
-import collections
+from collections import deque as dq
 
 
 # @ tensorflow
@@ -42,6 +42,7 @@ class PrivTensorWrapper:
 	NAME = 'PrivTensorWrapper_'
 	GET_WEIGHTED_LOSS = True
 	NUM_BATCH = int(100) # Batch size
+
 
 	VERBOSE = int(1)
 
@@ -177,7 +178,7 @@ class PrivTensorWrapper:
 		## save model
 		with self._MAIN_GRAPH.as_default() as g:
 			with self._MAIN_SESS.as_default() as sess:
-				self._MAIN_MODEL.save_weights(self._PT__save_file_location)
+				self._MAIN_MODEL.save_weights( self._PT__save_file_location)
 
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -515,10 +516,15 @@ class NestedGraph:
 
 			for stock_class in NestedGraph.LOOKUP[day][stock_code]:
 				tmp_list.append(stock_class.PT__predict_model(X_data))
-		
-		tmp_list = np.asarray(tmp_list)
 
-		return np.mean(tmp_list, axis=1)
+		#@ make array and take mean
+		tmp_list = np.asarray(tmp_list)
+		tmp_mean = np.mean(tmp_list, axis=1).tolist()
+
+
+		#@ add prediction to the data class
+
+		return tmp_mean
 
 
 	def NG__training_wrapper(self, stock_code):
@@ -612,7 +618,8 @@ class NestedGraph:
 			NestedGraph.LOOKUP_data[day] = {}
 
 		if stock_code not in NestedGraph.LOOKUP_data[day]:
-			NestedGraph.LOOKUP_data[day][stock_code] = Dataset(stock_code=stock_code)
+			NestedGraph.LOOKUP_data[day][stock_code] = Dataset(stock_code=stock_code,
+															   watch_length=self.minute_length)
 
 
 	def NG__wrapper(self, stock_code, _day,
@@ -688,6 +695,7 @@ class NestedGraph:
 		debug__article = 0
 		debug__passed = 0
 
+
 		## update needed datetime as list
 		update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
 		for i in range(self.minute_length, len(update_needed)-self.predict_length, 1 ):
@@ -716,15 +724,19 @@ class NestedGraph:
 			rtn_X, rtn_Y = data_class.DATA__make_stock_set(update_needed[i-self.minute_length:i],
 														   update_needed[i:i+self.predict_length],
 														   check_data_int=self.minute_length,
-														   check_answer_int=self.predict_length)
+														   check_answer_int=self.predict_length,
+														   datetime_str=update_needed[i])
 			rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
-			rtn_kospi = data_class.DATA__make_sub_set(subset_type='kospi')
-			rtn_dollar = data_class.DATA__make_sub_set(subset_type='dollar')
+			rtn_kospi = data_class.DATA__make_sub_set(update_needed[i-self.minute_length:i],
+													  subset_type='kospi')
+			rtn_dollar = data_class.DATA__make_sub_set(update_needed[i-self.minute_length:i],
+													   subset_type='dollar')
 
 			debug__passed += 1
 
 			## add date into the set
 			data_class.DATA__add_dateToSet(update_needed[i])
+
 
 			## contain values
 			tmp_totContainer.extend(rtn_X)
@@ -777,8 +789,11 @@ class NestedGraph:
 			               update_needed[len(update_needed) - self.minute_length:],
 						   check_data_int=self.minute_length)
 		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
-		rtn_kospi = data_class.DATA__make_sub_set(subset_type='kospi')
-		rtn_dollar = data_class.DATA__make_sub_set(subset_type='dollar')
+		rtn_kospi = data_class.DATA__make_sub_set(update_needed[len(update_needed) - self.minute_length:],
+												  subset_type='kospi')
+		rtn_dollar = data_class.DATA__make_sub_set(update_needed[len(update_needed) - self.minute_length:],
+												   subset_type='dollar')
+
 
 		## contain values
 		tmp_totContainer.extend(rtn_X)
@@ -828,19 +843,31 @@ class Dataset:
 	_dollar_dataset = {}
 
 
-	def __init__(self, stock_code):
+	def __init__(self, stock_code, watch_length):
 		self._stock_code = stock_code
 		self._stk_dataset = {}
-		#self._kospi_dataset = {}
-		#self._dollar_dataset = {}
 		self._article_dataset = {}
+		
+		self._ratio_train_dataset = {} # start data[0] record
+		self._ratio_pred_dataset = {}
 
-		self._ratio_dataset = {} # start data[0] record
+		self._prediction_dataset = {}
 
-		self._datetime_list = list()
+		self._datetime_que = dq(maxlen=int(watch_length))
 
 		self._X_data = {}
 		self._Y_data = {}
+
+
+	def DATA__save_prediction(self, datetime_obj : datetime.date, prediction_list : list):
+		"""
+
+		:param datetime_obj: datetime object as input
+		:param prediction_list: prediction list containing predicted values
+		:return:
+		"""
+
+		self._prediction_dataset[datetime_obj] = prediction_list
 
 
 	def DATA__get_prediction(self, date_list_data, check_data_int):
@@ -866,13 +893,16 @@ class Dataset:
 		return  rtn_list_data
 
 
-	def DATA__add_dateToSet(self, datetime_item):
+	def DATA__add_dateToSet(self, datetime_str):
 		"""
-
-		:return: Action - add datetime object into the list
+		:param datetime_str: datetime string value to put to queue
+		:return: Action - add datetime object into the
+		                  tobe used to limit train data length
 		"""
-		self._datetime_list.append(datetime_item)
-
+		if datetime_str in self._datetime_que:
+			pass
+		else:
+			self._datetime_que.append(datetime_str)
 
 
 
@@ -882,10 +912,10 @@ class Dataset:
 		:return: get _X / _Y for training
 		"""
 		tmp_X = [ data for key1, key2, data in zip(self._X_data.keys(), self._Y_data.keys(), self._X_data.values()) \
-				  if key1 == key2]
+				  if key1 == key2 if key1 in self._datetime_que]
 
 		tmp_Y = [ data for key1, key2, data in zip(self._Y_data.keys(), self._X_data.keys(), self._Y_data.values()) \
-				  if key1 == key2]
+				  if key1 == key2 if key1 in self._datetime_que]
 
 		return tmp_X, tmp_Y
 
@@ -905,14 +935,14 @@ class Dataset:
 
 
 
-	def DATA__make_stock_set(self, date_list_data, date_list_ans, check_data_int, check_answer_int):
+	def DATA__make_stock_set(self, date_list_data, date_list_ans, check_data_int, check_answer_int, datetime_str):
 		"""
 
 		:param date_list_data: original stock parse date list
 		:param date_list_ans: original stock parse answer list
 		:param check_data_int: to check length of parsed data
 		:param check_answer_int: to check length of parsed answer
-		:return: create X, Y data partials from current stcok data
+		:return: create X, Y data partials from current stock data
 		"""
 
 		assert len(date_list_data) == check_data_int
@@ -931,7 +961,10 @@ class Dataset:
 		rtn_list_answer = []
 		tmp_answer_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
 					           n, date in enumerate(date_list_ans) ]
-
+		
+		#@ record ratio
+		self._ratio_train_dataset[datetime_str] = standard_first_val
+		
 		assert len(rtn_list_data) == len(date_list_data) * 2
 		assert len(tmp_answer_price) == len(date_list_ans)
 
