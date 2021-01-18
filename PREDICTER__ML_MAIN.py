@@ -133,6 +133,7 @@ class Stock_prediction:
 																		  article_hash=hash_article)
 				if rtn_dataForPredic != None:
 					rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
+																		  _day=_today,
 																		  X_data=rtn_dataForPredic)
 					return ['Predictable', rtn_predicted]
 
@@ -414,7 +415,15 @@ def Session():
 							memo=f'StopIteration exception')
 					break
 
+			# @ get prediction result
+			tmp_pred_datetime_dict = \
+				prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
 
+
+			# @ plot graph and save
+			여기서 할지 class 내부에서 작업할지 결정!
+			SESS__save_image(tmp_dt_start__obj, tmp_score, main_Stk_df,
+							 tmp_pred_datetime_dict, stock_code, i + 1)
 			# add day
 			mainStk_dt_start__obj += datetime.timedelta(days=1)
 
@@ -423,7 +432,75 @@ def Session():
 
 
 
+def SESS__save_image(start_day_str, at_err_score, dataframe, prediction_dictionary, stock_code, episode_num):
+	# tmp_return_list_for_drawing.append( (datetime_single_start__now_obj, tmp_return) )
+	import matplotlib.pyplot as plt
+	import random
 
+	folder_location = (os.getcwd() + '\\PREDICTER__Image_result').replace('/', '\\')  #
+	file_location = folder_location + '\\' + str(stock_code) + '_' + str(
+		start_day_str.strftime("%Y-%m-%d")) + '__' + 'episode_num_' + str(episode_num) + '.png'
+
+	fig = plt.figure(figsize=(100, 50))
+	ax1 = fig.add_subplot(111)
+
+	plt.title('error score : ' + str(at_err_score))
+
+	# ax1 = dataframe.plot(x='date', y='open', figsize = (100, 50), grid=True, Linewidth=1, fontsize=5)
+	dataframe.plot(x='date', y='open', figsize=(80, 50), grid=True, Linewidth=1, fontsize=5, ax=ax1)
+
+	# https://datascienceschool.net/view-notebook/372443a5d90a46429c6459bba8b4342c/
+	# plt.title('hi')
+	tmp_list_whole_prediction = []
+	for date in prediction_dictionary:
+		tmp_list_single_predicion = []
+		# x = date
+		# y = None
+		# returned_list = list(np.where(dataframe['date'] == date))
+		# print(f'returned_list : {returned_list}')
+		# print(f'returned_list[0] : {returned_list[0]}')
+		# print(f'type of returned_list[0] : {type(returned_list[0])}')
+		for i in range(len(prediction_dictionary[date])):
+			x = date + datetime.timedelta(minutes=i)
+			y = prediction_dictionary[date][i]
+			tmp_list_single_predicion.append([x, y])
+		tmp_list_whole_prediction.append(tmp_list_single_predicion)
+
+	print(f'tmp_list_whole_prediction : {tmp_list_whole_prediction}')
+
+	tmp_plot_item = ['b', 'r', 'g', 'k', 'c', 'm']
+	for single_predictions in tmp_list_whole_prediction:
+		dot_color = random.choice(tmp_plot_item)
+		# for item in single_predictions:
+		# 	plt.plot(item[0], item[1], dot_style)
+
+		tmp_x = []
+		tmp_y = []
+		for i in range(len(single_predictions[0][1])):
+			tmp_x.append(single_predictions[0][0] + datetime.timedelta(minutes=i))
+			tmp_y.append(single_predictions[0][1][i])
+		ax1.plot_date(tmp_x, tmp_y, color= dot_color, marker='o', linestyle='solid',  alpha=0.5) # marker='None', marker='o'
+		ax1.axvline(x=single_predictions[0][0], color='r', linestyle='--', linewidth=1, alpha=0.3)
+		ax1.axvline(x=single_predictions[0][0] + datetime.timedelta(minutes=len(single_predictions[0][1])-1), color='b', linestyle='--', linewidth=1, alpha=0.3)
+
+	try:
+		fig.savefig(file_location, dpi=150)
+		plt.close(fig)
+
+		print(f'plotting successfully saved!')
+	except Exception as e:
+		import traceback
+		print(f'failed to save the plotting...: {e}')
+		traceback.print_exc()
+
+	# @ try deleting them
+	try:
+		fig = None
+		del fig
+
+		print(f'successful deleting them in SESS__save_image')
+	except Exception as e:
+		print(f'error in  deleting them in SESS__save_image... {e}')
 
 
 

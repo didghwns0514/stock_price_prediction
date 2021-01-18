@@ -504,9 +504,11 @@ class NestedGraph:
 
 
 	#@pushLog(dst_folder='PREDICTER__ML_CLASS')
-	def NG__prediction_wrapper(self, stock_code, X_data):
+	def NG__prediction_wrapper(self, stock_code, _day, X_data):
 		"""
 		param : stock_code
+		:param _day: actual prediction datetime
+
 		return : Action - returns mean value of predictions as an ensemble
 		"""
 
@@ -523,8 +525,56 @@ class NestedGraph:
 
 
 		#@ add prediction to the data class
+		for day in NestedGraph.LOOKUP_data:
+			assert stock_code in NestedGraph.LOOKUP_data[day]
+
+			data_class = NestedGraph.LOOKUP_data[day][stock_code]
+			data_class.DATA__save_prediction(datetime_obj=_day,
+											 prediction_list=tmp_mean)
 
 		return tmp_mean
+
+
+
+	def NG__get_prediction_dict(self, stock_code):
+		"""
+		:param stock_code: stock code used
+		:return: Action - return prediction with raio calculated
+		"""
+
+		# DATA__get_pred_saved
+		for day in NestedGraph.LOOKUP:
+			assert stock_code in NestedGraph.LOOKUP_data[day]
+
+			# @ data class
+			data_class = NestedGraph.LOOKUP_data[day][stock_code]
+
+			# @ dictionary
+			tmp_savedDict = data_class.DATA__get_pred_saved()
+			tmp_ratioDict = data_class.DATA__get_pred_ratio()
+
+
+			return self.NG__calc_prediction_ratio(tmp_savedDict, tmp_ratioDict)
+
+
+	def NG__calc_prediction_ratio(self, total_saved, total_ratio, get_latest : bool = False):
+		"""
+
+		:param total_saved: total prediction dataset, key : datetime.date
+		:param total_ratio: total ratio of the start dataset at the key, key : str_datetime
+		:param get_latest: boolean, if True / returns the latest prediction available
+		:return:
+		"""
+
+		if not get_latest:
+			tmp_rtn_dict = { key : ((value + 1) * total_ratio[FUNC_dtSwtich(key)]  ) \
+							 for key, value in zip(total_saved.keys(), total_saved.values()) }
+
+			return tmp_rtn_dict
+
+		else: # get the latest prediction
+			여기 고치고
+
 
 
 	def NG__training_wrapper(self, stock_code):
@@ -727,14 +777,14 @@ class NestedGraph:
 														   check_answer_int=self.predict_length,
 														   datetime_str=update_needed[i])
 			rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
-			rtn_kospi = data_class.DATA__make_sub_set(update_needed[i-self.minute_length:i],
+			rtn_kospi = data_class.DATA__make_sub_set(date_list_data=update_needed[i-self.minute_length:i],
 													  subset_type='kospi')
-			rtn_dollar = data_class.DATA__make_sub_set(update_needed[i-self.minute_length:i],
+			rtn_dollar = data_class.DATA__make_sub_set(date_list_data=update_needed[i-self.minute_length:i],
 													   subset_type='dollar')
 
 			debug__passed += 1
 
-			## add date into the set
+			## add date into the que to keep track on recent
 			data_class.DATA__add_dateToSet(update_needed[i])
 
 
@@ -749,6 +799,7 @@ class NestedGraph:
 			data_class.DATA__wrap_container(x_container=tmp_totContainer,
 											y_container=rtn_Y,
 											datetime_str=update_needed[i])
+
 		pushLog(dst_folder='PREDICTER__ML_CLASS',
 				lv='INFO', module='NG__dataCalculate', exception=True,
 				memo=f'stock_code : {stock_code} \ndebug__passed : {debug__passed}, debug__article : {debug__article}, debug__data_skip : {debug__data_skip}')
@@ -787,11 +838,12 @@ class NestedGraph:
 
 		rtn_X = data_class.DATA__get_prediction( \
 			               update_needed[len(update_needed) - self.minute_length:],
-						   check_data_int=self.minute_length)
+						   check_data_int=self.minute_length,
+						   datetime_str=targ_date)
 		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
-		rtn_kospi = data_class.DATA__make_sub_set(update_needed[len(update_needed) - self.minute_length:],
+		rtn_kospi = data_class.DATA__make_sub_set(date_list_data=update_needed[len(update_needed) - self.minute_length:],
 												  subset_type='kospi')
-		rtn_dollar = data_class.DATA__make_sub_set(update_needed[len(update_needed) - self.minute_length:],
+		rtn_dollar = data_class.DATA__make_sub_set(date_list_data=update_needed[len(update_needed) - self.minute_length:],
 												   subset_type='dollar')
 
 
@@ -849,7 +901,7 @@ class Dataset:
 		self._article_dataset = {}
 		
 		self._ratio_train_dataset = {} # start data[0] record
-		self._ratio_pred_dataset = {}
+		self._ratio_predict_dataset = {}
 
 		self._prediction_dataset = {}
 
@@ -859,22 +911,40 @@ class Dataset:
 		self._Y_data = {}
 
 
+	def DATA__get_pred_ratio(self):
+		"""
+
+		:return: Action - returns saved start value ratio of the predict dataset
+		"""
+
+		return self._ratio_predict_dataset
+
+
+	def DATA__get_pred_saved(self):
+		"""
+		:return: Action - returns saved prediction values in the data class
+		"""
+
+		return self._prediction_dataset
+
+
 	def DATA__save_prediction(self, datetime_obj : datetime.date, prediction_list : list):
 		"""
 
 		:param datetime_obj: datetime object as input
 		:param prediction_list: prediction list containing predicted values
-		:return:
+		:return: Action - to save predict values
 		"""
 
 		self._prediction_dataset[datetime_obj] = prediction_list
 
 
-	def DATA__get_prediction(self, date_list_data, check_data_int):
+	def DATA__get_prediction(self, date_list_data, check_data_int, datetime_str):
 		"""
 
 		:param date_list_data: date list to attrive back
-		:param check_data_int:to check length of parsed data
+		:param check_data_int: to check length of parsed data
+		:param datetime_str: key to record first val of prediction dataset
 		:return: create data
 		"""
 		assert len(date_list_data) * 2 == check_data_int
@@ -889,6 +959,10 @@ class Dataset:
 		rtn_list_data.extend(tmp_data_volume)
 
 		assert len(rtn_list_data) == len(date_list_data) * 2
+
+		#@ record first val
+		self._ratio_predict_dataset[datetime_str] = standard_first_val
+
 
 		return  rtn_list_data
 
@@ -972,23 +1046,25 @@ class Dataset:
 
 
 
-	def DATA__make_sub_set(self, subset_type):
+	def DATA__make_sub_set(self, date_list_data, subset_type):
 		"""
 
+		:param date_list_data: datetime str list to parse from (specific window to work with)
 		:param subset_type:
 		:return: make calculation based on mean values of kospi and dollar
 		"""
 		assert subset_type in ['kospi', 'dollar']
 
-		def return_market_status(hash):
+		def return_market_status(hash, date_list_data):
 
 			assert len(list(hash.keys())) > 0
 
 			tmp_hash_key_srted = FUNC_dtLIST_str_sort(list(hash.keys()))
+			tmp_filtered_recent = [ data for data in tmp_hash_key_srted if data in date_list_data]
 
 			## 1st layer
 			price = []
-			for dt in tmp_hash_key_srted:
+			for dt in tmp_filtered_recent:
 				price.append(hash[dt]['price'])
 
 			mean = sum(price) / len(price)
@@ -997,10 +1073,10 @@ class Dataset:
 			return [(latest_price - mean) / mean]
 
 		if subset_type == 'kospi':
-			return return_market_status(Dataset._kospi_dataset)
+			return return_market_status(Dataset._kospi_dataset, date_list_data)
 
 		elif subset_type == "dollar":
-			return return_market_status(Dataset._dollar_dataset)
+			return return_market_status(Dataset._dollar_dataset, date_list_data)
 
 
 
