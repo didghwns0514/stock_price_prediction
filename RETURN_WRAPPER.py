@@ -1,7 +1,9 @@
 
 class ReturnWrap:
 
-	CHECK_LIST = ['PREDICTER', 'PREDICTER_TEST']
+	CHECK_LIST_PREDICTER = ['PREDICTER', 'PREDICTER_TEST']
+
+	CHECK_TOTAL_LIST = CHECK_LIST_PREDICTER
 
 	@staticmethod
 	def _type(_type, rtn_val):
@@ -12,7 +14,7 @@ class ReturnWrap:
 		:return:
 		"""
 
-		assert _type in ReturnWrap.CHECK_LIST
+		assert _type in ReturnWrap.CHECK_TOTAL_LIST
 
 		if _type == 'PREDICTER':
 			ReturnWrap._predicter(rtn_val)

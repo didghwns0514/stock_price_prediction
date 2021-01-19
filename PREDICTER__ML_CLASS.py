@@ -118,6 +118,14 @@ class PrivTensorWrapper:
 		## calc model state
 		self.PT__calc_state()
 
+
+	def PT__get_state(self):
+		"""
+
+		:return: Action - to get the state of the model
+		"""
+		return self._PT__model_state
+
 	
 	def PT__calc_state(self):
 		"""
@@ -388,6 +396,14 @@ class PrivTensorWrapper:
 
 				## flag up
 				self._PT__initTrain = True
+
+
+	def PT__get_accuracy(self):
+		"""
+
+		:return: Action - returns accuracy instance in the class
+		"""
+		return self._PT__model_accuracy
 	
 
 	def PT__acc_cal(self, y_true, y_pred):
@@ -395,7 +411,7 @@ class PrivTensorWrapper:
 
 		# 특이값 많은 경우 mae 사용
 		# 아닌 경우 rmes 사용
-		 return mean_squared_error(y_true, y_pred)
+		 return (1 / (mean_squared_error(y_true, y_pred)  + 1e-15) * 100)
 
 
 	def PT__predict_model(self, X_data):
@@ -433,6 +449,26 @@ class NestedGraph:
 		self.minute_length = minute_length
 		self.predict_length = predict_length
 
+		## rect day
+		self.dateKey = None
+
+
+	def NG__set_day(self, _today):
+		"""
+
+		:param _today: date used to rectify and use as key
+		:return:
+		"""
+		self.dateKey = FUNC_dtRect(_today, "00:00")
+
+
+	def NG__get_day(self):
+		"""
+
+		:return: get the recified key date
+		"""
+		return self.dateKey
+
 
 	def NG__clear(self, _today_date):
 		"""
@@ -441,9 +477,10 @@ class NestedGraph:
 		return : Action - clean the model from the memory
 						- clean the class variable dictionary
 		"""
-		today_date = FUNC_dtRect(_today_date, "00:00")
-		self.NG__clear_keras(_today_date=today_date)
-		self.NG__clear_data(_today_date=today_date)
+
+		self.NG__clear_keras(_today_date=self.NG__get_day())
+		self.NG__clear_data(_today_date=self.NG__get_day())
+
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
 	def NG__clear_keras(self, _today_date):
@@ -456,7 +493,8 @@ class NestedGraph:
 		del_list__day = []
 		for day in NestedGraph.LOOKUP:
 
-			if FUNC_dtRect(_today_date, "00:00") != day:
+			#if FUNC_dtRect(_today_date, "00:00") != day:
+			if self.NG__get_day() != day:
 				del_list__day.append(day)
 
 				del_list__stkcode = []
@@ -487,7 +525,8 @@ class NestedGraph:
 		del_list__day = []
 		for day in NestedGraph.LOOKUP_data:
 
-			if FUNC_dtRect(_today_date, "00:00") != day:
+			#if FUNC_dtRect(_today_date, "00:00") != day:
+			if self.NG__get_day() != day:
 				del_list__day.append(day)
 
 				del_list__stkcode = []
@@ -513,11 +552,10 @@ class NestedGraph:
 		"""
 
 		tmp_list = []
-		for day in NestedGraph.LOOKUP:
-			assert stock_code in NestedGraph.LOOKUP[day]
+		assert stock_code in NestedGraph.LOOKUP[self.NG__get_day()]
 
-			for stock_class in NestedGraph.LOOKUP[day][stock_code]:
-				tmp_list.append(stock_class.PT__predict_model(X_data))
+		for stock_class in NestedGraph.LOOKUP[self.NG__get_day()][stock_code]:
+			tmp_list.append(stock_class.PT__predict_model(X_data))
 
 		#@ make array and take mean
 		tmp_list = np.asarray(tmp_list)
@@ -525,14 +563,34 @@ class NestedGraph:
 
 
 		#@ add prediction to the data class
-		for day in NestedGraph.LOOKUP_data:
-			assert stock_code in NestedGraph.LOOKUP_data[day]
+		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
 
-			data_class = NestedGraph.LOOKUP_data[day][stock_code]
-			data_class.DATA__save_prediction(datetime_obj=_day,
-											 prediction_list=tmp_mean)
+		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code]
+		data_class.DATA__save_prediction(datetime_obj=_day,
+										 prediction_list=tmp_mean)
 
 		return tmp_mean
+
+
+	def NG__get_accuracy(self, stock_code):
+		"""
+
+		:param stock_code: stock code used
+		:return: Action - returns accuracy of the predicters in the stock code, each in the list
+						  is a container containing status of each model by (model state, model accuracy)
+		"""
+
+		tmp_return = []
+		assert stock_code in NestedGraph.LOOKUP[self.NG__get_day()]
+
+		for predicter in NestedGraph.LOOKUP[self.NG__get_day()][stock_code]:
+			tmp_model_state = predicter.PT__get_state()
+			tmp_model_acc = predicter.PT__get_accuracy()
+
+			tmp_return.append([tmp_model_state, tmp_model_acc])
+
+
+		return tmp_return
 
 
 
@@ -542,19 +600,17 @@ class NestedGraph:
 		:return: Action - return prediction with raio calculated
 		"""
 
-		# DATA__get_pred_saved
-		for day in NestedGraph.LOOKUP:
-			assert stock_code in NestedGraph.LOOKUP_data[day]
+		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
 
-			# @ data class
-			data_class = NestedGraph.LOOKUP_data[day][stock_code]
+		# @ data class
+		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code]
 
-			# @ dictionary
-			tmp_savedDict = data_class.DATA__get_pred_saved()
-			tmp_ratioDict = data_class.DATA__get_pred_ratio()
+		# @ dictionary
+		tmp_savedDict = data_class.DATA__get_pred_saved()
+		tmp_ratioDict = data_class.DATA__get_pred_ratio()
 
 
-			return self.NG__calc_prediction_ratio(tmp_savedDict, tmp_ratioDict)
+		return self.NG__calc_prediction_ratio(tmp_savedDict, tmp_ratioDict)
 
 
 	def NG__calc_prediction_ratio(self, total_saved, total_ratio, get_latest : bool = False):
@@ -573,7 +629,8 @@ class NestedGraph:
 			return tmp_rtn_dict
 
 		else: # get the latest prediction
-			여기 고치고
+			latest_key = sorted(total_saved.keys())[-1]
+			return total_ratio[FUNC_dtSwtich(latest_key)]
 
 
 
@@ -584,19 +641,18 @@ class NestedGraph:
 		:return: Action - trains the graphs // if data was preped, returns according booleans
 		"""
 
-		for day in NestedGraph.LOOKUP:
-			assert stock_code in NestedGraph.LOOKUP[day]
-			assert stock_code in NestedGraph.LOOKUP_data[day]
+		assert stock_code in NestedGraph.LOOKUP[self.NG__get_day()]
+		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
 
-			data_class = NestedGraph.LOOKUP_data[day][stock_code]
-			X, Y = data_class.DATA__get_container()
+		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code]
+		X, Y = data_class.DATA__get_container()
 
-			for stock_class in NestedGraph.LOOKUP[day][stock_code]:
-				if X and Y : # non empty containers!
-					stock_class.PT__train_model(X=X, Y=Y)
-					return True
-				else:
-					return False
+		for stock_class in NestedGraph.LOOKUP[self.NG__get_day()][stock_code]:
+			if X and Y : # non empty containers!
+				stock_class.PT__train_model(X=X, Y=Y)
+				return True
+			else:
+				return False
 
 
 
@@ -633,60 +689,54 @@ class NestedGraph:
 		return rtn
 
 
-	def NG__check_prep(self, stock_code, _day):
+	def NG__check_prep(self, stock_code):
 		"""
 		:param : stock_code, day - day value from datetime lib
 		:return : Action - fills up self.LOOKUP dictionary
 		"""
 
-		day = FUNC_dtRect(_day, "00:00")
-
 		## reset outdated graph / data
-		self.NG__clear(_today_date=day)
+		self.NG__clear(_today_date=self.NG__get_day())
 
 
 		## allocate graph
-		if day not in NestedGraph.LOOKUP:
-			NestedGraph.LOOKUP[day] = {}
+		if self.NG__get_day() not in NestedGraph.LOOKUP:
+			NestedGraph.LOOKUP[self.NG__get_day()] = {}
 		
-		if stock_code not in NestedGraph.LOOKUP[day]:
-			NestedGraph.LOOKUP[day][stock_code] = []
+		if stock_code not in NestedGraph.LOOKUP[self.NG__get_day()]:
+			NestedGraph.LOOKUP[self.NG__get_day()][stock_code] = []
 
 		## make keras graph
 		for trys in range(NestedGraph.MAX_NUM_OF_ENSEM):
-			prd_made = len(NestedGraph.LOOKUP[day][stock_code])
+			prd_made = len(NestedGraph.LOOKUP[self.NG__get_day()][stock_code])
 			print(f'prd_made : {prd_made}')
 			if  prd_made < NestedGraph.MAX_NUM_OF_ENSEM:
-				NestedGraph.LOOKUP[day][stock_code].append(self.NG__allocater(stock_code=stock_code))
+				NestedGraph.LOOKUP[self.NG__get_day()][stock_code].append(self.NG__allocater(stock_code=stock_code))
 				print(f'passed prep!')
 			else:
 				pass
 				print(f'skipped prep!')
 
 		## allocate data class
-		if day not in NestedGraph.LOOKUP_data:
-			NestedGraph.LOOKUP_data[day] = {}
+		if self.NG__get_day() not in NestedGraph.LOOKUP_data:
+			NestedGraph.LOOKUP_data[self.NG__get_day()] = {}
 
-		if stock_code not in NestedGraph.LOOKUP_data[day]:
-			NestedGraph.LOOKUP_data[day][stock_code] = Dataset(stock_code=stock_code,
+		if stock_code not in NestedGraph.LOOKUP_data[self.NG__get_day()]:
+			NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code] = Dataset(stock_code=stock_code,
 															   watch_length=self.minute_length)
 
 
-	def NG__wrapper(self, stock_code, _day,
+	def NG__wrapper(self, stock_code,
 					stk_hashData=None,
 					kospi_hashData=None,
 					dollar_hashData=None):
 
-		# @ rect day
-		day = FUNC_dtRect(_day, "00:00")
-
 		# @ prepare containers
-		self.NG__check_prep(stock_code=stock_code, 
-							_day=day)
+		self.NG__check_prep(stock_code=stock_code)
 
 		## assert stock code existance
-		assert stock_code in NestedGraph.LOOKUP_data[day]
-		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
+		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
+		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code] # pointer
 
 		if stk_hashData != None:
 			data_class.DATA__stk_update(new_data=stk_hashData)
@@ -730,12 +780,10 @@ class NestedGraph:
 		:param article_check: either to check article existance or not
 		:return:
 		"""
-		# @ rect day
-		day = FUNC_dtRect(_day, "00:00")
 
 		## assert stock code existance
-		assert stock_code in NestedGraph.LOOKUP_data[day]
-		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
+		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
+		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code] # pointer
 
 		key__stkData = list(data_class._stk_dataset.keys())
 		key__X_data = list(data_class._X_data.keys())
@@ -813,12 +861,9 @@ class NestedGraph:
 		:return: return the following data correct for _day variable
 		"""
 
-		# @ rect day
-		day = FUNC_dtRect(_day, "00:00")
-
 		## assert stock code existance
-		assert stock_code in NestedGraph.LOOKUP_data[day]
-		data_class = NestedGraph.LOOKUP_data[day][stock_code] # pointer
+		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
+		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code] # pointer
 		key__stkData = list(data_class._stk_dataset.keys())
 
 		## check _day existance in the dataset hash

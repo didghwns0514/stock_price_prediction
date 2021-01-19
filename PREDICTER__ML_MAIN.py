@@ -113,7 +113,6 @@ class Stock_prediction:
 		if artc_rtn:
 
 			self.nestgraph.NG__wrapper(stock_code=stock_code,
-									   _day=_today,
 									   stk_hashData=hash_stock,
 									   kospi_hashData=hash_kospi,
 									   dollar_hashData=hash_dollar
@@ -151,7 +150,10 @@ class Stock_prediction:
 
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
+		# @ set rect day in the NG
+		self.nestgraph.NG__set_day(_today=_today)
 
+		# @ operate on the stock
 		rtn = self._checkStock(stock_code=stock_code,
 						   hash_stock=hash_stock,
 						   hash_kospi=hash_kospi,
@@ -419,11 +421,19 @@ def Session():
 			tmp_pred_datetime_dict = \
 				prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
 
+			tmp_model_status = prediction_agent.nestgraph.NG__get_accuracy(stock_code)
+
 
 			# @ plot graph and save
-			여기서 할지 class 내부에서 작업할지 결정!
-			SESS__save_image(tmp_dt_start__obj, tmp_score, main_Stk_df,
-							 tmp_pred_datetime_dict, stock_code, i + 1)
+			############################
+			# Plotting only done in the session
+			#
+			############################
+			SESS__save_image(start_day_str=tmp_dt_start__obj,
+							 model_status=tmp_model_status,
+							 dataframe=main_Stk_df,
+							 prediction_dictionary=tmp_pred_datetime_dict,
+							 stock_code=stock_code)
 			# add day
 			mainStk_dt_start__obj += datetime.timedelta(days=1)
 
@@ -432,19 +442,19 @@ def Session():
 
 
 
-def SESS__save_image(start_day_str, at_err_score, dataframe, prediction_dictionary, stock_code, episode_num):
-	# tmp_return_list_for_drawing.append( (datetime_single_start__now_obj, tmp_return) )
+def SESS__save_image(start_day_str, model_status, dataframe, prediction_dictionary, stock_code):
+
 	import matplotlib.pyplot as plt
 	import random
 
 	folder_location = (os.getcwd() + '\\PREDICTER__Image_result').replace('/', '\\')  #
 	file_location = folder_location + '\\' + str(stock_code) + '_' + str(
-		start_day_str.strftime("%Y-%m-%d")) + '__' + 'episode_num_' + str(episode_num) + '.png'
+		start_day_str.strftime("%Y-%m-%d")) + '.png'
 
 	fig = plt.figure(figsize=(100, 50))
 	ax1 = fig.add_subplot(111)
 
-	plt.title('error score : ' + str(at_err_score))
+	plt.title('error score : ' + str(model_status))
 
 	# ax1 = dataframe.plot(x='date', y='open', figsize = (100, 50), grid=True, Linewidth=1, fontsize=5)
 	dataframe.plot(x='date', y='open', figsize=(80, 50), grid=True, Linewidth=1, fontsize=5, ax=ax1)
