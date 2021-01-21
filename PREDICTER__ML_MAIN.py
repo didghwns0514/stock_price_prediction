@@ -148,6 +148,7 @@ class Stock_prediction:
 			print(f'check article is false : {artc_rtn}')
 			return ['No-article', None]
 
+		
 	def _stock_op_wrapper(self, stock_code, hash_stock, hash_kospi, hash_dollar, _today, hash_article):
 
 		# @ set rect day in the NG
@@ -235,11 +236,13 @@ def Session():
 			if _type == 'answer':
 				return_hash = SQ__parse_answer(ori_df_whole=df,
 											  dt_now__obj=tmp_dt_sweep,
-											  minute_forward=minute_forward)
+											  minute_forward=minute_forward,
+											  stock_code=stock_code)
 			else:
 				return_hash = SQ__parse_sqData(ori_df_whole=df,
 											   dt_now__obj=tmp_dt_sweep,
-											   hours_duration_back=hours_back)
+											   hours_duration_back=hours_back,
+											   stock_code=stock_code)
 
 			yield return_hash, tmp_dt_sweep
 
@@ -315,8 +318,9 @@ def Session():
 					memo=f'stock code did not match standards, returned None type')
 			continue
 
-		mainStk_dt_start__obj = main_Stk_df.date.min() + datetime.timedelta(days=3)
+		mainStk_dt_start__obj = main_Stk_df.date.min() + datetime.timedelta(days=10)
 		mainStk_dt_end__obj = main_Stk_df.date.max() - datetime.timedelta(days=1)
+
 
 
 		#################################
@@ -325,6 +329,9 @@ def Session():
 		while mainStk_dt_start__obj <= mainStk_dt_end__obj:
 			tmp_dt_start__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"9:00")
 			tmp_dt_end__obj = SUB_F.FUNC_dtRect(mainStk_dt_start__obj,"15:30")
+
+			# checking break in the middle
+			tmp_break_bool = False
 
 			print('\n'*2)
 			print(f'=#'*20)
@@ -373,6 +380,7 @@ def Session():
 								module='Session', 
 								exception=True,
 								memo=f'time stamp different by generators')
+						tmp_break_bool = True
 						break
 
 
@@ -380,6 +388,7 @@ def Session():
 						print(f'weekday, proceeding...!')
 					else:
 						print(f'weekend, skipping...!')
+						tmp_break_bool = True
 						break
 					rtn = prediction_agent._stock_op_wrapper(stock_code=stock_code,
 													   hash_stock=hash_data,
@@ -392,6 +401,7 @@ def Session():
 						print(f'predictable!')
 
 					else: # unpredictable
+						tmp_break_bool = True
 						break
 
 					log, data = rtn ## data 분석 proceed -> plot graph
@@ -409,31 +419,41 @@ def Session():
 								  \n- normally passed')
 
 				except StopIteration as se:
+					print(f'error in sweeping singe day : {se}')
+					traceback.print_exc()
 					pushLog(dst_folder='PREDICTER__ML_MAIN', 
 							lv='ERROR',
 							module='Session', 
 							exception=True,
 							exception_msg=str(se),
 							memo=f'StopIteration exception')
+					input(f'type any to continue to next!')
+					tmp_break_bool = True
 					break
 
 			# @ get prediction result
-			tmp_pred_datetime_dict = \
-				prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
+			if not tmp_break_bool:
+				tmp_pred_datetime_dict = \
+					prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
 
-			tmp_model_status = prediction_agent.nestgraph.NG__get_accuracy(stock_code)
+				tmp_model_status = prediction_agent.nestgraph.NG__get_accuracy(stock_code)
 
 
-			# @ plot graph and save
-			############################
-			# Plotting only done in the session
-			#
-			############################
-			SESS__save_image(start_day_str=tmp_dt_start__obj,
-							 model_status=tmp_model_status,
-							 dataframe=main_Stk_df,
-							 prediction_dictionary=tmp_pred_datetime_dict,
-							 stock_code=stock_code)
+				# @ plot graph and save
+				############################
+				# Plotting only done in the session
+				#
+				############################
+				FUNC__save_image(start_day_str=tmp_dt_start__obj,
+								 model_status=tmp_model_status,
+								 dataframe=main_Stk_df,
+								 pred_dict=tmp_pred_datetime_dict,
+								 stock_code=stock_code)
+				pass
+
+			else:
+				print(f'iter to next day')
+
 			# add day
 			mainStk_dt_start__obj += datetime.timedelta(days=1)
 
@@ -442,56 +462,68 @@ def Session():
 
 
 
-def SESS__save_image(start_day_str, model_status, dataframe, prediction_dictionary, stock_code):
+def FUNC__save_image(start_day_str, model_status, dataframe, pred_dict, stock_code):
+	"""
+
+	:param start_day_str: predction training datetime
+	:param model_status: model status container, follow hierarchy call tree to check
+						 -> [ [ model state, model accuracy  ], [ , ] ..... [ , ] ]
+	:param dataframe:
+	:param pred_dict:
+	:param stock_code:
+	:return:
+	"""
 
 	import matplotlib.pyplot as plt
 	import random
 
-	folder_location = (os.getcwd() + '\\PREDICTER__Image_result').replace('/', '\\')  #
+	folder_location = (os.getcwd() + '\\PREDICTER__Image_result').replace('/', '\\')
+	if not os.path.isdir(folder_location):
+		os.mkdir(folder_location)
 	file_location = folder_location + '\\' + str(stock_code) + '_' + str(
 		start_day_str.strftime("%Y-%m-%d")) + '.png'
 
+
+	# @ picture
 	fig = plt.figure(figsize=(100, 50))
 	ax1 = fig.add_subplot(111)
+	
+	
+	# @ set title
+	tmp_title = ''
+	for stat, acc in model_status:
+		tmp_title += 'state : ' + str(stat)
+		tmp_title += '\n' + 'acc : ' + str(acc)
+	plt.title(tmp_title)
 
-	plt.title('error score : ' + str(model_status))
-
+	# @ add original dateimte - value plot
 	# ax1 = dataframe.plot(x='date', y='open', figsize = (100, 50), grid=True, Linewidth=1, fontsize=5)
 	dataframe.plot(x='date', y='open', figsize=(80, 50), grid=True, Linewidth=1, fontsize=5, ax=ax1)
 
 	# https://datascienceschool.net/view-notebook/372443a5d90a46429c6459bba8b4342c/
-	# plt.title('hi')
-	tmp_list_whole_prediction = []
-	for date in prediction_dictionary:
-		tmp_list_single_predicion = []
-		# x = date
-		# y = None
-		# returned_list = list(np.where(dataframe['date'] == date))
-		# print(f'returned_list : {returned_list}')
-		# print(f'returned_list[0] : {returned_list[0]}')
-		# print(f'type of returned_list[0] : {type(returned_list[0])}')
-		for i in range(len(prediction_dictionary[date])):
-			x = date + datetime.timedelta(minutes=i)
-			y = prediction_dictionary[date][i]
-			tmp_list_single_predicion.append([x, y])
-		tmp_list_whole_prediction.append(tmp_list_single_predicion)
-
-	print(f'tmp_list_whole_prediction : {tmp_list_whole_prediction}')
-
+	# @ plot rand
 	tmp_plot_item = ['b', 'r', 'g', 'k', 'c', 'm']
-	for single_predictions in tmp_list_whole_prediction:
-		dot_color = random.choice(tmp_plot_item)
-		# for item in single_predictions:
-		# 	plt.plot(item[0], item[1], dot_style)
 
-		tmp_x = []
-		tmp_y = []
-		for i in range(len(single_predictions[0][1])):
-			tmp_x.append(single_predictions[0][0] + datetime.timedelta(minutes=i))
-			tmp_y.append(single_predictions[0][1][i])
-		ax1.plot_date(tmp_x, tmp_y, color= dot_color, marker='o', linestyle='solid',  alpha=0.5) # marker='None', marker='o'
-		ax1.axvline(x=single_predictions[0][0], color='r', linestyle='--', linewidth=1, alpha=0.3)
-		ax1.axvline(x=single_predictions[0][0] + datetime.timedelta(minutes=len(single_predictions[0][1])-1), color='b', linestyle='--', linewidth=1, alpha=0.3)
+	for date_key in pred_dict:
+		dot_color = random.choice(tmp_plot_item)
+		tmp_x = [ date_key + datetime.timedelta(minutes=i+1) for i in range(0, len(pred_dict[date_key]) ) ]
+		tmp_y = pred_dict[date_key]
+
+		ax1.plot_date(tmp_x, tmp_y,
+					  color=dot_color,
+					  marker='o',
+					  linestyle='solid',
+					  alpha=0.5)  # marker='None', marker='o'
+		ax1.axvline(x=date_key,
+					color='r',
+					linestyle='--',
+					linewidth=1,
+					alpha=0.3)
+		ax1.axvline(x=date_key + datetime.timedelta(minutes=len(tmp_y)),
+					color='b',
+					linestyle='--',
+					linewidth=1,
+					alpha=0.3)
 
 	try:
 		fig.savefig(file_location, dpi=150)
@@ -508,17 +540,9 @@ def SESS__save_image(start_day_str, model_status, dataframe, prediction_dictiona
 		fig = None
 		del fig
 
-		print(f'successful deleting them in SESS__save_image')
+		print(f'successful deleting them in FUNC__save_image')
 	except Exception as e:
-		print(f'error in  deleting them in SESS__save_image... {e}')
-
-
-
-
-
-
-
-
+		print(f'error in  deleting them in FUNC__save_image... {e}')
 
 
 
