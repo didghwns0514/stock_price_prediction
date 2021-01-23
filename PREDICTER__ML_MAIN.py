@@ -130,7 +130,7 @@ class Stock_prediction:
 				rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
 																		  _day=_today,
 																		  article_hash=hash_article)
-				if rtn_dataForPredic != None:
+				if rtn_dataForPredic != None: # article existance problem
 					rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
 																		  _day=_today,
 																		  X_data=rtn_dataForPredic)

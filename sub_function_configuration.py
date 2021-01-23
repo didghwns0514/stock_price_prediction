@@ -92,13 +92,15 @@ def FUNC_datetime_backward(datetime_now__obj_, hours_back):
 	# @ already inside today's window coverage
 	if tmp_minutes_to_goback <= 0:
 		tmp_list_for_return.append([datetime_now__obj - datetime.timedelta(minutes=tmp_total_minutes_back), datetime_now__obj])
-		return tmp_list_for_return
+		#return tmp_list_for_return
 
 	else:
 		tmp_list_for_return.append( [FUNC_dtRect(datetime_now__obj,"9:00"),
 									 datetime_now__obj])
 		tmp_list_for_return = func_sub_iteratior(tmp_minutes_to_goback, datetime_today_fix_start__obj, tmp_list_for_return)
-		return tmp_list_for_return
+
+	tmp_rtn = sorted(tmp_list_for_return, key=lambda x : x[0])
+	return tmp_rtn
 
 
 def func_sub_iteratior(miutes_left, before_datetime_start__obj, return_list):

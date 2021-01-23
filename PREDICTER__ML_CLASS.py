@@ -623,14 +623,14 @@ class NestedGraph:
 		"""
 
 		if not get_latest:
-			tmp_rtn_dict = { key : ((value + 1) * total_ratio[FUNC_dtSwtich(key)]  ) \
+			tmp_rtn_dict = { key : ((value + 1) * total_ratio[key]  ) \
 							 for key, value in zip(total_saved.keys(), total_saved.values()) }
 
 			return tmp_rtn_dict
 
 		else: # get the latest prediction
 			latest_key = sorted(total_saved.keys())[-1]
-			return total_ratio[FUNC_dtSwtich(latest_key)]
+			return  (total_saved[latest_key] + 1) * total_ratio[latest_key]
 
 
 
@@ -795,9 +795,9 @@ class NestedGraph:
 
 
 		## update needed datetime as list
-		update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
+		#update_needed = FUNC_dtLIST_str_sort(list( set(key__stkData) - set(key__X_data) ))
+		update_needed = sorted(list(set(key__stkData) - set(key__X_data)))
 		for i in range(self.minute_length, len(update_needed)-self.predict_length, 1 ):
-
 
 			tmp_totContainer = []
 
@@ -823,8 +823,11 @@ class NestedGraph:
 														   update_needed[i:i+self.predict_length],
 														   check_data_int=self.minute_length,
 														   check_answer_int=self.predict_length,
-														   datetime_str=update_needed[i])
-			rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
+														   datetime=update_needed[i])
+			rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(\
+			                     data_class.DATA__get_original_set( \
+									 date_list_data=update_needed[i-self.minute_length:i],
+									 check_data_int=self.minute_length))
 			rtn_kospi = data_class.DATA__make_sub_set(date_list_data=update_needed[i-self.minute_length:i],
 													  subset_type='kospi')
 			rtn_dollar = data_class.DATA__make_sub_set(date_list_data=update_needed[i-self.minute_length:i],
@@ -833,7 +836,7 @@ class NestedGraph:
 			debug__passed += 1
 
 			## add date into the que to keep track on recent
-			data_class.DATA__add_dateToSet(update_needed[i])
+			data_class.DATA__add_dateToSet(datetime=update_needed[i])
 
 
 			## contain values
@@ -846,7 +849,7 @@ class NestedGraph:
 			## append data
 			data_class.DATA__wrap_container(x_container=tmp_totContainer,
 											y_container=rtn_Y,
-											datetime_str=update_needed[i])
+											datetime=update_needed[i])
 
 		pushLog(dst_folder='PREDICTER__ML_CLASS',
 				lv='INFO', module='NG__dataCalculate', exception=True,
@@ -867,8 +870,8 @@ class NestedGraph:
 		key__stkData = list(data_class._stk_dataset.keys())
 
 		## check _day existance in the dataset hash
-		targ_date = FUNC_dtSwtich(_day)
-		assert targ_date in data_class._stk_dataset
+		#targ_date = FUNC_dtSwtich(_day)
+		assert _day in data_class._stk_dataset
 
 		tmp_totContainer = []
 
@@ -879,13 +882,17 @@ class NestedGraph:
 			return None
 
 		## update needed datetime as list
-		update_needed = FUNC_dtLIST_str_sort(key__stkData)
+		#update_needed = FUNC_dtLIST_str_sort(key__stkData)
+		update_needed = sorted(key__stkData)
 
 		rtn_X = data_class.DATA__get_prediction( \
 			               update_needed[len(update_needed) - self.minute_length:],
 						   check_data_int=self.minute_length,
-						   datetime_str=targ_date)
-		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun(rtn_X)
+						   datetime=_day)
+		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun( \
+			data_class.DATA__get_original_set( \
+				date_list_data=update_needed[len(update_needed) - self.minute_length:],
+				check_data_int=self.minute_length))
 		rtn_kospi = data_class.DATA__make_sub_set(date_list_data=update_needed[len(update_needed) - self.minute_length:],
 												  subset_type='kospi')
 		rtn_dollar = data_class.DATA__make_sub_set(date_list_data=update_needed[len(update_needed) - self.minute_length:],
@@ -984,7 +991,7 @@ class Dataset:
 		self._prediction_dataset[datetime_obj] = prediction_list
 
 
-	def DATA__get_prediction(self, date_list_data, check_data_int, datetime_str):
+	def DATA__get_prediction(self, date_list_data, check_data_int, datetime):
 		"""
 
 		:param date_list_data: date list to attrive back
@@ -1006,22 +1013,22 @@ class Dataset:
 		assert len(rtn_list_data) == len(date_list_data) * 2
 
 		#@ record first val
-		self._ratio_predict_dataset[datetime_str] = standard_first_val
+		self._ratio_predict_dataset[datetime] = standard_first_val
 
 
 		return  rtn_list_data
 
 
-	def DATA__add_dateToSet(self, datetime_str):
+	def DATA__add_dateToSet(self, datetime):
 		"""
-		:param datetime_str: datetime string value to put to queue
+		:param datetime: datetime value to put to queue
 		:return: Action - add datetime object into the
 		                  tobe used to limit train data length
 		"""
-		if datetime_str in self._datetime_que:
+		if datetime in self._datetime_que:
 			pass
 		else:
-			self._datetime_que.append(datetime_str)
+			self._datetime_que.append(datetime)
 
 
 
@@ -1039,22 +1046,21 @@ class Dataset:
 		return tmp_X, tmp_Y
 
 
-	def DATA__wrap_container(self, x_container, y_container, datetime_str):
+	def DATA__wrap_container(self, x_container, y_container, datetime):
 		"""
 
 		:param x_container: x value to append to _X_data
 		:param y_container: y vale to append to _Y_data
 		:return: add _X / _Y dictionary it's new values
 		"""
-		if datetime_str in self._X_data or datetime_str in self._Y_data:
+		if datetime in self._X_data or datetime in self._Y_data:
 			return
 
-		self._X_data[datetime_str] = x_container
-		self._Y_data[datetime_str] = y_container
+		self._X_data[datetime] = x_container
+		self._Y_data[datetime] = y_container
 
 
-
-	def DATA__make_stock_set(self, date_list_data, date_list_ans, check_data_int, check_answer_int, datetime_str):
+	def DATA__make_stock_set(self, date_list_data, date_list_ans, check_data_int, check_answer_int, datetime):
 		"""
 
 		:param date_list_data: original stock parse date list
@@ -1082,7 +1088,7 @@ class Dataset:
 					           n, date in enumerate(date_list_ans) ]
 		
 		#@ record ratio
-		self._ratio_train_dataset[datetime_str] = standard_first_val
+		self._ratio_train_dataset[datetime] = standard_first_val
 		
 		assert len(rtn_list_data) == len(date_list_data) * 2
 		assert len(tmp_answer_price) == len(date_list_ans)
@@ -1090,11 +1096,28 @@ class Dataset:
 		return rtn_list_data, tmp_answer_price
 
 
+	def DATA__get_original_set(self, date_list_data, check_data_int):
+		"""
+
+		:param date_list_data: datetime list to parse from (specific window to work with)
+		"param check_data_int: to check length of parsed data
+		:return:
+		"""
+
+		assert len(date_list_data) == check_data_int
+
+		tmp_data_price = [(self._stk_dataset[date]['price']) for \
+						  n, date in enumerate(date_list_data)]
+
+		assert len(tmp_data_price) == check_data_int
+
+		return tmp_data_price
+
 
 	def DATA__make_sub_set(self, date_list_data, subset_type):
 		"""
 
-		:param date_list_data: datetime str list to parse from (specific window to work with)
+		:param date_list_data: datetime list to parse from (specific window to work with)
 		:param subset_type:
 		:return: make calculation based on mean values of kospi and dollar
 		"""
@@ -1104,7 +1127,8 @@ class Dataset:
 
 			assert len(list(hash.keys())) > 0
 
-			tmp_hash_key_srted = FUNC_dtLIST_str_sort(list(hash.keys()))
+			#tmp_hash_key_srted = FUNC_dtLIST_str_sort(list(hash.keys()))
+			tmp_hash_key_srted = sorted(list(hash.keys()))
 			tmp_filtered_recent = [ data for data in tmp_hash_key_srted if data in date_list_data]
 
 			## 1st layer
@@ -1173,8 +1197,8 @@ class Dataset:
 		:return : Action - update new data on interest stock _article_dataset instance
 		"""
 		assert isinstance(new_data, float) or isinstance(new_data, int)
-		_day_str = FUNC_dtSwtich(datetime_item=_day)
-		self._article_dataset.update({_day_str : new_data})
+		#_day_str = FUNC_dtSwtich(datetime_item=_day)
+		self._article_dataset.update({_day : new_data})
 
 
 
