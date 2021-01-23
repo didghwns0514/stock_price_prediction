@@ -127,6 +127,7 @@ class Stock_prediction:
 
 			if bool_trainable:
 
+				rtn_dataForPredic 이부분 체크, None 계속 들어간다
 				rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
 																		  _day=_today,
 																		  article_hash=hash_article)
@@ -380,6 +381,10 @@ def Session():
 								module='Session', 
 								exception=True,
 								memo=f'time stamp different by generators')
+						tmp_break_bool = True
+						break
+
+					elif list(filter(lambda x : x == None , [hash_kospi, hash_dollar, hash_data ])):
 						tmp_break_bool = True
 						break
 
