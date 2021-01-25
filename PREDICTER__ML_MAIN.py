@@ -53,7 +53,7 @@ class Stock_prediction:
 	# KODEX 코스피, KODEX 미국달러선물 레버리지, KODEX 200선물 인버스 2X
 
 	## article strict match
-	ARTICLE_CHECK = False
+	ARTICLE_CHECK = True
 
 	LENGTH__MINUTE_DATA = int((60 * 4)) # 3 data used, stock / kospi / dollar-mearchant
 	LENGTH__NEWS_ENCODED = int(1)
@@ -127,14 +127,16 @@ class Stock_prediction:
 
 			if bool_trainable:
 
-				rtn_dataForPredic 이부분 체크, None 계속 들어간다
+				#rtn_dataForPredic 이부분 체크, None 계속 들어간다
 				rtn_dataForPredic = self.nestgraph.NG__get_prediction_set(stock_code=stock_code,
 																		  _day=_today,
-																		  article_hash=hash_article)
+																		  article_hash=hash_article,
+																		  article_check=Stock_prediction.ARTICLE_CHECK)
 				if rtn_dataForPredic != None: # article existance problem
 					rtn_predicted = self.nestgraph.NG__prediction_wrapper(stock_code=stock_code,
 																		  _day=_today,
 																		  X_data=rtn_dataForPredic)
+					print(f'Predictable is True')
 					return ['Predictable', rtn_predicted]
 
 				else:
@@ -382,10 +384,12 @@ def Session():
 								exception=True,
 								memo=f'time stamp different by generators')
 						tmp_break_bool = True
+						print(f'datestamp list isnt in sink...!')
 						break
 
 					elif list(filter(lambda x : x == None , [hash_kospi, hash_dollar, hash_data ])):
 						tmp_break_bool = True
+						print(f'value returned from generator is corrupt...!')
 						break
 
 
@@ -402,16 +406,15 @@ def Session():
 													   _today=t1,
 													   hash_article=pickle_article)
 
-					if ReturnWrap._type(_type='PREDICTER_TEST', rtn_val=rtn) == 'Predictable':
-						print(f'predictable!')
+					log, data = rtn  ## data 분석 proceed -> plot graph
+					rtn_checker = ReturnWrap._type(_type='PREDICTER_TEST', rtn_val=rtn)
+					if rtn_checker:
+						print(f'predictable! -> log message : {log}')
 
 					else: # unpredictable
+						print(f'un-predictable! -> log message : {log}')
 						tmp_break_bool = True
 						break
-
-					log, data = rtn ## data 분석 proceed -> plot graph
-
-
 
 
 					## add success log
@@ -437,27 +440,34 @@ def Session():
 					break
 
 			# @ get prediction result
-			if not tmp_break_bool:
+			check_stock_code = prediction_agent.nestgraph.NG__check_stkcode(stock_code)
+			if check_stock_code:
+				print(f'stock code exists in nested graph')
+
 				tmp_pred_datetime_dict = \
 					prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
 
 				tmp_model_status = prediction_agent.nestgraph.NG__get_accuracy(stock_code)
 
 
-				# @ plot graph and save
-				############################
-				# Plotting only done in the session
-				#
-				############################
-				FUNC__save_image(start_day_str=tmp_dt_start__obj,
-								 model_status=tmp_model_status,
-								 dataframe=main_Stk_df,
-								 pred_dict=tmp_pred_datetime_dict,
-								 stock_code=stock_code)
-				pass
+				if tmp_pred_datetime_dict:
+					# @ plot graph and save
+					############################
+					# Plotting only done in the session
+					#
+					############################
+					print(f'start plotting graph')
+					FUNC__save_image(start_day_str=tmp_dt_start__obj,
+									 model_status=tmp_model_status,
+									 dataframe=main_Stk_df,
+									 pred_dict=tmp_pred_datetime_dict,
+									 stock_code=stock_code)
+					pass
 
+				else:
+					print(f'iter to next day - no predictions available')
 			else:
-				print(f'iter to next day')
+				print(f'no stock code available in nested graph')
 
 			# add day
 			mainStk_dt_start__obj += datetime.timedelta(days=1)

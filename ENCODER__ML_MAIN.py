@@ -97,6 +97,7 @@ class Autoencoder:
 		:return: None if None type or nothing in the list
 		"""
 		if rtn_list == None:
+
 			return None
 		else:
 			if isinstance(rtn_list, list):

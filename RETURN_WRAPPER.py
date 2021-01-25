@@ -17,10 +17,10 @@ class ReturnWrap:
 		assert _type in ReturnWrap.CHECK_TOTAL_LIST
 
 		if _type == 'PREDICTER':
-			ReturnWrap._predicter(rtn_val)
+			return ReturnWrap._predicter(rtn_val)
 
 		elif _type == 'PREDICTER_TEST':
-			ReturnWrap._predicter_test(rtn_val)
+			return ReturnWrap._predicter_test(rtn_val)
 
 	@staticmethod
 	def _predicter(rtn_val):
@@ -42,7 +42,7 @@ class ReturnWrap:
 		assert log in ['Predictable', 'No-prediction_set', 'Not-traininable', 'No-article']
 
 		if log == 'Predictable':
-			return 'Predictable'
+			return True
 
 		else:
-			return 'No-predictable'
+			return False

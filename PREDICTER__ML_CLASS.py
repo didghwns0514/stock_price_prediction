@@ -418,9 +418,14 @@ class PrivTensorWrapper:
 
 		assert self._MAIN_SESS != None
 
-		rtn = self._MAIN_MODEL.predict(X_data) ## suppose is 2D list return
+		with self._MAIN_GRAPH.as_default() as g:
+			with self._MAIN_SESS.as_default() as sess:
 
-		return rtn[0]
+				X_data_conv = np.array(X_data).reshape(-1, self._input_shape)
+
+				rtn = self._MAIN_MODEL.predict(X_data_conv) ## suppose is 2D list return
+
+				return rtn[0]
 	
 
 class NestedGraph:
@@ -451,6 +456,20 @@ class NestedGraph:
 
 		## rect day
 		self.dateKey = None
+
+
+	def NG__check_stkcode(self, stock_code):
+		"""
+
+		:param stock_code: stock_code used
+		:return: Action - check existance of the code in the nested graph dict
+		"""
+
+		if stock_code in NestedGraph.LOOKUP and \
+				stock_code in NestedGraph.LOOKUP_data:
+			return True
+		else:
+			return False
 
 
 	def NG__set_day(self, _today):
@@ -638,11 +657,14 @@ class NestedGraph:
 		"""
 
 		:param stock_code: stock_code
-		:return: Action - trains the graphs // if data was preped, returns according booleans
+		:return: Action - trains the graphs
+		                  // if data was preped, returns according booleans
 		"""
 
 		assert stock_code in NestedGraph.LOOKUP[self.NG__get_day()]
 		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
+
+		train_fin_bool = False
 
 		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code]
 		X, Y = data_class.DATA__get_container()
@@ -650,9 +672,12 @@ class NestedGraph:
 		for stock_class in NestedGraph.LOOKUP[self.NG__get_day()][stock_code]:
 			if X and Y : # non empty containers!
 				stock_class.PT__train_model(X=X, Y=Y)
-				return True
 			else:
+				#break
 				return False
+
+		else:
+			return True
 
 
 
@@ -755,7 +780,7 @@ class NestedGraph:
 		:param _day: original dat / wo rectified
 		:param article_pickle: article pickle
 		:param article_check: either to check article existance or not
-		:return:
+		:return: boolean for next step
 		"""
 
 		if article_check:
@@ -765,6 +790,8 @@ class NestedGraph:
 												article_pickle=article_hash)
 			if rtn_article == None:  # no article exists
 				return False
+			else:
+				return True
 
 		else:
 			return True
@@ -856,11 +883,12 @@ class NestedGraph:
 				memo=f'stock_code : {stock_code} \ndebug__passed : {debug__passed}, debug__article : {debug__article}, debug__data_skip : {debug__data_skip}')
 
 
-	def NG__get_prediction_set(self, stock_code, _day, article_hash):
+	def NG__get_prediction_set(self, stock_code, _day, article_hash, article_check):
 		"""
 
 		:param stock_code: stock_code
 		:param _day: actual datetime value of "now" for prediction
+		:param article_check: boolean to check article
 		:return: return the following data correct for _day variable
 		"""
 
@@ -878,8 +906,13 @@ class NestedGraph:
 		rtn_article = self.NG__checkArticle(stock_code=stock_code,
 											specific_time=_day,
 											article_pickle=article_hash)
-		if rtn_article == None:  # no article exists
-			return None
+
+		if rtn_article == None : # no article exists
+			if article_check :
+				pass
+			else:
+				# get dummy article
+				rtn_article = self.NG__makeDummyArticle()
 
 		## update needed datetime as list
 		#update_needed = FUNC_dtLIST_str_sort(key__stkData)
@@ -999,7 +1032,7 @@ class Dataset:
 		:param datetime_str: key to record first val of prediction dataset
 		:return: create data
 		"""
-		assert len(date_list_data) * 2 == check_data_int
+		assert len(date_list_data) == check_data_int
 
 		standard_first_val = self._stk_dataset[date_list_data[0]]['price']
 
@@ -1035,7 +1068,7 @@ class Dataset:
 	def DATA__get_container(self):
 		"""
 
-		:return: get _X / _Y for training
+		:return: get _X / _Y for training / returns list
 		"""
 		tmp_X = [ data for key1, key2, data in zip(self._X_data.keys(), self._Y_data.keys(), self._X_data.values()) \
 				  if key1 == key2 if key1 in self._datetime_que]
