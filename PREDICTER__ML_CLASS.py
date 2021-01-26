@@ -496,7 +496,7 @@ class NestedGraph:
 		return : Action - clean the model from the memory
 						- clean the class variable dictionary
 		"""
-
+		print(f'enter NG__clear function')
 		self.NG__clear_keras(_today_date=self.NG__get_day())
 		self.NG__clear_data(_today_date=self.NG__get_day())
 
@@ -526,11 +526,13 @@ class NestedGraph:
 
 				# clear stock_codes in day key
 				for d_stock_code in del_list__stkcode:
+					print(f'deleting LOOKUP-keras : {d_stock_code}')
 					del NestedGraph.LOOKUP[day][d_stock_code]
 
 		# clear day in the lookup table
 		for d_day in del_list__day:
-				del NestedGraph.LOOKUP[d_day]
+			print(f'deleting LOOKUP : {d_day}')
+			del NestedGraph.LOOKUP[d_day]
 
 
 	@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -554,11 +556,13 @@ class NestedGraph:
 
 				# delete stock code and dataset inside
 				for d_stock_code in del_list__stkcode:
+					print(f'deleting LOOKUP_data : {d_stock_code}')
 					del NestedGraph.LOOKUP_data[day][d_stock_code]
 
 		# delete day
 		for d_day in del_list__day:
-				del NestedGraph.LOOKUP_data[d_day]
+			print(f'deleting LOOKUP_data : {d_day}')
+			del NestedGraph.LOOKUP_data[d_day]
 
 
 	#@pushLog(dst_folder='PREDICTER__ML_CLASS')
@@ -664,18 +668,19 @@ class NestedGraph:
 		assert stock_code in NestedGraph.LOOKUP[self.NG__get_day()]
 		assert stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]
 
-		train_fin_bool = False
 
 		data_class = NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code]
 		X, Y = data_class.DATA__get_container()
 
+		bool_check_train = True
 		for stock_class in NestedGraph.LOOKUP[self.NG__get_day()][stock_code]:
 			if X and Y : # non empty containers!
 				stock_class.PT__train_model(X=X, Y=Y)
 			else:
-				#break
-				return False
+				bool_check_train = False
 
+		if not bool_check_train:
+			return False
 		else:
 			return True
 
@@ -723,6 +728,8 @@ class NestedGraph:
 		## reset outdated graph / data
 		self.NG__clear(_today_date=self.NG__get_day())
 
+		print(f'enter NG__check_prep, allocate for stock_code : {stock_code}')
+		print(f'enter NG__check_prep, day is : {self.NG__get_day()}')
 
 		## allocate graph
 		if self.NG__get_day() not in NestedGraph.LOOKUP:

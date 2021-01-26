@@ -37,7 +37,7 @@ class Autoencoder:
 		pass
 
 	def FUNC_SIMPLE__read_article(self, _specific_time, stock_code,
-								  article_loc=None, article_pickle=None,hours_back=int(13)):
+								  article_loc=None, article_pickle=None, hours_back=int(13)):
 		"""
 
 		:param _specific_time: specific time to parse 4 days

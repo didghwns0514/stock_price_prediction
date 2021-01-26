@@ -65,10 +65,40 @@ def FUNC_to_dtObject(datetime_it, string_method='%Y%m%d%H%M%S'):
 
 
 
+def FUNC_set_startDate(_datetime):
+	"""
+
+	:param _datetime:
+	:return:
+	"""
+
+	#print(f'original _datetime : {_datetime}')
+	if _datetime.weekday() in [5, 6]:
+		_datetime = FUNC_dtRect(_datetime, "15:30")
+
+		while (_datetime.weekday() in [5, 6]):
+			_datetime -= datetime.timedelta(days=1)
+
+	elif (int(_datetime.weekday()) == 0):  # monday
+
+		if _datetime < FUNC_dtRect(_datetime, "9:00"):
+			_datetime = FUNC_dtRect(_datetime - datetime.timedelta(days=3), "15:30")
+
+	else:
+		if _datetime < FUNC_dtRect(_datetime, "9:00"):
+			_datetime = FUNC_dtRect(_datetime - datetime.timedelta(days=1), "15:30")
+
+	#print(f'alternated _datetime : {_datetime}')
+
+	return _datetime
+
+
 def FUNC_datetime_backward(datetime_now__obj_, hours_back):
 	"""
 	dont include time, 'NOW' in the return
 	"""
+
+	datetime_now__obj_ = FUNC_set_startDate(datetime_now__obj_)
 
 	tmp_list_for_return = []
 	tmp_list_for_return_ = None # for ram!
