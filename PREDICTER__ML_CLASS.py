@@ -792,13 +792,17 @@ class NestedGraph:
 
 		if article_check:
 
+
 			rtn_article = self.NG__checkArticle(stock_code=stock_code,
 												specific_time=_day,
-												article_pickle=article_hash)
+												article_pickle=article_hash,
+												request_time=_day)
 			if rtn_article == None:  # no article exists
 				return False
+
 			else:
 				return True
+
 
 		else:
 			return True
@@ -842,7 +846,8 @@ class NestedGraph:
 
 			rtn_article = self.NG__checkArticle(stock_code=stock_code,
 												specific_time=update_needed[i],
-												article_pickle=article_hash)
+												article_pickle=article_hash,
+												request_time=_day)
 			if rtn_article == None : # no article exists
 				if article_check :
 					debug__article += 1
@@ -906,13 +911,14 @@ class NestedGraph:
 
 		## check _day existance in the dataset hash
 		#targ_date = FUNC_dtSwtich(_day)
-		assert _day in data_class._stk_dataset
+		#assert _day in data_class._stk_dataset
 
 		tmp_totContainer = []
 
 		rtn_article = self.NG__checkArticle(stock_code=stock_code,
 											specific_time=_day,
-											article_pickle=article_hash)
+											article_pickle=article_hash,
+											request_time=_day)
 
 		if rtn_article == None : # no article exists
 			if article_check :
@@ -950,17 +956,21 @@ class NestedGraph:
 
 
 
-	def NG__checkArticle(self, stock_code, specific_time,
+	def NG__checkArticle(self, stock_code, specific_time, request_time,
 					  article_loc=None, article_pickle=None):
 		"""
 
 		:param stock_code: stock_code
 		:param specific_time: time now to retrieve article of net 5days
+		:param request_time: to check article in the weekend // maybe not needed!
 		:param article_loc:
 		:param article_pickle:
 		 -> will check article_loc and article_pickle if both are None
+
 		:return: wrapper for reading article, returns calculated result
 		"""
+
+
 
 		rtn = self.AGENT_SUB__encoder.FUNC_SIMPLE__read_article(article_loc=article_loc,
 																article_pickle=article_pickle,

@@ -68,8 +68,8 @@ def FUNC_to_dtObject(datetime_it, string_method='%Y%m%d%H%M%S'):
 def FUNC_set_startDate(_datetime):
 	"""
 
-	:param _datetime:
-	:return:
+	:param _datetime: datetime now
+	:return: Actions always return the right stock operation day
 	"""
 
 	#print(f'original _datetime : {_datetime}')
@@ -155,6 +155,27 @@ def func_sub_iteratior(miutes_left, before_datetime_start__obj, return_list):
 							  FUNC_dtRect(tmp_target_datetime__obj, "15:30") ] )
 
 		return func_sub_iteratior(tmp_minutes_left, FUNC_dtRect(tmp_target_datetime__obj,"9:00"), return_list )
+
+
+def FUNC_article_getdatetime(datetime_obj):
+	"""
+
+	:param datetime_obj: datetime when the request was made
+	:return: alternated datetime object considering after market time
+	"""
+
+	if datetime_obj <= FUNC_dtRect(datetime_obj, "15:30") and datetime_obj >=  FUNC_dtRect(datetime_obj, "15:30"): # market open time
+		return datetime_obj
+
+
+	else:
+
+		tmp_weekday = datetime_obj.weekday()
+
+		if tmp_weekday == 4 : # 금요일
+			pass
+		elif tmp_weekday == 5 or tmp_weekday == 6: # 토 / 일요일
+			pass
 
 
 if __name__ == '__main__':

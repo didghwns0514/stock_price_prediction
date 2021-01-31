@@ -106,8 +106,7 @@ class Stock_prediction:
 		:param _today: datetime obj of date only
 		:param hash_answer: 
 		"""
-		이부분, today가 주말일 경우와, 다른 부분에서 사용되는 곳에서
-		주말일 경우, 주말 article 까지 포함해야 하므로, 그부분 확인해서 wrapper 작성할 것!
+
 		artc_rtn = self.nestgraph.NG__check_article_first(stock_code=stock_code,
 											   _day=_today,
 											   article_hash=hash_article,
