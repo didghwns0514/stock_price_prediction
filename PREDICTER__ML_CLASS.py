@@ -465,8 +465,8 @@ class NestedGraph:
 		:return: Action - check existance of the code in the nested graph dict
 		"""
 
-		if stock_code in NestedGraph.LOOKUP and \
-				stock_code in NestedGraph.LOOKUP_data:
+		if stock_code in NestedGraph.LOOKUP[self.NG__get_day()] and \
+				stock_code in NestedGraph.LOOKUP_data[self.NG__get_day()]:
 			return True
 		else:
 			return False
@@ -582,7 +582,7 @@ class NestedGraph:
 
 		#@ make array and take mean
 		tmp_list = np.asarray(tmp_list)
-		tmp_mean = np.mean(tmp_list, axis=1).tolist()
+		tmp_mean = np.mean(tmp_list, axis=0).tolist()
 
 
 		#@ add prediction to the data class
@@ -645,15 +645,20 @@ class NestedGraph:
 		:return:
 		"""
 
+		def decode_single_pred(pred_conved, ratio):
+			rtn_list = [ (val + 1)*ratio for val in pred_conved ]
+			return rtn_list
+
 		if not get_latest:
-			tmp_rtn_dict = { key : ((value + 1) * total_ratio[key]  ) \
+			tmp_rtn_dict = { key : decode_single_pred(pred_conved=value, ratio=total_ratio[key]) \
 							 for key, value in zip(total_saved.keys(), total_saved.values()) }
 
 			return tmp_rtn_dict
 
 		else: # get the latest prediction
 			latest_key = sorted(total_saved.keys())[-1]
-			return  (total_saved[latest_key] + 1) * total_ratio[latest_key]
+			#return  (total_saved[latest_key] + 1) * total_ratio[latest_key]
+			return decode_single_pred(pred_conved=total_saved[latest_key], ratio=total_ratio[latest_key])
 
 
 

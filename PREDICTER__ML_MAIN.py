@@ -436,39 +436,41 @@ def Session():
 							exception=True,
 							exception_msg=str(se),
 							memo=f'StopIteration exception')
-					input(f'type any to continue to next!')
-					tmp_break_bool = True
+					#input(f'type any to continue to next!')
+					#tmp_break_bool = True
 					break
 
-			# @ get prediction result
-			check_stock_code = prediction_agent.nestgraph.NG__check_stkcode(stock_code)
-			if check_stock_code:
-				print(f'stock code exists in nested graph')
+			if tmp_break_bool == False:
 
-				tmp_pred_datetime_dict = \
-					prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
+				# @ get prediction result
+				check_stock_code = prediction_agent.nestgraph.NG__check_stkcode(stock_code)
+				if check_stock_code:
+					print(f'stock code exists in nested graph')
 
-				tmp_model_status = prediction_agent.nestgraph.NG__get_accuracy(stock_code)
+					tmp_pred_datetime_dict = \
+						prediction_agent.nestgraph.NG__get_prediction_dict(stock_code)
+
+					tmp_model_status = prediction_agent.nestgraph.NG__get_accuracy(stock_code)
 
 
-				if tmp_pred_datetime_dict:
-					# @ plot graph and save
-					############################
-					# Plotting only done in the session
-					#
-					############################
-					print(f'start plotting graph')
-					FUNC__save_image(start_day_str=tmp_dt_start__obj,
-									 model_status=tmp_model_status,
-									 dataframe=main_Stk_df,
-									 pred_dict=tmp_pred_datetime_dict,
-									 stock_code=stock_code)
-					pass
+					if tmp_pred_datetime_dict:
+						# @ plot graph and save
+						############################
+						# Plotting only done in the session
+						#
+						############################
+						print(f'start plotting graph')
+						FUNC__save_image(start_day_str=tmp_dt_start__obj,
+										 model_status=tmp_model_status,
+										 dataframe=main_Stk_df,
+										 pred_dict=tmp_pred_datetime_dict,
+										 stock_code=stock_code)
+						pass
 
+					else:
+						print(f'iter to next day - no predictions available')
 				else:
-					print(f'iter to next day - no predictions available')
-			else:
-				print(f'no stock code available in nested graph')
+					print(f'no stock code available in nested graph')
 
 			# add day
 			mainStk_dt_start__obj += datetime.timedelta(days=1)
