@@ -71,27 +71,29 @@ class Autoencoder:
 		specific_time = FUNC_to_dtObject(_specific_time)
 
 		if article_loc != None and article_pickle == None:
-			with open(article_loc, 'wb') as file:
+			with open(article_loc, 'rb') as file:
 				pickle_file = pickle.load(file)
 				srch_name = search_name(pickled=pickle_file, code=stock_code)
-				tmp_rtn = parse_four_days(specific_time=specific_time,
+				tmp_rtn = parse_n_days(specific_time=specific_time,
 									  stock_name=srch_name,
 									  pickle_data=pickle_file)
-				rtn = self.FUNC_SIMPLE__calculate(tmp_rtn)
+				rtn = self.FUNC_SIMPLE__calculate(tmp_rtn,
+												  traditional_mean=True)
 
 		elif article_loc == None and article_pickle != None:
 			srch_name = search_name(pickled=article_pickle, code=stock_code)
-			tmp_rtn = parse_four_days(specific_time=specific_time,
+			tmp_rtn = parse_n_days(specific_time=specific_time,
 								  stock_name=srch_name,
 								  pickle_data=article_pickle)
-			rtn = self.FUNC_SIMPLE__calculate(tmp_rtn)
+			rtn = self.FUNC_SIMPLE__calculate(tmp_rtn,
+											  traditional_mean=True)
 		else:
 			raise ValueError('check assertion in FUNC_SIMPLE__read_article')
 
 		return rtn
 
 
-	def FUNC_SIMPLE__calculate(self, rtn_list):
+	def FUNC_SIMPLE__calculate(self, rtn_list, traditional_mean=True):
 		"""
 		:param : rtn_list : input from FUNC_SIMPLE__read_article
 		:return: None if None type or nothing in the list
@@ -106,8 +108,13 @@ class Autoencoder:
 			else:
 				return None
 
-		tmp_filtered = np.asarray( [ time * score for time, score in rtn_list] )
-		mean, std = norm.fit(tmp_filtered)
+		if not traditional_mean:
+			tmp_filtered = np.asarray( [ time * score for time, score in rtn_list] )
+			mean, std = norm.fit(tmp_filtered)
+
+		else:
+			tmp_filtered = [time * score for time, score in rtn_list]
+			mean = sum(tmp_filtered) / len(tmp_filtered)
 
 		if mean < 0:
 			mean = 0
@@ -147,7 +154,7 @@ def zero_padding(list_obj):
 	return tmp_list_original
 
 
-def parse_four_days(specific_time, stock_name, pickle_data,
+def parse_n_days(specific_time, stock_name, pickle_data,
 					judge_zero_article_bool = True, n_days=int(Autoencoder.DATE_LENGTH)):
 
 	"""
@@ -180,11 +187,11 @@ def parse_four_days(specific_time, stock_name, pickle_data,
 				tmp_time_delta = time_now__obj - article_time__obj
 				tmp_duration_in_hour = return_exp( tmp_time_delta.total_seconds() / (60*60), days = n_days )
 				tmp_result_list.append( [tmp_duration_in_hour, (tmp_article_list[i][1] + 1)*0.5 ] )
-				# 점수 0~1사이로 세팅, 10이 lowest, 20가 maximum socre
+				# 점수 0~1사이로 세팅, 10이 lowest, 20가 maximum socre -> 0~1로 재설정(원래 -1~1)사이
 
 	if judge_zero_article_bool == True:
 		if len(tmp_result_list) == 0:
-			#raise RuntimeError('parse_four_days - error!') # ValueError
+			#raise RuntimeError('parse_n_days - error!') # ValueError
 			return None
 		else:
 			return tmp_result_list#zero_padding(tmp_result_list)
@@ -320,7 +327,7 @@ def Session_2(get_saved_list = False): # real - parsed from minute-base
 				if i % 10000 == 0:
 					print('    +++time_now    :: ', time_now)
 					print('    +++finish_date :: ', finish_date)
-				tmp_list_4days_article_number.append( parse_four_days(time_now, key_1, pickle_data) )
+				tmp_list_4days_article_number.append( parse_n_days(time_now, key_1, pickle_data) )
 				time_now = copy.deepcopy(time_now + datetime.timedelta(minutes=60))
 
 

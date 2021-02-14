@@ -4,33 +4,9 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = '-1'
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import datetime
-import copy
 import traceback
-import joblib
+#import joblib
 import pickle
-import codecs
-import sqlite3
-
-# # @ keras
-# import keras
-# from keras.models import Sequential, Model, load_model
-# from keras.optimizers import Adam
-# from keras.layers import Dense, Dropout, Activation, Flatten, Reshape, Input
-# from keras.layers import Conv1D, MaxPooling1D, LeakyReLU, PReLU, UpSampling1D
-# from keras.utils import np_utils
-# from keras.callbacks import CSVLogger, ModelCheckpoint, EarlyStopping
-# from keras import backend as K
-# import h5py
-# from keras.backend.tensorflow_backend import set_session
-
-
-# # @ tensorflow
-# import tensorflow as tf
-
 
 # @ outside module
 import sub_function_configuration as SUB_F
@@ -55,10 +31,12 @@ class Stock_prediction:
 	## article strict match
 	ARTICLE_CHECK = True
 
-	LENGTH__MINUTE_DATA = int((60 * 4)) # 3 data used, stock / kospi / dollar-mearchant
+	LENGTH__MINUTE_DATA = int((60 * 4)) # 3 data used, stock*2 / kospi / dollar-mearchant
 	LENGTH__NEWS_ENCODED = int(1)
+	LENGTH__NOW_TIME = int(1)
 	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 2) + int(1*2) \
 						+ int(LENGTH__NEWS_ENCODED) \
+						+ int(LENGTH__NOW_TIME) \
 						+ int(1200)
 	LENGTH__ALL_OUTPUT = int(30)
 
@@ -72,7 +50,8 @@ class Stock_prediction:
 		self.nestgraph = PCLS.NestedGraph(shape_input=Stock_prediction.LENGTH__ALL_INPUT,
 										  shape_output=Stock_prediction.LENGTH__ALL_OUTPUT,
 										  minute_length=Stock_prediction.LENGTH__MINUTE_DATA,
-										  predict_length=Stock_prediction.LENGTH__ALL_OUTPUT)
+										  predict_length=Stock_prediction.LENGTH__ALL_OUTPUT,
+										  dataque_length=int(Stock_prediction.HOURS_WATCH*60))
 
 		#self.options = Options(self.envs)
 		self.module = module
@@ -174,94 +153,6 @@ class Stock_prediction:
 
 def Session():
 
-	def sqlite_capture(db_loc):
-
-		sqlite_conTop = sqlite3.connect(db_loc)
-		sqlite_curTop = sqlite_conTop.cursor()
-
-		def wrapper(_stock_code=None, get_codes=False):
-
-			if get_codes:
-				tmp_codes__obj = sqlite_curTop.execute("SELECT name FROM sqlite_master WHERE type='table';")
-				tmp_codes = tmp_codes__obj.fetchall()
-				tmp_codes = [ list(value)[0] for value in tmp_codes ]
-				return tmp_codes
-
-			else:
-				stock_code = str(_stock_code)
-				assert stock_code != None
-
-				head_string = 'SELECT * FROM '
-				tmp_selected = "'" + str(stock_code) + "'"
-				tmp_df = pd.read_sql(head_string + tmp_selected, sqlite_conTop, index_col=None)
-
-				if (not tmp_df.empty)  and  len(tmp_df) >= int(900 * 0.99):
-					rtn_df = tmp_df.loc[  (tmp_df['open'] >= 5000) \
-									    & (np.mean(tmp_df['volume'])>=500 )
-							           ].copy()
-					if rtn_df.empty : # 빈 데이터
-						return pd.DataFrame() # return real empty df
-					else:
-						## change date to datetime
-						rtn_df['date'] = pd.to_datetime(rtn_df['date'],  format="%Y%m%d%H%M%S" )
-						print(f'stock code that was selected... : {stock_code}')
-						print(f'{rtn_df.head()}')
-						return rtn_df
-				else: # not enough data / or no data at all
-					return pd.DataFrame() # return real empty df
-
-		return wrapper
-
-
-	def sweep_day(df, stock_code, start_date, end_date,
-				  hours_back = int(13), minute_forward = int(30), _type='data',
-				  min_dur=int(1)):
-		"""
-
-		:param df: dataframe input
-		:param start_date:
-		:param end_date:
-		:return: yields hashs until stopiteration exception
-			=> except StopIteration:: happends at the end of the function
-		"""
-
-		assert _type in ['data', 'answer']
-
-		tmp_dt_start = copy.deepcopy(start_date)
-		tmp_dt_sweep = copy.deepcopy(start_date)
-		tmp_dt_end = end_date
-		return_hash = None
-
-		print(f'begin parsing stock_code : {stock_code}')
-
-		while tmp_dt_sweep <= tmp_dt_end:
-
-			## get hash
-			if _type == 'answer':
-				return_hash = SQ__parse_answer(ori_df_whole=df,
-											  dt_now__obj=tmp_dt_sweep,
-											  minute_forward=minute_forward,
-											  stock_code=stock_code)
-			else:
-				return_hash = SQ__parse_sqData(ori_df_whole=df,
-											   dt_now__obj=tmp_dt_sweep,
-											   hours_duration_back=hours_back,
-											   stock_code=stock_code)
-
-			yield return_hash, tmp_dt_sweep
-
-			## right now -> update after yield keyword
-			tmp_dt_sweep += datetime.timedelta(minutes=min_dur)
-
-		print(f'ended parsing stock_code : {stock_code}')
-
-
-
-
-	# # @ import for db
-	import sqlite3
-
-	
 	#@ stock prediction wrapper class
 	prediction_agent = Stock_prediction(module=True)
 
@@ -459,10 +350,12 @@ def Session():
 						# Plotting only done in the session
 						#
 						############################
+						tmp_single_day_df = main_Stk_df.loc[(main_Stk_df.date >= tmp_dt_start__obj) & (
+								main_Stk_df.date <= tmp_dt_end__obj)]
 						print(f'start plotting graph')
 						FUNC__save_image(start_day_str=tmp_dt_start__obj,
 										 model_status=tmp_model_status,
-										 dataframe=main_Stk_df,
+										 dataframe=tmp_single_day_df,
 										 pred_dict=tmp_pred_datetime_dict,
 										 stock_code=stock_code)
 						pass
@@ -476,7 +369,6 @@ def Session():
 			mainStk_dt_start__obj += datetime.timedelta(days=1)
 
 	print(f'total execution finished!')
-
 
 
 
