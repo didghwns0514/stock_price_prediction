@@ -455,7 +455,7 @@ class Trade_agent:
 		return self.stocks_ownList.pop(0)
 
 	@FUNC_inventory.setter
-	def FUNC_inventory(self, new_price):
+	def FUNC_inventory(self, new_price): # setter
 
 		tmp_ownList_cpy = copy.deepcopy(self.stocks_ownList)
 		tmp_ownList_cpy.append(new_price)
@@ -464,7 +464,7 @@ class Trade_agent:
 		self.stocks_ownList = [ mean_val for _ in tmp_ownList_cpy]
 
 
-	def FUNC_reward(self, bool_allowed:bool) ->float:
+	def FUNC_reward(self, bool_allowed:bool, RWD_TYPE:int=1) ->float:
 		"""
 
 		:param bool_allowed:
@@ -473,8 +473,6 @@ class Trade_agent:
 		"""
 		# @ local values
 		reward = 0
-		RWD_TYPE = 1
-
 
 		# @ if logic by allowed action
 		if bool_allowed: # allowed action
