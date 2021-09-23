@@ -14,7 +14,7 @@ import tensorflow as tf
 from keras.models import Sequential, Model, load_model
 from keras.callbacks import CSVLogger, ModelCheckpoint, EarlyStopping
 from keras.optimizers import Adam
-from keras.layers import Dense, Dropout,  Activation, Flatten, Reshape, Input
+from keras.layers import Dense, LSTM, Dropout,  Activation, Flatten, Reshape, Input
 import keras.backend as K
 
 
@@ -40,7 +40,7 @@ class PrivTensorWrapper:
 
 	PT_CREATION_DIC_CNT = {} # cnter dictionary per model
 	NAME = 'PrivTensorWrapper_'
-	GET_WEIGHTED_LOSS = True
+	GET_WEIGHTED_LOSS = False
 	NUM_BATCH = int(100) # Batch size
 
 
@@ -64,6 +64,8 @@ class PrivTensorWrapper:
 		}
 	}
 
+	MODEL_MODE = [ 'nn', 'lstm' ] # 0, 1
+	MODE_SELECT = 'nn'
 
 
 	def __init__(self,
@@ -98,6 +100,8 @@ class PrivTensorWrapper:
 		self._PT__model_state = None # for saving state of the class
 		self._input_shape = input_shape
 		self._output_shape = output_shape
+
+		self._model_mode = None
 		#----------------------------------------
 
 		## required locations
@@ -112,11 +116,23 @@ class PrivTensorWrapper:
 										 graph=g)
 		self._MAIN_MODEL = None
 
+		## set model mode
+		self.PT__set_model_mode()
+
 		## load/build model
 		self.PT__handle_mode()
 
 		## calc model state
 		self.PT__calc_state()
+
+
+	def PT__set_model_mode(self):
+		"""
+		function to set model mode
+		"""
+		assert PrivTensorWrapper.MODE_SELECT in PrivTensorWrapper.MODEL_MODE
+
+		self._model_mode = PrivTensorWrapper.MODEL_MODE
 
 
 	def PT__get_state(self):
@@ -230,51 +246,42 @@ class PrivTensorWrapper:
 
 		with self._MAIN_GRAPH.as_default() as g:
 			with self._MAIN_SESS.as_default() as sess:
-				
-				lw = None
-				if PrivTensorWrapper.GET_WEIGHTED_LOSS: # diffrentiated loss
-					#lw = list(range(self._output_shape, 0, -1))
-					#lw = {index:weight for index, weight in enumerate(range(30, 0, -1))}
-					pass
+
+				# @ configure model by selected configuration
+				model=None
+				if self._model_mode == 'nn':
+					model = Sequential([
+
+						Dense(120,
+							  activation='relu',
+							  input_shape=(self._input_shape,),
+							  name=self.NAME + 'Dense_1'),
+						Dense(120,
+							  activation='relu',
+							  name=self.NAME + 'Dense_2'),
+						Dense(120,
+							  activation='relu',
+							  name=self.NAME + 'Dense_3'),
+						Dense(self._output_shape,
+							  activation='relu',
+							  name=self.NAME + 'trainable')
+					])
+
+				elif self._model_mode == 'lstm':
+
 				else:
-					#lw = [1 for _ in range(0, self._output_shape,1)]
-					#lw = {index: 1 for index, weight in enumerate(range(30, 0, -1))}
-					pass
+					raise ValueError('wrong model mode configuration-1')
 
-				## build model
-					# Input(shape=(self._input_shape,1),
-					# 	  name=self.NAME + 'Inputs_1'),
-				model = Sequential([
 
-					Dense(120, 
-						  activation='relu',
-						  input_shape=(self._input_shape,),
-						  name=self.NAME + 'Dense_1'),
-					Dense(120, 
-						  activation='relu', 
-						  name=self.NAME + 'Dense_2'),
-					Dense(120, 
-						  activation='relu', 
-						  name=self.NAME + 'Dense_3'),
-					Dense(self._output_shape,
-						  activation='relu', 
-						  name=self.NAME + 'trainable')
-				])
-
-				## different optimizer for preloaded model instance
+				# @ different optimizer for preloaded model instance
 				optimizer = None
 				if self._PT__ifLoaded:
 					optimizer=Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-8)
 				else:
 					optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8)
 
-				# model.compile(loss=tf.keras.losses.MeanAbsoluteP, 
-				#               optimizer=optimizer,
-				#               loss_weights=lw) # loss='mse'
 
-				# model.compile(loss=self.PT__custom_loss,
-				# 			  optimizer=optimizer,
-				# 			  loss_weights=lw) # loss='mse'
+				# @ compile model
 				model.compile(loss=self.PT__custom_loss,
 							  optimizer=optimizer) # loss='mse'
 
@@ -298,6 +305,8 @@ class PrivTensorWrapper:
 				lw = None
 				if PrivTensorWrapper.GET_WEIGHTED_LOSS:
 					lw = [ num / tot_sum for num in range(int(self._output_shape), 0, -1)]
+				else:
+					lw = [ 1  for num in range(int(self._output_shape), 0, -1)]
 
 				# M  = (100 / length) * K.abs( 1 - K.sum(y_pred))
 				diff = K.abs((y_true - y_pred) / K.clip(K.abs(y_true),
@@ -350,11 +359,20 @@ class PrivTensorWrapper:
 
 		X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.15)
 
+		if self._model_mode == 'nn':
+			X_train = np.array(X_train).reshape(-1, self._input_shape)
+			X_test = np.array(X_test).reshape(-1, self._input_shape)
+			Y_train = np.array(Y_train).reshape(-1, self._output_shape)
+			Y_test = np.array(Y_test).reshape(-1, self._output_shape)
 
-		X_train = np.array(X_train).reshape(-1, self._input_shape)
-		X_test = np.array(X_test).reshape(-1, self._input_shape)
-		Y_train = np.array(Y_train).reshape(-1, self._output_shape)
-		Y_test = np.array(Y_test).reshape(-1, self._output_shape)
+		elif self._model_mode == 'lstm':
+			X_train = np.array(X_train).reshape(self._input_shape,1 ,1)
+			X_test = np.array(X_test).reshape(self._input_shape,1 ,1)
+			Y_train = np.array(Y_train).reshape(self._output_shape,1 ,1)
+			Y_test = np.array(Y_test).reshape(self._output_shape,1 ,1)
+
+		else:
+			raise ValueError('wrong model mode configuration-2')
 
 
 		with self._MAIN_GRAPH.as_default() as g:
@@ -411,7 +429,9 @@ class PrivTensorWrapper:
 
 		# 특이값 많은 경우 mae 사용
 		# 아닌 경우 rmes 사용
-		 return (1 / (mean_squared_error(y_true, y_pred)  + 1e-15) * 100)
+		# return (1 / (mean_squared_error(y_true, y_pred)  + 1e-15) * 100)
+
+		return ( 1 / (self.PT__custom_loss( y_true=y_true, y_pred=y_pred) + 1e-15) * 100  )
 
 
 	def PT__predict_model(self, X_data):
@@ -434,7 +454,7 @@ class NestedGraph:
 	MAX_NUM_OF_ENSEM = 2
 	LOOKUP_data = {}
 
-	def __init__(self, shape_input, shape_output, minute_length, predict_length):
+	def __init__(self, shape_input, shape_output, minute_length, predict_length, dataque_length):
 
 		## locations
 		self.AT_SAVE_PATH__folder = str(os.getcwd() + "\\PREDICTER__MODEL_SAVE")
@@ -455,6 +475,7 @@ class NestedGraph:
 		self.predict_length = predict_length
 
 		## rect day
+		self.que_length = dataque_length
 		self.dateKey = None
 
 
@@ -760,7 +781,7 @@ class NestedGraph:
 
 		if stock_code not in NestedGraph.LOOKUP_data[self.NG__get_day()]:
 			NestedGraph.LOOKUP_data[self.NG__get_day()][stock_code] = Dataset(stock_code=stock_code,
-															   watch_length=self.minute_length)
+															   watch_length=self.que_length)
 
 
 	def NG__wrapper(self, stock_code,
@@ -808,10 +829,17 @@ class NestedGraph:
 			else:
 				return True
 
-
 		else:
 			return True
-		
+
+
+	def NG__getDatetime(self, datetime_obj):
+		"""
+
+		:param datetime_obj: datetime used
+		"""
+
+		return FUNC_getDatetimeConv(datetime_obj)
 
 
 	def NG__dataCalculate(self, stock_code, _day, article_hash, article_check):
@@ -863,8 +891,8 @@ class NestedGraph:
 			data_class.DATA__article_update(new_data=rtn_article,
 											_day=update_needed[i])
 
-			rtn_X, rtn_Y = data_class.DATA__make_stock_set(update_needed[i-self.minute_length:i],
-														   update_needed[i:i+self.predict_length],
+			rtn_X, rtn_Y = data_class.DATA__make_stock_set(date_list_data=update_needed[i-self.minute_length:i],
+														   date_list_ans=update_needed[i:i+self.predict_length],
 														   check_data_int=self.minute_length,
 														   check_answer_int=self.predict_length,
 														   datetime=update_needed[i])
@@ -876,6 +904,7 @@ class NestedGraph:
 													  subset_type='kospi')
 			rtn_dollar = data_class.DATA__make_sub_set(date_list_data=update_needed[i-self.minute_length:i],
 													   subset_type='dollar')
+			rtn_datetime = self.NG__getDatetime(datetime_obj=update_needed[i])
 
 			debug__passed += 1
 
@@ -888,6 +917,7 @@ class NestedGraph:
 			tmp_totContainer.extend(rtn_X_decoded)
 			tmp_totContainer.extend(rtn_kospi)
 			tmp_totContainer.extend(rtn_dollar)
+			tmp_totContainer.extend([rtn_datetime])
 			tmp_totContainer.extend([rtn_article])
 
 			## append data
@@ -937,7 +967,7 @@ class NestedGraph:
 		update_needed = sorted(key__stkData)
 
 		rtn_X = data_class.DATA__get_prediction( \
-			               update_needed[len(update_needed) - self.minute_length:],
+			               date_list_data=update_needed[len(update_needed) - self.minute_length:],
 						   check_data_int=self.minute_length,
 						   datetime=_day)
 		rtn_X_decoded = self.AGENT_SUB__denoiser.FUNC_PREDICT_MAIN__ontherun( \
@@ -948,6 +978,7 @@ class NestedGraph:
 												  subset_type='kospi')
 		rtn_dollar = data_class.DATA__make_sub_set(date_list_data=update_needed[len(update_needed) - self.minute_length:],
 												   subset_type='dollar')
+		rtn_datetime = self.NG__getDatetime(datetime_obj=_day)
 
 
 		## contain values
@@ -955,6 +986,7 @@ class NestedGraph:
 		tmp_totContainer.extend(rtn_X_decoded)
 		tmp_totContainer.extend(rtn_kospi)
 		tmp_totContainer.extend(rtn_dollar)
+		tmp_totContainer.extend([rtn_datetime])
 		tmp_totContainer.extend([rtn_article])
 
 		return tmp_totContainer
@@ -1062,8 +1094,9 @@ class Dataset:
 		tmp_data_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
 					         n, date in enumerate(date_list_data) ]
 		tmp_data_volume = [  self._stk_dataset[date]['volume'] for n, date in enumerate(date_list_data) ]
-		rtn_list_data.extend(tmp_data_price)
-		rtn_list_data.extend(tmp_data_volume)
+		_ = [rtn_list_data.extend([t_p, t_v]) for t_p, t_v in zip(tmp_data_price, tmp_data_volume)]
+		# rtn_list_data.extend(tmp_data_price)
+		# rtn_list_data.extend(tmp_data_volume)
 
 		assert len(rtn_list_data) == len(date_list_data) * 2
 
@@ -1108,6 +1141,7 @@ class Dataset:
 		:param y_container: y vale to append to _Y_data
 		:return: add _X / _Y dictionary it's new values
 		"""
+		# @ skip existing data
 		if datetime in self._X_data or datetime in self._Y_data:
 			return
 
@@ -1134,15 +1168,16 @@ class Dataset:
 		tmp_data_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
 					         n, date in enumerate(date_list_data) ]
 		tmp_data_volume = [  self._stk_dataset[date]['volume'] for n, date in enumerate(date_list_data) ]
-		rtn_list_data.extend(tmp_data_price)
-		rtn_list_data.extend(tmp_data_volume)
+		# rtn_list_data.extend(tmp_data_price)
+		# rtn_list_data.extend(tmp_data_volume)
+		_ = [ rtn_list_data.extend([t_p, t_v]) for t_p, t_v in zip(tmp_data_price, tmp_data_volume) ]
 
 
 		rtn_list_answer = []
 		tmp_answer_price = [ ( self._stk_dataset[date]['price'] / standard_first_val) - 1 for  \
 					           n, date in enumerate(date_list_ans) ]
 		
-		#@ record ratio
+		#@ record ratio -> time when it was made
 		self._ratio_train_dataset[datetime] = standard_first_val
 		
 		assert len(rtn_list_data) == len(date_list_data) * 2
@@ -1178,13 +1213,13 @@ class Dataset:
 		"""
 		assert subset_type in ['kospi', 'dollar']
 
-		def return_market_status(hash, date_list_data):
+		def return_market_status(hash, _date_list_data):
 
 			assert len(list(hash.keys())) > 0
 
 			#tmp_hash_key_srted = FUNC_dtLIST_str_sort(list(hash.keys()))
 			tmp_hash_key_srted = sorted(list(hash.keys()))
-			tmp_filtered_recent = [ data for data in tmp_hash_key_srted if data in date_list_data]
+			tmp_filtered_recent = [ data for data in tmp_hash_key_srted if data in _date_list_data]
 
 			## 1st layer
 			price = []

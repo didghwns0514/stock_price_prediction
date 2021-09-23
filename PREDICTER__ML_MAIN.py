@@ -55,10 +55,12 @@ class Stock_prediction:
 	## article strict match
 	ARTICLE_CHECK = True
 
-	LENGTH__MINUTE_DATA = int((60 * 4)) # 3 data used, stock / kospi / dollar-mearchant
+	LENGTH__MINUTE_DATA = int((60 * 4)) # 3 data used, stock*2 / kospi / dollar-mearchant
 	LENGTH__NEWS_ENCODED = int(1)
+	LENGTH__NOW_TIME = int(1)
 	LENGTH__ALL_INPUT = int(LENGTH__MINUTE_DATA * 2) + int(1*2) \
 						+ int(LENGTH__NEWS_ENCODED) \
+						+ int(LENGTH__NOW_TIME) \
 						+ int(1200)
 	LENGTH__ALL_OUTPUT = int(30)
 
@@ -72,7 +74,8 @@ class Stock_prediction:
 		self.nestgraph = PCLS.NestedGraph(shape_input=Stock_prediction.LENGTH__ALL_INPUT,
 										  shape_output=Stock_prediction.LENGTH__ALL_OUTPUT,
 										  minute_length=Stock_prediction.LENGTH__MINUTE_DATA,
-										  predict_length=Stock_prediction.LENGTH__ALL_OUTPUT)
+										  predict_length=Stock_prediction.LENGTH__ALL_OUTPUT,
+										  dataque_length=int(Stock_prediction.HOURS_WATCH*60))
 
 		#self.options = Options(self.envs)
 		self.module = module
@@ -459,10 +462,12 @@ def Session():
 						# Plotting only done in the session
 						#
 						############################
+						tmp_single_day_df = main_Stk_df.loc[(main_Stk_df.date >= tmp_dt_start__obj) & (
+								main_Stk_df.date <= tmp_dt_end__obj)]
 						print(f'start plotting graph')
 						FUNC__save_image(start_day_str=tmp_dt_start__obj,
 										 model_status=tmp_model_status,
-										 dataframe=main_Stk_df,
+										 dataframe=tmp_single_day_df,
 										 pred_dict=tmp_pred_datetime_dict,
 										 stock_code=stock_code)
 						pass

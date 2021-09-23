@@ -157,26 +157,43 @@ def func_sub_iteratior(miutes_left, before_datetime_start__obj, return_list):
 		return func_sub_iteratior(tmp_minutes_left, FUNC_dtRect(tmp_target_datetime__obj,"9:00"), return_list )
 
 
-def FUNC_article_getdatetime(datetime_obj):
+def FUNC_getDatetimeConv(datetime_obj):
 	"""
 
 	:param datetime_obj: datetime when the request was made
 	:return: alternated datetime object considering after market time
+	         Final output is alternated... 15:30 / 9:00... and weekday are params
 	"""
 
-	if datetime_obj <= FUNC_dtRect(datetime_obj, "15:30") and datetime_obj >=  FUNC_dtRect(datetime_obj, "15:30"): # market open time
-		return datetime_obj
+	targ_date = datetime_obj
+
+	tmp_weekday = datetime_obj.weekday()
+	if tmp_weekday == 5 or tmp_weekday == 6: # 토 / 일요일
+		while (datetime_obj.weekday() in [5, 6]):
+			datetime_obj += datetime.timedelta(days=1)
+		else: #while loop ended
+			targ_date = FUNC_dtRect(datetime_obj, "9:00")
 
 
-	else:
-
-		tmp_weekday = datetime_obj.weekday()
-
-		if tmp_weekday == 4 : # 금요일
+	else: # other weekdays
+		if datetime_obj <= FUNC_dtRect(datetime_obj, "15:30") \
+				and datetime_obj >= FUNC_dtRect(datetime_obj, "9:00"):  # market open time
 			pass
-		elif tmp_weekday == 5 or tmp_weekday == 6: # 토 / 일요일
-			pass
 
+		elif datetime_obj > FUNC_dtRect(datetime_obj, "15:30"):
+			if tmp_weekday == 4 : # friday
+				targ_date = FUNC_dtRect(datetime_obj + datetime.timedelta(days=3), "9:00")
+
+		elif datetime_obj < FUNC_dtRect(datetime_obj, "9:00"):
+			targ_date = FUNC_dtRect(datetime_obj, "9:00")
+
+	targ_date_base = FUNC_dtRect(targ_date, "9:00")
+
+	time_diff = targ_date - targ_date_base
+	totSec = time_diff.total_seconds()
+	calc = totSec / (60 * 60)
+
+	return calc
 
 if __name__ == '__main__':
 	import random
