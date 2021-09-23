@@ -70,8 +70,9 @@ Tensorflow/Keras, LSTM, CNN, AutoEncoder Decoder 를 이용한 주식 자동화 
      1. BS4를 이용하여 뉴스 수집
         <img src='images/2021-09-24-03-10-14.png' />
      2. 키움증권에서 가져온 상장 회사 이름에 대해 모든 증권 뉴스의 문장을 부여하고  
-        경과 시간 및 Sentimental 분석을 합쳐 점수화를 수행  
-        <img src='images/2021-09-24-03-12-38.png' />
+        경과 시간 및 Sentimental 분석을 합쳐 점수화를 수행
+        - Syntax : 링크주소, 날짜, 0~1 점수값 (0-> 나쁨 0.5->중립 1.0-> 좋음), 원본 문장
+          <img src='images/2021-09-24-03-12-38.png' />
 
 2. 주가 Denosing 모듈
 
