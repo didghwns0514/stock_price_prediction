@@ -1,5 +1,11 @@
 #folder
-*CRAWLER*
+#*CRAWLER*
+/CRAWLER__checkpoints-LSTM_lang/
+/CRAWLER__necessary_data/
+/CRAWLER__LSTM_LANG/
+/CRAWLER__vector/
+/CRAWLER__article_result_dynamic/
+
 /TRADER__checkpoints-stock_trading/
 /LOGGER_FOLDER/
 .idea/
@@ -18,4 +24,7 @@ __pycache__/
 *.db
 sub_function_configuration.py
 DATA_OPERATION.py
+
+
+
 
