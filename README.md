@@ -46,9 +46,9 @@ Tensorflow/Keras, LSTM, CNN, AutoEncoder Decoder 를 이용한 주식 자동화 
 <!-- https://github.com/didghwns0514/stock_price_prediction -->
 
 - Sections
-  - [Automated-Stock-Trading](https://github.com/didghwns0514/stock_price_prediction/blob/main/README.md#KnowhowFactory-Chicken-Automation)
-  - [Usage](https://github.com/didghwns0514/stock_price_prediction/blob/main/README.md#Usage)
-  - [Maintainer](https://github.com/didghwns0514/stock_price_prediction/blob/main/README.md#Maintainer)
+  - [Automated-Stock-Trading](https://github.com/didghwns0514/stock_price_prediction/blob/master/README.md#Automated-Stock-Trading)
+  - [Usage](https://github.com/didghwns0514/stock_price_prediction/blob/master/README.md#Usage)
+  - [Maintainer](https://github.com/didghwns0514/stock_price_prediction/blob/master/README.md#Maintainer)
 
 <br/>
 <br/>
@@ -59,7 +59,7 @@ Tensorflow/Keras, LSTM, CNN, AutoEncoder Decoder 를 이용한 주식 자동화 
 
 ### Automated-Stock-Trading
 
-**Status :** Use Local PC for training and Calculating DQN/LSTM with powerful GPU
+**Status :** Used Local PC for training and Calculating DQN/LSTM with powerful GPU
 
 **Used :**
 
